@@ -1,4 +1,4 @@
 #[derive(Debug)]
 pub struct Header {
-	pub directories: u32
+	pub directories_count: u32
 }
