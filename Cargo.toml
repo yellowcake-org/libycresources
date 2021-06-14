@@ -4,7 +4,8 @@ version = "0.1.0"
 authors = ["Alexander Orlov <me@0xceed.com>"]
 edition = "2018"
 
-[[bin]]
-name = "formats"
+[[example]]
+name = "browser"
 
-[dependencies]
+[dev-dependencies]
+clap = "3.0.0-beta.2"
