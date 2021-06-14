@@ -1,26 +1,62 @@
-mod header;
+pub mod header;
 
-use std::io::Read;
-use std::io::Seek;
-use std::io::SeekFrom::*;
+use std::fs::File;
+use std::io::{Read, Seek};
+use std::string::String;
 
-pub fn header(mut file: std::fs::File) -> header::Header {
-	let mut directories_count_slice: [u8; 4] = [0; 4];
-	let _ = file.read(&mut directories_count_slice);
-	let directories_count = u32::from_be_bytes(directories_count_slice);
+#[derive(Debug)]
+pub enum Error {
+	File(std::io::Error), 
+	Encoding(std::string::FromUtf8Error)
+}
 
-	let _ = file.seek(Current(3 * 4));
-	for _ in 0..directories_count {
-		let mut name_length_slice: [u8; 1] = [0; 1];
-		let _ = file.read(&mut name_length_slice);
-		let name_length = u8::from_be_bytes(name_length_slice);
-
-		let mut name_slice: Vec<u8> = Vec::with_capacity(name_length as usize);
-		let _ = file.by_ref().take(name_length as u64).read_to_end(&mut name_slice).unwrap();
-		let name = std::str::from_utf8(&name_slice).unwrap();
-
-		println!("{:?}", name);
+pub fn count_dirs(mut file: &File) -> Result<usize, Error> {
+	return match file.seek(std::io::SeekFrom::Start(0)) {
+		Err(error) => Err(Error::File(error)),
+		Ok(_) => {
+			const NUMBER_COUNT: usize = 4;
+			let mut slice: [u8; NUMBER_COUNT] = [0; NUMBER_COUNT];
+			
+			match file.read_exact(&mut slice) {
+				Err(error) => Err(Error::File(error)),
+				Ok(_) => Ok(u32::from_be_bytes(slice) as usize)
+			}
+		}
 	}
+}
 
-	return header::Header{ directories_count: directories_count };
+pub fn list_dirs(mut file: &File, count: usize) -> Result<header::Dirs, Error> {
+	assert!(count != 0);
+	let mut offset: u64 = 4 * 4;
+
+	if let Err(error) = file.seek(std::io::SeekFrom::Start(offset)) {
+		return Err(Error::File(error))
+	} else {
+		let mut names = Vec::new();
+
+		for _ in 0..count {
+			const NAME_LENGTH_COUNT: usize = 1;
+			let mut name_length_slice: [u8; NAME_LENGTH_COUNT] = [0; NAME_LENGTH_COUNT];
+			
+			offset += match file.read_exact(&mut name_length_slice) {
+				Err(error) => return Err(Error::File(error)),
+				Ok(_) => NAME_LENGTH_COUNT as u64
+			};
+
+			let name_length = u8::from_be_bytes(name_length_slice);
+			let mut name_slice = vec![0u8; name_length as usize];
+			
+			offset += match file.read_exact(&mut name_slice) {
+				Err(error) => return Err(Error::File(error)),
+				Ok(_) => name_length as u64
+			};
+
+			names.push(match String::from_utf8(name_slice) {
+				Err(error) => return Err(Error::Encoding(error)),
+				Ok(name) => name
+			});
+		}
+
+		return Ok(header::Dirs{ names: names, offset: offset })
+	}
 }

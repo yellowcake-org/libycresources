@@ -10,7 +10,10 @@ struct Options {
 fn main() {
 	let options = Options::parse();
     let file = File::open(options.file).unwrap();
-    let header = libformats::dat::header(file);
+    
+    let dirs_count = libformats::dat::count_dirs(&file).unwrap();
+    println!("Directories: {:?}.", dirs_count);
 
-    println!("Header: {:?}", header);
+    let dirs = libformats::dat::list_dirs(&file, dirs_count).unwrap();
+    println!("Listing: {:?}.", dirs.names);
 }
