@@ -10,14 +10,17 @@ pub mod dir {
 pub mod file {
 	use std::string::String;
 
+	#[derive(Debug)]
 	pub enum Size {
 		Packed(usize), Plain(usize)
 	}
 
+	#[derive(Debug)]
 	pub struct File {
 		pub name: String,
-		pub compressed: bool,
-		pub offset: usize,
-		pub size: Size
+		pub path: String,
+		pub size: Size,
+
+		pub(crate) offset: usize
 	}
 }

@@ -70,6 +70,8 @@ pub fn list_files(mut file: &File, within: headers::dir::Dir) -> Result<Vec<head
 	if let Err(error) = file.seek(std::io::SeekFrom::Start(within.offset as u64)) {
 		return Err(Error::File(error))
 	} else {
+		let mut files = Vec::new();
+		
 		for dir in within.names {
 			const NUMBER_COUNT: usize = 4;
 			let mut file_count_slice: [u8; NUMBER_COUNT] = [0; NUMBER_COUNT];
@@ -104,12 +106,53 @@ pub fn list_files(mut file: &File, within: headers::dir::Dir) -> Result<Vec<head
 						Ok(name) => name
 					};
 
-					println!("File: {:?}.", String::from_str(&dir).unwrap() + &name);
+					let path = String::from_str(&dir).unwrap() + &name;
+					const ATTRIBUTES_LENGTH: i64 = 4;
 
-					let _ = file.seek(std::io::SeekFrom::Current(4 * 4 as i64));
+					if let Err(error) = file.seek(std::io::SeekFrom::Current(ATTRIBUTES_LENGTH)) {
+						return Err(Error::File(error))
+					} else {
+						const OFFSET_SLICE_COUNT: usize = 4;
+						let mut offset_slice: [u8; OFFSET_SLICE_COUNT] = [0; OFFSET_SLICE_COUNT];
+						
+						let offset = match file.read_exact(&mut offset_slice) {
+							Err(error) => return Err(Error::File(error)),
+							Ok(_) => u32::from_be_bytes(offset_slice) as usize
+						};
+
+						const SIZE_SLICE_COUNT: usize = 4;
+						let mut size_slice: [u8; SIZE_SLICE_COUNT] = [0; SIZE_SLICE_COUNT];
+						
+						let size = match file.read_exact(&mut size_slice) {
+							Err(error) => return Err(Error::File(error)),
+							Ok(_) => u32::from_be_bytes(size_slice) as usize
+						};
+
+						const PACKED_SIZE_SLICE_COUNT: usize = 4;
+						let mut packed_size_slice: [u8; PACKED_SIZE_SLICE_COUNT] = [0; PACKED_SIZE_SLICE_COUNT];
+						
+						let packed_size = match file.read_exact(&mut packed_size_slice) {
+							Err(error) => return Err(Error::File(error)),
+							Ok(_) => u32::from_be_bytes(packed_size_slice) as usize
+						};
+
+						let complex_size = if packed_size > 0 { 
+							headers::file::Size::Packed(packed_size) 
+						} else { 
+							headers::file::Size::Plain(size) 
+						};
+
+						files.push(headers::file::File {
+							name: name,
+							path: path,
+							offset: offset,
+							size: complex_size
+						})
+					}
 				}
 			}
 		}
-		return Ok(Vec::new())
+
+		return Ok(files)		
 	}	
 }
