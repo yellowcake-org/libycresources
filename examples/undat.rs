@@ -18,5 +18,6 @@ fn main() {
     println!("Listing: {:?}.", dirs.names);
 
     let files = libformats::dat::list_files(&file, dirs).unwrap();
-    println!("Files: {:?}.", files);
+    println!("Files: {:?}.", files.len());
+    println!("Listing: {:?}.", files);
 }
