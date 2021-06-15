@@ -3,7 +3,7 @@ pub mod dir {
 
 	pub struct Dir {
 		pub names: Vec<String>,
-		pub(crate) offset: usize
+		pub(crate) offset: u32
 	}
 }
 
@@ -11,7 +11,7 @@ pub mod file {
 	use std::string::String;
 
 	pub enum Size {
-		Packed { compressed: usize, plain: usize }, Plain(usize)
+		Packed { compressed: u32, plain: u32 }, Plain(u32)
 	}
 
 	pub struct File {
@@ -19,6 +19,6 @@ pub mod file {
 		pub path: String,
 		pub size: Size,
 
-		pub(crate) offset: usize
+		pub(crate) offset: u32
 	}
 }
