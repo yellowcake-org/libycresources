@@ -19,5 +19,7 @@ fn main() {
 
     let files = libformats::dat::list_files(&file, dirs).unwrap();
     println!("Files: {:?}.", files.len());
-    println!("Listing: {:?}.", files);
+
+    let paths = files.iter().map(|f| f.path.to_owned()).collect::<Vec<String>>();
+    println!("Listing: {:?}.", paths);
 }
