@@ -3,7 +3,7 @@ pub mod dir {
 
 	pub struct Dir {
 		pub names: Vec<String>,
-		pub(crate) offset: u32
+		pub(crate) offset: u64
 	}
 }
 
