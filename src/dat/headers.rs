@@ -11,7 +11,7 @@ pub mod file {
 	use std::string::String;
 
 	pub enum Size {
-		Packed(usize), Plain(usize)
+		Packed { compressed: usize, plain: usize }, Plain(usize)
 	}
 
 	pub struct File {

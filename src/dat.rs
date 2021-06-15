@@ -137,7 +137,7 @@ pub fn list_files(mut file: &File, within: headers::dir::Dir) -> Result<Vec<head
 						};
 
 						let complex_size = if packed_size > 0 { 
-							headers::file::Size::Packed(packed_size) 
+							headers::file::Size::Packed { compressed: packed_size, plain: size } 
 						} else { 
 							headers::file::Size::Plain(size) 
 						};
