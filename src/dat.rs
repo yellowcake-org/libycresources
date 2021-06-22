@@ -16,14 +16,14 @@ pub fn count_dirs(file: &File) -> Result<u32, Error> {
 	return fetch_u32(file, Some(0));
 }
 
-pub fn list_dirs(mut file: &File, count: u32) -> Result<headers::dir::Dir, Error> {
-	assert!(count != 0);
+pub fn list_dirs(mut file: &File, count: &u32) -> Result<headers::dir::Dir, Error> {
+	assert!(*count != 0);
 
 	if let Err(error) = file.seek(std::io::SeekFrom::Start(4 * 4 as u64)) { return Err(Error::File(error)) }
 
 	let mut names = Vec::new();
 
-	for _ in 0..count {
+	for _ in 0..*count {
 		let mut name: String = match fetch_string(file, None) {
 			Err(error) => return Err(error),
 			Ok(value) => value
@@ -44,7 +44,7 @@ pub fn list_dirs(mut file: &File, count: u32) -> Result<headers::dir::Dir, Error
 	return Ok(headers::dir::Dir{ names: names, offset: offset })
 }
 
-pub fn list_files(mut file: &File, within: headers::dir::Dir) -> Result<Vec<headers::file::File>, Error> {
+pub fn list_files(mut file: &File, within: &headers::dir::Dir) -> Result<Vec<headers::file::File>, Error> {
 	let count = within.names.len();
 	assert!(count != 0);
 
@@ -52,7 +52,7 @@ pub fn list_files(mut file: &File, within: headers::dir::Dir) -> Result<Vec<head
 
 	let mut files = Vec::new();
 		
-	for dir in within.names {
+	for dir in &within.names {
 		let file_count = match fetch_u32(file, None) {
 			Err(error) => return Err(error),
 			Ok(value) => value
