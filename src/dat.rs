@@ -1,14 +1,15 @@
 pub mod headers;
 
 use std::fs::File;
-use std::io::{Read, Seek};
+use std::io::{Read, Seek, Write};
 
 use std::string::String;
 use std::str::FromStr;
 
 #[derive(Debug)]
 pub enum Error {
-	File(std::io::Error), 
+	File(std::io::Error),
+	Corrupted,
 	Encoding(std::string::FromUtf8Error)
 }
 
@@ -96,6 +97,44 @@ pub fn list_files(mut file: &File, within: &headers::dir::Dir) -> Result<Vec<hea
 	}
 
 	return Ok(files)
+}
+
+pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -> Result<(), Error> {
+	let filename = output.to_owned() + &header.path;
+	let path = std::path::Path::new(&filename);
+	
+	let directory = match path.parent() {
+		None => return Err(Error::Corrupted),
+		Some(directory) => directory
+	};
+
+	if let Err(error) = std::fs::create_dir_all(&directory) { return Err(Error::File(error)) }
+
+	let mut created = match std::fs::File::create(&path) {
+		Err(error) => return Err(Error::File(error)),
+		Ok(created) => created
+	};
+
+	if let Err(error) = file.seek(std::io::SeekFrom::Start(header.offset as u64)) { return Err(Error::File(error)) }
+	
+	let length = match header.size {
+		headers::file::Size::Plain(length) => length,
+		headers::file::Size::Packed { compressed, plain: _ } => compressed
+	};
+
+	let mut file_slice = vec![0u8; length as usize];
+	if let Err(error) = file.read_exact(&mut file_slice) { return Err(Error::File(error)) }
+
+	let written = match created.write(&file_slice) {
+		Err(error) => return Err(Error::File(error)),
+		Ok(size) => size as u32
+	};
+
+	if length != written {
+		return Err(Error::Corrupted);
+	}
+
+	return Ok(());
 }
 
 // MARK: - Private

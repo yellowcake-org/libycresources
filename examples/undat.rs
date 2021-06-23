@@ -10,7 +10,7 @@ struct Options {
 
 #[derive(Clap)]
 enum Subcommand {
-    Extract, List(List), Count(Count)
+    Extract(Extract), List(List), Count(Count)
 }
 
 #[derive(Clap)]
@@ -23,6 +23,11 @@ enum Count {
     Files, Directories
 }
 
+#[derive(Clap)]
+struct Extract {
+    output: String
+}
+
 fn main() {
     let options = Options::parse();
     let file = File::open(options.file).unwrap();
@@ -33,7 +38,19 @@ fn main() {
     let paths = &files.iter().map(|f| f.path.to_owned()).collect::<Vec<String>>();
 
     match options.subcommand {
-        Subcommand::Extract => { unimplemented!(); },
+        Subcommand::Extract(cmd) => {
+            println!("Extracting {:?} files...", &files.len());
+
+            for header in files {
+                println!("Extracting {:?}...", &header.path);
+
+                match libformats::dat::extract(&file, &header, &cmd.output) {
+                    Ok(_) => { println!("Done.") },
+                    Err(error) => { println!("Erred: {:?}.", error) }
+                }
+
+            }
+        },
         Subcommand::List(subject) => {
             match subject {
                 List::Directories => { println!("{:?}", &dirs.names); },
