@@ -35,7 +35,6 @@ fn main() {
     let dirs_count = libformats::dat::count_dirs(&file).unwrap();
     let dirs = libformats::dat::list_dirs(&file, &dirs_count).unwrap();
     let files = libformats::dat::list_files(&file, &dirs).unwrap();
-    let paths = &files.iter().map(|f| f.path.to_owned()).collect::<Vec<String>>();
 
     match options.subcommand {
         Subcommand::Extract(cmd) => {
@@ -53,17 +52,18 @@ fn main() {
         },
         Subcommand::List(subject) => {
             match subject {
-                List::Directories => { println!("{:?}", &dirs.names); },
-                List::Files => { 
-                    println!("{:?}", paths); 
+                List::Directories => { println!("{:?}", &dirs.names) },
+                List::Files => {
+                    let paths = &files.iter().map(|f| f.path.to_owned()).collect::<Vec<String>>();
+                    println!("{:?}", paths)
                 }
             }
         },
         Subcommand::Count(subject) => {
             match subject {
-                Count::Directories => { println!("{:?}", &dirs_count); },
+                Count::Directories => { println!("{:?}", &dirs_count) },
                 Count::Files => { 
-                    println!("{:?}", &files.len()); 
+                    println!("{:?}", &files.len())
                 }
             }
         }

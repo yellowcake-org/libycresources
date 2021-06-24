@@ -10,6 +10,7 @@ use std::str::FromStr;
 pub enum Error {
 	File(std::io::Error),
 	Corrupted,
+	Decompression,
 	Encoding(std::string::FromUtf8Error)
 }
 
@@ -117,24 +118,120 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 
 	if let Err(error) = file.seek(std::io::SeekFrom::Start(header.offset as u64)) { return Err(Error::File(error)) }
 	
-	let length = match header.size {
-		headers::file::Size::Plain(length) => length,
-		headers::file::Size::Packed { compressed, plain: _ } => compressed
-	};
+	match header.size {
+		headers::file::Size::Plain(length) => {
+			let mut bytes = vec![0u8; length as usize];
+			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
 
-	let mut file_slice = vec![0u8; length as usize];
-	if let Err(error) = file.read_exact(&mut file_slice) { return Err(Error::File(error)) }
+			let written = match created.write(&bytes) {
+				Err(error) => return Err(Error::File(error)),
+				Ok(size) => size as u32
+			};
 
-	let written = match created.write(&file_slice) {
-		Err(error) => return Err(Error::File(error)),
-		Ok(size) => size as u32
-	};
+			if length != written { return Err(Error::Corrupted) }
 
-	if length != written {
-		return Err(Error::Corrupted);
+			return Ok(())
+		},
+		headers::file::Size::Packed { compressed, plain } => {
+			let mut bytes = vec![0u8; compressed as usize];
+			let mut decompressed = vec![0u8; plain as usize];
+			
+			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
+
+			const DICT_SIZE: i16 = 4096;
+			let mut buffer = vec![0x20; DICT_SIZE as usize];
+
+			const MATCH_MIN: i16 = 3;
+			const MATCH_MAX: i16 = 18;
+
+			let mut N: i16 = 0;
+			let mut DO: i16 = 0;
+			let mut DI: i16 = DICT_SIZE - MATCH_MAX;
+			let mut L: i16 = 0;
+			let mut F: i16 = 0;
+
+			let mut idx: usize = 0;
+			let mut ddx: usize = 0;
+
+			while idx < compressed as usize {
+				N = i16::from_be_bytes([bytes[idx], bytes[idx + 1]]);
+				idx += 2;
+
+				if N == 0 { break }
+				let end = idx + N.abs() as usize;
+
+				if N < 0 {
+					while idx < end {
+						let byte = bytes[idx];
+						idx += 1;
+
+						decompressed[ddx] = byte;
+						ddx += 1;
+					}
+				} else {
+					DO = DICT_SIZE - MATCH_MAX;
+					buffer = vec![0x20; DICT_SIZE as usize];
+
+					while idx < end {
+						F = bytes[idx] as i16;
+						idx += 1;
+
+						let mut i = 0;
+						while i != 8 && idx < end {
+							if (F & 1) != 0 {
+								let byte = bytes[idx];
+								idx += 1;
+
+								decompressed[ddx] = byte;
+								ddx += 1;
+
+								buffer[DO as usize] = byte;
+								DO += 1;
+
+								if DO >= DICT_SIZE { DO = 0 }
+							} else {
+								DI = bytes[idx] as i16;
+								idx += 1;
+
+								L = bytes[idx] as i16;
+								idx += 1;
+
+								DI = DI | ((0xF0 & L) << 4);
+                            	L &= 0x0F;
+
+                            	for _ in 0..L as i16 + MATCH_MIN {
+                            		let byte = buffer[DI as usize];
+                            		
+                            		decompressed[ddx] = byte;
+                            		ddx += 1;
+
+                            		buffer[DO as usize] = byte;
+
+                            		DI += 1;
+                            		DO += 1;
+
+                            		if DO >= DICT_SIZE { DO = 0 }
+	                                if DI >= DICT_SIZE { DI = 0 }
+                            	}
+							}
+
+							F >>= 1;
+							i += 1;
+						}
+					}
+				}
+			}
+
+			let written = match created.write(&decompressed) {
+				Err(error) => return Err(Error::File(error)),
+				Ok(size) => size as u32
+			};
+
+			if plain != written { return Err(Error::Corrupted) }
+
+			return Ok(())
+		}
 	}
-
-	return Ok(());
 }
 
 // MARK: - Private
