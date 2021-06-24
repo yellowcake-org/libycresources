@@ -138,17 +138,17 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 			
 			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
 
-			const DICT_SIZE: i16 = 4096;
+			const DICT_SIZE: u16 = 4096;
 			let mut buffer = vec![0x20; DICT_SIZE as usize];
 
-			const MATCH_MIN: i16 = 3;
-			const MATCH_MAX: i16 = 18;
+			const MATCH_MIN: u16 = 3;
+			const MATCH_MAX: u16 = 18;
 
 			let mut N: i16 = 0;
-			let mut DO: i16 = 0;
-			let mut DI: i16 = DICT_SIZE - MATCH_MAX;
-			let mut L: i16 = 0;
-			let mut F: i16 = 0;
+			let mut DO: u16 = 0;
+			let mut DI: u16 = DICT_SIZE - MATCH_MAX;
+			let mut L: u16 = 0;
+			let mut F: u16 = 0;
 
 			let mut idx: usize = 0;
 			let mut ddx: usize = 0;
@@ -158,10 +158,10 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 				idx += 2;
 
 				if N == 0 { break }
-				let end = idx + N.abs() as usize;
 
 				if N < 0 {
-					while idx < end {
+					let end = idx + N.abs() as usize;
+					while idx < end && ddx < plain as usize {
 						let byte = bytes[idx];
 						idx += 1;
 
@@ -172,12 +172,14 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 					DO = DICT_SIZE - MATCH_MAX;
 					buffer = vec![0x20; DICT_SIZE as usize];
 
+					let end = idx + N as usize;
 					while idx < end {
-						F = bytes[idx] as i16;
+						F = bytes[idx] as u16;
 						idx += 1;
 
-						let mut i = 0;
-						while i != 8 && idx < end {
+						for _ in 0..8 {
+							if idx >= end { break }
+							
 							if (F & 1) != 0 {
 								let byte = bytes[idx];
 								idx += 1;
@@ -190,16 +192,16 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 
 								if DO >= DICT_SIZE { DO = 0 }
 							} else {
-								DI = bytes[idx] as i16;
+								DI = bytes[idx] as u16;
 								idx += 1;
 
-								L = bytes[idx] as i16;
+								L = bytes[idx] as u16;
 								idx += 1;
 
 								DI = DI | ((0xF0 & L) << 4);
                             	L &= 0x0F;
 
-                            	for _ in 0..L as i16 + MATCH_MIN {
+                            	for _ in 0..(L + MATCH_MIN) {
                             		let byte = buffer[DI as usize];
                             		
                             		decompressed[ddx] = byte;
@@ -216,7 +218,6 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 							}
 
 							F >>= 1;
-							i += 1;
 						}
 					}
 				}
