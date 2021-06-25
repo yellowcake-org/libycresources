@@ -149,7 +149,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 					let end = idx + count.abs() as usize;
 					
 					while idx < end && output.len() < plain as usize {
-						output.push( match fetch_u8(file, None) {
+						output.push(match fetch_u8(file, None) {
 							Err(error) => return Err(error),
 							Ok(value) => value
 						});
@@ -157,13 +157,11 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 						idx += 1;
 					}
 				} else {
-					const BUFFER_SIZE: u16 = 4096;
-
 					const MATCH_MIN: u16 = 3;
 					const MATCH_MAX: u16 = 18;
 
-					let mut buffer = vec![0x20; BUFFER_SIZE as usize];
-					let mut offset_r: u16 = BUFFER_SIZE - MATCH_MAX;
+					let mut buffer = vec![0x20; 4096];
+					let mut offset_r: u16 = buffer.len() as u16 - MATCH_MAX;
 
 					let end = idx + count as usize;
 					while idx < end {
@@ -188,7 +186,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 								buffer[offset_r as usize] = byte;
 								offset_r += 1;
 
-								if offset_r >= BUFFER_SIZE { offset_r = 0 }
+								if offset_r >= buffer.len() as u16 { offset_r = 0 }
 							} else {
 								let mut offset_w = match fetch_u8(file, None) {
 									Err(error) => return Err(error),
@@ -214,8 +212,8 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
                             		offset_w += 1;
                             		offset_r += 1;
 
-                            		if offset_r >= BUFFER_SIZE { offset_r = 0 }
-	                                if offset_w >= BUFFER_SIZE { offset_w = 0 }
+                            		if offset_r >= buffer.len() as u16 { offset_r = 0 }
+	                                if offset_w >= buffer.len() as u16 { offset_w = 0 }
                             	}
 							}
 
@@ -284,16 +282,12 @@ fn fetch_u8(mut file: &File, offset: Option<u64>) -> Result<u8, Error> {
 }
 
 fn fetch_string(mut file: &File, offset: Option<u64>) -> Result<String, Error> {
-	if let Err(error) = offset_if_needed(file, offset) { return Err(error) }
-
-	const COUNT: usize = std::mem::size_of::<u8>();
-	let mut string_length_slice: [u8; COUNT] = [0; COUNT];
+	let string_length = match fetch_u8(file, offset) {
+		Err(error) => return Err(error),
+		Ok(value) => value
+	};
 	
-	if let Err(error) = file.read_exact(&mut string_length_slice) { return Err(Error::File(error)) }
-
-	let string_length = u8::from_be_bytes(string_length_slice);
 	let mut string_slice = vec![0u8; string_length as usize];
-	
 	if let Err(error) = file.read_exact(&mut string_slice) { return Err(Error::File(error)) }
 
 	return match String::from_utf8(string_slice) {
