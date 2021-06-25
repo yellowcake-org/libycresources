@@ -146,12 +146,16 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 				if count == 0 { break }
 
 				if count < 0 {
-					let mut slice = vec![0u8; count.abs() as usize];
+					let end = idx + count.abs() as usize;
+					
+					while idx < end && output.len() < plain as usize {
+						output.push( match fetch_u8(file, None) {
+							Err(error) => return Err(error),
+							Ok(value) => value
+						});
 
-					if let Err(error) = file.read_exact(&mut slice) { return Err(Error::File(error)) }
-					output.append(&mut slice);
-
-					idx += count.abs() as usize;
+						idx += 1;
+					}
 				} else {
 					const BUFFER_SIZE: u16 = 4096;
 
@@ -161,7 +165,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 					let mut buffer = vec![0x20; BUFFER_SIZE as usize];
 					let mut offset_r: u16 = BUFFER_SIZE - MATCH_MAX;
 
-					let end = idx + count.abs() as usize;
+					let end = idx + count as usize;
 					while idx < end {
 						let mut flags = match fetch_u8(file, None) {
 							Err(error) => return Err(error),
