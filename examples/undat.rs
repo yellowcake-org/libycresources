@@ -1,27 +1,20 @@
 use clap::Clap;
+
 use std::fs::File;
 use std::io::Write;
 
 #[derive(Clap)]
 struct Options {
+    input: String,
     #[clap(subcommand)]
-    subcommand: Subcommand,
-    file: String
+    subcommand: Subcommand
 }
 
 #[derive(Clap)]
 enum Subcommand {
-    Extract(Extract), List(List), Count(Count)
-}
-
-#[derive(Clap)]
-enum List {
-    Files, Directories
-}
-
-#[derive(Clap)]
-enum Count {
-    Files, Directories
+    Dirs,
+    Files,
+    Extract(Extract)
 }
 
 #[derive(Clap)]
@@ -31,61 +24,60 @@ struct Extract {
 
 fn main() {
     let options = Options::parse();
-    let file = File::open(options.file).unwrap();
+    let file = File::open(options.input).unwrap();
 
-    let dirs_count = libformats::dat::count_dirs(&file).unwrap();
-    let dirs = libformats::dat::list_dirs(&file, &dirs_count).unwrap();
-    let files = libformats::dat::list_files(&file, &dirs).unwrap();
+    let dirs = libformats::dat::dirs(&file).unwrap();
+    let files = libformats::dat::files(&file, &dirs).unwrap();
 
     match options.subcommand {
+        Subcommand::Dirs => {
+            for (idx, dir) in dirs.names.iter().enumerate() {
+                println!("[{:?}]: {:?}", idx, dir);
+            }
+        },
+        Subcommand::Files => {
+            for (idx, file) in files.iter().enumerate() {
+                println!("[{:?}]: {:?}", idx, file.path);
+            }
+        },
         Subcommand::Extract(cmd) => {
             println!("Extracting {:?} files...", &files.len());
 
             for header in files {
                 println!("Extracting {:?}...", &header.path);
 
-                let mut extracted = match libformats::dat::extract(&file, &header) {
+                let mut extracted = match libformats::dat::bytes(&file, &header) {
                     Ok(value) => value,
-                    Err(error) => { println!("Erred: {:?}.", error); continue; }
+                    Err(error) => { println!("Extraction error: {:?}.", error); continue; }
                 };
 
-                let filename = cmd.output.to_owned() + &header.path;
-                let path = std::path::Path::new(&filename);
+                let root = std::path::Path::new(&cmd.output);
+                let joined = root.join(header.path);
+                let path = joined.as_path();
                 
                 let directory = match path.parent() {
-                    None => { println!("Couldn't unwrap path."); continue; }
+                    None => { println!("Parent for path \"{:?}\" is no valid!", path); continue; }
                     Some(directory) => directory
                 };
 
-                if let Err(error) = std::fs::create_dir_all(&directory) { println!("Erred: {:?}.", error); continue; }
+                if let Err(error) = std::fs::create_dir_all(&directory) { 
+                    println!("Directory creation error: {:?}.", error);
+                    continue
+                }
 
                 let mut created = match std::fs::File::create(&path) {
-                    Err(error) => { println!("Erred: {:?}.", error); continue; },
+                    Err(error) => { println!("File creation error: {:?}.", error); continue; },
                     Ok(created) => created
                 };
 
                 let written = match created.write(&mut extracted) {
-                    Err(error) => { println!("Erred: {:?}.", error); continue; },
+                    Err(error) => { println!("File writing error: {:?}.", error); continue; },
                     Ok(value) => value
                 } as u32;
 
-                if extracted.len() != written as usize { println!("Written bytes aren't equal to extracted.") }
-            }
-        },
-        Subcommand::List(subject) => {
-            match subject {
-                List::Directories => { println!("{:?}", &dirs.names) },
-                List::Files => {
-                    let paths = &files.iter().map(|f| f.path.to_owned()).collect::<Vec<String>>();
-                    println!("{:?}", paths)
-                }
-            }
-        },
-        Subcommand::Count(subject) => {
-            match subject {
-                Count::Directories => { println!("{:?}", &dirs_count) },
-                Count::Files => { 
-                    println!("{:?}", &files.len())
+                if extracted.len() != written as usize { 
+                    println!("Attention! Written bytes aren't equal to extracted.");
+                    println!("Hence the file is corrupted.") 
                 }
             }
         }
