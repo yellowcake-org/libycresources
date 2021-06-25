@@ -19,7 +19,7 @@ pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
 		Ok(value) => value
 	};
 
-	if let Err(error) = file.seek(std::io::SeekFrom::Start(4 * 4 as u64)) { return Err(Error::File(error)) }
+	if let Err(error) = file.seek(std::io::SeekFrom::Start(4 * 4_u64)) { return Err(Error::File(error)) }
 
 	let mut names = Vec::new();
 
@@ -28,7 +28,7 @@ pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
 			Err(error) => return Err(error),
 			Ok(value) => value
 		}
-		.split("\\")
+		.split('\\')
 		.map(|dir| dir.to_owned() + "/")
 		.collect();
 
@@ -41,7 +41,7 @@ pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
 		Ok(value) => value
 	};
 
-	return Ok(headers::Dirs{ names: names, offset: offset })
+	Ok(headers::Dirs{ names, offset })
 }
 
 pub fn files(mut file: &File, within: &headers::Dirs) -> Result<Vec<headers::File>, Error> {
@@ -58,7 +58,7 @@ pub fn files(mut file: &File, within: &headers::Dirs) -> Result<Vec<headers::Fil
 			Ok(value) => value
 		};
 
-		if let Err(error) = file.seek(std::io::SeekFrom::Current(3 * 4 as i64)) { return Err(Error::File(error)) }
+		if let Err(error) = file.seek(std::io::SeekFrom::Current(3 * 4_i64)) { return Err(Error::File(error)) }
 
 		for _ in 0..file_count {
 			let name = match fetch_string(file, None) {
@@ -91,11 +91,11 @@ pub fn files(mut file: &File, within: &headers::Dirs) -> Result<Vec<headers::Fil
 				headers::Size::Plain(size) 
 			};
 
-			files.push(headers::File { name: name, path: path, offset: offset, size: complex_size })
+			files.push(headers::File { name, path, offset, size: complex_size })
 		}
 	}
 
-	return Ok(files)
+	Ok(files)
 }
 
 pub fn bytes(mut file: &File, header: &headers::File) -> Result<Vec<u8>, Error> {
@@ -106,7 +106,7 @@ pub fn bytes(mut file: &File, header: &headers::File) -> Result<Vec<u8>, Error> 
 			let mut bytes = vec![0u8; length as usize];
 			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
 
-			return Ok(bytes)
+			Ok(bytes)
 		},
 		headers::Size::Packed { compressed, plain } => {
 			let mut output: Vec<u8> = Vec::new();
@@ -176,7 +176,7 @@ pub fn bytes(mut file: &File, header: &headers::File) -> Result<Vec<u8>, Error> 
 								} as u16;
 								processed += 1;
 
-								offset_w = offset_w | ((0xF0 & length) << 4);
+								offset_w |= (0xF0 & length) << 4;
 								length &= 0x0F;
 
 								for _ in 0..(length + MATCH_MIN) {
@@ -201,7 +201,7 @@ pub fn bytes(mut file: &File, header: &headers::File) -> Result<Vec<u8>, Error> 
 
 			if plain != output.len() as u32 { return Err(Error::Decompression) }
 
-			return Ok(output)
+			Ok(output)
 		}
 	}
 }
@@ -213,7 +213,7 @@ fn offset(mut file: &File, offset: Option<u64>) -> Result<(), Error> {
 		if let Err(error) = file.seek(std::io::SeekFrom::Start(offset)) { return Err(Error::File(error)) }
 	}
 
-	return Ok(())
+	Ok(())
 }
 
 fn fetch_u32(mut file: &File, offset: Option<u64>) -> Result<u32, Error> {
@@ -222,7 +222,7 @@ fn fetch_u32(mut file: &File, offset: Option<u64>) -> Result<u32, Error> {
 	const COUNT: usize = std::mem::size_of::<u32>();
 	let mut slice: [u8; COUNT] = [0; COUNT];
 	
-	return match file.read_exact(&mut slice) {
+	match file.read_exact(&mut slice) {
 		Err(error) => Err(Error::File(error)),
 		Ok(_) => Ok(u32::from_be_bytes(slice))
 	}
@@ -234,7 +234,7 @@ fn fetch_i16(mut file: &File, offset: Option<u64>) -> Result<i16, Error> {
 	const COUNT: usize = std::mem::size_of::<i16>();
 	let mut slice: [u8; COUNT] = [0; COUNT];
 
-	return match file.read_exact(&mut slice) {
+	match file.read_exact(&mut slice) {
 		Err(error) => Err(Error::File(error)),
 		Ok(_) => Ok(i16::from_be_bytes(slice))
 	}
@@ -246,7 +246,7 @@ fn fetch_u8(mut file: &File, offset: Option<u64>) -> Result<u8, Error> {
 	const COUNT: usize = std::mem::size_of::<u8>();
 	let mut slice: [u8; COUNT] = [0; COUNT];
 
-	return match file.read_exact(&mut slice) {
+	match file.read_exact(&mut slice) {
 		Err(error) => Err(Error::File(error)),
 		Ok(_) => Ok(u8::from_be_bytes(slice))
 	}
@@ -261,8 +261,8 @@ fn fetch_string(mut file: &File, offset: Option<u64>) -> Result<String, Error> {
 	let mut string_slice = vec![0u8; string_length as usize];
 	if let Err(error) = file.read_exact(&mut string_slice) { return Err(Error::File(error)) }
 
-	return match String::from_utf8(string_slice) {
-		Err(error) => return Err(Error::Encoding(error)),
+	match String::from_utf8(string_slice) {
+		Err(error) => Err(Error::Encoding(error)),
 		Ok(string) => Ok(string)
-	};
+	}
 }
