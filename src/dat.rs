@@ -111,27 +111,27 @@ pub fn extract(mut file: &File, header: &headers::file::File) -> Result<Vec<u8>,
 		},
 		headers::file::Size::Packed { compressed, plain } => {
 			let mut output: Vec<u8> = Vec::new();
-			let mut idx: usize = 0;
+			let mut read: usize = 0;
 
-			while idx < compressed as usize {
+			while read < compressed as usize {
 				let count = match fetch_i16(file, None) {
 					Err(error) => return Err(error),
 					Ok(value) => value
 				};
-				idx += 2;
+				read += 2;
 
 				if count == 0 { break }
 
 				if count < 0 {
-					let end = idx + count.abs() as usize;
+					let end = read + count.abs() as usize;
 					
-					while idx < end && output.len() < plain as usize {
+					while read < end && output.len() < plain as usize {
 						output.push(match fetch_u8(file, None) {
 							Err(error) => return Err(error),
 							Ok(value) => value
 						});
 
-						idx += 1;
+						read += 1;
 					}
 				} else {
 					const MATCH_MIN: u16 = 3;
@@ -140,23 +140,23 @@ pub fn extract(mut file: &File, header: &headers::file::File) -> Result<Vec<u8>,
 					let mut buffer = vec![0x20; 4096];
 					let mut offset_r: u16 = buffer.len() as u16 - MATCH_MAX;
 
-					let end = idx + count as usize;
-					while idx < end {
+					let end = read + count as usize;
+					while read < end {
 						let mut flags = match fetch_u8(file, None) {
 							Err(error) => return Err(error),
 							Ok(value) => value
 						} as u16;
-						idx += 1;
+						read += 1;
 
 						for _ in 0..8 {
-							if idx >= end { break }
+							if read >= end { break }
 							
 							if (flags & 1) != 0 {
 								let byte = match fetch_u8(file, None) {
 									Err(error) => return Err(error),
 									Ok(value) => value
 								};
-								idx += 1;
+								read += 1;
 
 								output.push(byte);
 
@@ -169,13 +169,13 @@ pub fn extract(mut file: &File, header: &headers::file::File) -> Result<Vec<u8>,
 									Err(error) => return Err(error),
 									Ok(value) => value
 								} as u16;
-								idx += 1;
+								read += 1;
 
 								let mut length = match fetch_u8(file, None) {
 									Err(error) => return Err(error),
 									Ok(value) => value
 								} as u16;
-								idx += 1;
+								read += 1;
 
 								offset_w = offset_w | ((0xF0 & length) << 4);
                             	length &= 0x0F;
