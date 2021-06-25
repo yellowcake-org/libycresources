@@ -134,6 +134,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 		},
 		headers::file::Size::Packed { compressed, plain } => {
 			let mut idx: usize = 0;
+			let mut output: Vec<u8> = Vec::new();
 
 			while idx < compressed as usize {
 				let count = match fetch_i16(file, None) {
@@ -148,7 +149,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 					let mut slice = vec![0u8; count.abs() as usize];
 
 					if let Err(error) = file.read_exact(&mut slice) { return Err(Error::File(error)) }
-					if let Err(error) = created.write(&mut slice) { return Err(Error::File(error)) }
+					output.append(&mut slice);
 
 					idx += count.abs() as usize;
 				} else {
@@ -178,7 +179,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 								};
 								idx += 1;
 
-								if let Err(error) = created.write(&[byte]) { return Err(Error::File(error)) }
+								output.push(byte);
 
 								buffer[offset_r as usize] = byte;
 								offset_r += 1;
@@ -203,8 +204,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
                             	for _ in 0..(length + MATCH_MIN) {
                             		let byte = buffer[offset_w as usize];
                             		
-                            		if let Err(error) = created.write(&[byte]) { return Err(Error::File(error)) }
-
+                            		output.push(byte);
                             		buffer[offset_r as usize] = byte;
 
                             		offset_w += 1;
@@ -221,7 +221,7 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 				}
 			}
 
-			let written = match created.seek(std::io::SeekFrom::Current(0)) {
+			let written = match created.write(&mut output) {
 				Err(error) => return Err(Error::File(error)),
 				Ok(value) => value
 			} as u32;
