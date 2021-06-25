@@ -23,11 +23,13 @@ enum Subcommand {
 
 #[derive(Clap)]
 struct Unpack {
+    /// Destination directory.
     output: String
 }
 
 #[derive(Clap)]
 struct Files {
+    /// If presented, list files within this directory only.
     directory: Option<String>
 }
 
@@ -54,14 +56,12 @@ fn main() {
             }
         },
         Subcommand::Unpack(cmd) => {
-            println!("Extracting {:?} files...", &files.len());
-
             for header in files {
                 println!("Extracting {:?}...", &header.path);
 
                 let mut extracted = match libformats::dat::bytes(&file, &header) {
                     Ok(value) => value,
-                    Err(error) => { println!("Extraction error: {:?}.", error); continue; }
+                    Err(error) => { eprintln!("Extraction error: {:?}.", error); continue; }
                 };
 
                 let root = std::path::Path::new(&cmd.output);
@@ -69,28 +69,28 @@ fn main() {
                 let path = joined.as_path();
                 
                 let directory = match path.parent() {
-                    None => { println!("Parent for path \"{:?}\" is not valid!", path); continue; }
+                    None => { eprintln!("Parent for path \"{:?}\" is not valid!", path); continue; }
                     Some(directory) => directory
                 };
 
                 if let Err(error) = std::fs::create_dir_all(&directory) { 
-                    println!("Directory creation error: {:?}.", error);
+                    eprintln!("Directory creation error: {:?}.", error);
                     continue
                 }
 
                 let mut created = match std::fs::File::create(&path) {
-                    Err(error) => { println!("File creation error: {:?}.", error); continue; },
+                    Err(error) => { eprintln!("File creation error: {:?}.", error); continue; },
                     Ok(created) => created
                 };
 
                 let written = match created.write(&mut extracted) {
-                    Err(error) => { println!("File writing error: {:?}.", error); continue; },
+                    Err(error) => { eprintln!("File writing error: {:?}.", error); continue; },
                     Ok(value) => value
                 } as u32;
 
                 if extracted.len() != written as usize { 
-                    println!("Attention! Written bytes aren't equal to extracted.");
-                    println!("Hence the file is corrupted.") 
+                    eprintln!("Attention! Written bytes aren't equal to extracted.");
+                    eprintln!("Hence the file is corrupted.") 
                 }
             }
         }
