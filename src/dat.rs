@@ -19,8 +19,6 @@ pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
 		Ok(value) => value
 	};
 
-	assert!(count != 0);
-
 	if let Err(error) = file.seek(std::io::SeekFrom::Start(4 * 4 as u64)) { return Err(Error::File(error)) }
 
 	let mut names = Vec::new();

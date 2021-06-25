@@ -35,10 +35,19 @@ struct Files {
 
 fn main() {
     let options = Options::parse();
-    let file = File::open(options.input).unwrap();
+    let file = match File::open(options.input) {
+        Err(error) => { eprintln!("File opening error: {:?}.", error); return },
+        Ok(value) => value
+    };
 
-    let dirs = libformats::dat::dirs(&file).unwrap();
-    let files = libformats::dat::files(&file, &dirs).unwrap();
+    let dirs = match libformats::dat::dirs(&file) {
+        Err(error) => { eprintln!("Dirs listing error: {:?}.", error); return },
+        Ok(value) => value
+    };
+    let files = match libformats::dat::files(&file, &dirs) {
+        Err(error) => { eprintln!("Files listing error: {:?}.", error); return },
+        Ok(value) => value
+    };
 
     match options.subcommand {
         Subcommand::Dirs => {
@@ -61,7 +70,7 @@ fn main() {
 
                 let mut extracted = match libformats::dat::bytes(&file, &header) {
                     Ok(value) => value,
-                    Err(error) => { eprintln!("Extraction error: {:?}.", error); continue; }
+                    Err(error) => { eprintln!("Extraction error: {:?}.", error); continue }
                 };
 
                 let root = std::path::Path::new(&cmd.output);
@@ -69,7 +78,7 @@ fn main() {
                 let path = joined.as_path();
                 
                 let directory = match path.parent() {
-                    None => { eprintln!("Parent for path \"{:?}\" is not valid!", path); continue; }
+                    None => { eprintln!("Parent for path \"{:?}\" is not valid!", path); continue }
                     Some(directory) => directory
                 };
 
@@ -79,12 +88,12 @@ fn main() {
                 }
 
                 let mut created = match std::fs::File::create(&path) {
-                    Err(error) => { eprintln!("File creation error: {:?}.", error); continue; },
+                    Err(error) => { eprintln!("File creation error: {:?}.", error); continue },
                     Ok(created) => created
                 };
 
                 let written = match created.write(&mut extracted) {
-                    Err(error) => { eprintln!("File writing error: {:?}.", error); continue; },
+                    Err(error) => { eprintln!("File writing error: {:?}.", error); continue },
                     Ok(value) => value
                 } as u32;
 
