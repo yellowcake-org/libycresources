@@ -133,68 +133,68 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 			return Ok(())
 		},
 		headers::file::Size::Packed { compressed, plain } => {
-			let mut bytes = vec![0u8; compressed as usize];
-			let mut decompressed = vec![0u8; plain as usize];
-			
-			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
-
-			const DICT_SIZE: u16 = 4096;
-
-			const MATCH_MIN: u16 = 3;
-			const MATCH_MAX: u16 = 18;
-
-			let mut offset_r: u16;
-			let mut offset_w: u16;
-
-			let mut count: i16;
-			let mut flags: u16;
-			let mut length: u16;
-
 			let mut idx: usize = 0;
-			let mut ddx: usize = 0;
 
 			while idx < compressed as usize {
-				count = i16::from_be_bytes([bytes[idx], bytes[idx + 1]]);
+				let count = match fetch_i16(file, None) {
+					Err(error) => return Err(error),
+					Ok(value) => value
+				};
 				idx += 2;
 
 				if count == 0 { break }
-				let end = idx + count.abs() as usize;
 
 				if count < 0 {
-					while idx < end && ddx < plain as usize {
-						let byte = bytes[idx];
-						idx += 1;
+					let mut slice = vec![0u8; count.abs() as usize];
 
-						decompressed[ddx] = byte;
-						ddx += 1;
-					}
+					if let Err(error) = file.read_exact(&mut slice) { return Err(Error::File(error)) }
+					if let Err(error) = created.write(&mut slice) { return Err(Error::File(error)) }
+
+					idx += count.abs() as usize;
 				} else {
-					offset_r = DICT_SIZE - MATCH_MAX;
-					let mut buffer = vec![0x20; DICT_SIZE as usize];
+					const BUFFER_SIZE: u16 = 4096;
 
+					const MATCH_MIN: u16 = 3;
+					const MATCH_MAX: u16 = 18;
+
+					let mut buffer = vec![0x20; BUFFER_SIZE as usize];
+					let mut offset_r: u16 = BUFFER_SIZE - MATCH_MAX;
+
+					let end = idx + count.abs() as usize;
 					while idx < end {
-						flags = bytes[idx] as u16;
+						let mut flags = match fetch_u8(file, None) {
+							Err(error) => return Err(error),
+							Ok(value) => value
+						} as u16;
 						idx += 1;
 
 						for _ in 0..8 {
 							if idx >= end { break }
 							
 							if (flags & 1) != 0 {
-								let byte = bytes[idx];
+								let byte = match fetch_u8(file, None) {
+									Err(error) => return Err(error),
+									Ok(value) => value
+								};
 								idx += 1;
 
-								decompressed[ddx] = byte;
-								ddx += 1;
+								if let Err(error) = created.write(&[byte]) { return Err(Error::File(error)) }
 
 								buffer[offset_r as usize] = byte;
 								offset_r += 1;
 
-								if offset_r >= DICT_SIZE { offset_r = 0 }
+								if offset_r >= BUFFER_SIZE { offset_r = 0 }
 							} else {
-								offset_w = bytes[idx] as u16;
+								let mut offset_w = match fetch_u8(file, None) {
+									Err(error) => return Err(error),
+									Ok(value) => value
+								} as u16;
 								idx += 1;
 
-								length = bytes[idx] as u16;
+								let mut length = match fetch_u8(file, None) {
+									Err(error) => return Err(error),
+									Ok(value) => value
+								} as u16;
 								idx += 1;
 
 								offset_w = offset_w | ((0xF0 & length) << 4);
@@ -203,16 +203,15 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
                             	for _ in 0..(length + MATCH_MIN) {
                             		let byte = buffer[offset_w as usize];
                             		
-                            		decompressed[ddx] = byte;
-                            		ddx += 1;
+                            		if let Err(error) = created.write(&[byte]) { return Err(Error::File(error)) }
 
                             		buffer[offset_r as usize] = byte;
 
                             		offset_w += 1;
                             		offset_r += 1;
 
-                            		if offset_r >= DICT_SIZE { offset_r = 0 }
-	                                if offset_w >= DICT_SIZE { offset_w = 0 }
+                            		if offset_r >= BUFFER_SIZE { offset_r = 0 }
+	                                if offset_w >= BUFFER_SIZE { offset_w = 0 }
                             	}
 							}
 
@@ -222,10 +221,10 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 				}
 			}
 
-			let written = match created.write(&decompressed) {
+			let written = match created.seek(std::io::SeekFrom::Current(0)) {
 				Err(error) => return Err(Error::File(error)),
-				Ok(size) => size as u32
-			};
+				Ok(value) => value
+			} as u32;
 
 			if plain != written { return Err(Error::Corrupted) }
 
@@ -247,8 +246,8 @@ fn offset_if_needed(mut file: &File, offset: Option<u64>) -> Result<(), Error> {
 fn fetch_u32(mut file: &File, offset: Option<u64>) -> Result<u32, Error> {
 	if let Err(error) = offset_if_needed(file, offset) { return Err(error) }
 
-	const BYTES_COUNT: usize = 4;
-	let mut slice: [u8; BYTES_COUNT] = [0; BYTES_COUNT];
+	const COUNT: usize = std::mem::size_of::<u32>();
+	let mut slice: [u8; COUNT] = [0; COUNT];
 	
 	return match file.read_exact(&mut slice) {
 		Err(error) => Err(Error::File(error)),
@@ -256,11 +255,35 @@ fn fetch_u32(mut file: &File, offset: Option<u64>) -> Result<u32, Error> {
 	}
 }
 
+fn fetch_i16(mut file: &File, offset: Option<u64>) -> Result<i16, Error> {
+	if let Err(error) = offset_if_needed(file, offset) { return Err(error) }
+
+	const COUNT: usize = std::mem::size_of::<i16>();
+	let mut slice: [u8; COUNT] = [0; COUNT];
+
+	return match file.read_exact(&mut slice) {
+		Err(error) => Err(Error::File(error)),
+		Ok(_) => Ok(i16::from_be_bytes(slice))
+	}
+}
+
+fn fetch_u8(mut file: &File, offset: Option<u64>) -> Result<u8, Error> {
+	if let Err(error) = offset_if_needed(file, offset) { return Err(error) }
+
+	const COUNT: usize = std::mem::size_of::<u8>();
+	let mut slice: [u8; COUNT] = [0; COUNT];
+
+	return match file.read_exact(&mut slice) {
+		Err(error) => Err(Error::File(error)),
+		Ok(_) => Ok(u8::from_be_bytes(slice))
+	}
+}
+
 fn fetch_string(mut file: &File, offset: Option<u64>) -> Result<String, Error> {
 	if let Err(error) = offset_if_needed(file, offset) { return Err(error) }
 
-	const LENGTH_BYTE_COUNT: usize = 1;
-	let mut string_length_slice: [u8; LENGTH_BYTE_COUNT] = [0; LENGTH_BYTE_COUNT];
+	const COUNT: usize = std::mem::size_of::<u8>();
+	let mut string_length_slice: [u8; COUNT] = [0; COUNT];
 	
 	if let Err(error) = file.read_exact(&mut string_length_slice) { return Err(Error::File(error)) }
 
