@@ -139,28 +139,28 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
 
 			const DICT_SIZE: u16 = 4096;
-			let mut buffer = vec![0x20; DICT_SIZE as usize];
 
 			const MATCH_MIN: u16 = 3;
 			const MATCH_MAX: u16 = 18;
 
-			let mut N: i16 = 0;
-			let mut DO: u16 = 0;
-			let mut DI: u16 = DICT_SIZE - MATCH_MAX;
-			let mut L: u16 = 0;
-			let mut F: u16 = 0;
+			let mut offset_r: u16;
+			let mut offset_w: u16;
+
+			let mut count: i16;
+			let mut flags: u16;
+			let mut length: u16;
 
 			let mut idx: usize = 0;
 			let mut ddx: usize = 0;
 
 			while idx < compressed as usize {
-				N = i16::from_be_bytes([bytes[idx], bytes[idx + 1]]);
+				count = i16::from_be_bytes([bytes[idx], bytes[idx + 1]]);
 				idx += 2;
 
-				if N == 0 { break }
+				if count == 0 { break }
+				let end = idx + count.abs() as usize;
 
-				if N < 0 {
-					let end = idx + N.abs() as usize;
+				if count < 0 {
 					while idx < end && ddx < plain as usize {
 						let byte = bytes[idx];
 						idx += 1;
@@ -169,55 +169,54 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 						ddx += 1;
 					}
 				} else {
-					DO = DICT_SIZE - MATCH_MAX;
-					buffer = vec![0x20; DICT_SIZE as usize];
+					offset_r = DICT_SIZE - MATCH_MAX;
+					let mut buffer = vec![0x20; DICT_SIZE as usize];
 
-					let end = idx + N as usize;
 					while idx < end {
-						F = bytes[idx] as u16;
+						flags = bytes[idx] as u16;
 						idx += 1;
 
 						for _ in 0..8 {
 							if idx >= end { break }
 							
-							if (F & 1) != 0 {
+							if (flags & 1) != 0 {
 								let byte = bytes[idx];
 								idx += 1;
 
 								decompressed[ddx] = byte;
 								ddx += 1;
 
-								buffer[DO as usize] = byte;
-								DO += 1;
+								buffer[offset_r as usize] = byte;
+								offset_r += 1;
 
-								if DO >= DICT_SIZE { DO = 0 }
+								if offset_r >= DICT_SIZE { offset_r = 0 }
 							} else {
-								DI = bytes[idx] as u16;
+								offset_w = bytes[idx] as u16;
 								idx += 1;
 
-								L = bytes[idx] as u16;
+								length = bytes[idx] as u16;
 								idx += 1;
 
-								DI = DI | ((0xF0 & L) << 4);
-                            	L &= 0x0F;
+								offset_w = offset_w | ((0xF0 & length) << 4);
+                            	length &= 0x0F;
 
-                            	for _ in 0..(L + MATCH_MIN) {
-                            		let byte = buffer[DI as usize];
+                            	for _ in 0..(length + MATCH_MIN) {
+                            		let byte = buffer[offset_w as usize];
                             		
                             		decompressed[ddx] = byte;
                             		ddx += 1;
 
-                            		buffer[DO as usize] = byte;
+                            		buffer[offset_r as usize] = byte;
 
-                            		DI += 1;
-                            		DO += 1;
+                            		offset_w += 1;
+                            		offset_r += 1;
 
-                            		if DO >= DICT_SIZE { DO = 0 }
-	                                if DI >= DICT_SIZE { DI = 0 }
+                            		if offset_r >= DICT_SIZE { offset_r = 0 }
+	                                if offset_w >= DICT_SIZE { offset_w = 0 }
                             	}
 							}
 
-							F >>= 1;
+							flags >>= 1;
 						}
 					}
 				}
