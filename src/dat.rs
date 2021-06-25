@@ -177,20 +177,20 @@ pub fn bytes(mut file: &File, header: &headers::File) -> Result<Vec<u8>, Error> 
 								processed += 1;
 
 								offset_w = offset_w | ((0xF0 & length) << 4);
-                            	length &= 0x0F;
+								length &= 0x0F;
 
-                            	for _ in 0..(length + MATCH_MIN) {
-                            		let byte = buffer[offset_w as usize];
-                            		
-                            		output.push(byte);
-                            		buffer[offset_r as usize] = byte;
+								for _ in 0..(length + MATCH_MIN) {
+									let byte = buffer[offset_w as usize];
+									
+									output.push(byte);
+									buffer[offset_r as usize] = byte;
 
-                            		offset_w += 1;
-                            		offset_r += 1;
+									offset_w += 1;
+									offset_r += 1;
 
-                            		if offset_r >= buffer.len() as u16 { offset_r = 0 }
-	                                if offset_w >= buffer.len() as u16 { offset_w = 0 }
-                            	}
+									if offset_r >= buffer.len() as u16 { offset_r = 0 }
+									if offset_w >= buffer.len() as u16 { offset_w = 0 }
+								}
 							}
 
 							flags >>= 1;
