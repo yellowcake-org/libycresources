@@ -1,7 +1,7 @@
 pub mod headers;
 
 use std::fs::File;
-use std::io::{Read, Seek, Write};
+use std::io::{Read, Seek};
 
 use std::string::String;
 use std::str::FromStr;
@@ -9,7 +9,6 @@ use std::str::FromStr;
 #[derive(Debug)]
 pub enum Error {
 	File(std::io::Error),
-	Corrupted,
 	Decompression,
 	Encoding(std::string::FromUtf8Error)
 }
@@ -100,22 +99,7 @@ pub fn list_files(mut file: &File, within: &headers::dir::Dir) -> Result<Vec<hea
 	return Ok(files)
 }
 
-pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -> Result<(), Error> {
-	let filename = output.to_owned() + &header.path;
-	let path = std::path::Path::new(&filename);
-	
-	let directory = match path.parent() {
-		None => return Err(Error::Corrupted),
-		Some(directory) => directory
-	};
-
-	if let Err(error) = std::fs::create_dir_all(&directory) { return Err(Error::File(error)) }
-
-	let mut created = match std::fs::File::create(&path) {
-		Err(error) => return Err(Error::File(error)),
-		Ok(created) => created
-	};
-
+pub fn extract(mut file: &File, header: &headers::file::File) -> Result<Vec<u8>, Error> {
 	if let Err(error) = file.seek(std::io::SeekFrom::Start(header.offset as u64)) { return Err(Error::File(error)) }
 	
 	match header.size {
@@ -123,18 +107,11 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 			let mut bytes = vec![0u8; length as usize];
 			if let Err(error) = file.read_exact(&mut bytes) { return Err(Error::File(error)) }
 
-			let written = match created.write(&bytes) {
-				Err(error) => return Err(Error::File(error)),
-				Ok(size) => size as u32
-			};
-
-			if length != written { return Err(Error::Corrupted) }
-
-			return Ok(())
+			return Ok(bytes)
 		},
 		headers::file::Size::Packed { compressed, plain } => {
-			let mut idx: usize = 0;
 			let mut output: Vec<u8> = Vec::new();
+			let mut idx: usize = 0;
 
 			while idx < compressed as usize {
 				let count = match fetch_i16(file, None) {
@@ -223,14 +200,9 @@ pub fn extract(mut file: &File, header: &headers::file::File, output: &String) -
 				}
 			}
 
-			let written = match created.write(&mut output) {
-				Err(error) => return Err(Error::File(error)),
-				Ok(value) => value
-			} as u32;
+			if plain != output.len() as u32 { return Err(Error::Decompression) }
 
-			if plain != written { return Err(Error::Corrupted) }
-
-			return Ok(())
+			return Ok(output)
 		}
 	}
 }

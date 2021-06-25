@@ -1,5 +1,6 @@
 use clap::Clap;
 use std::fs::File;
+use std::io::Write;
 
 #[derive(Clap)]
 struct Options {
@@ -43,11 +44,32 @@ fn main() {
             for header in files {
                 println!("Extracting {:?}...", &header.path);
 
-                match libformats::dat::extract(&file, &header, &cmd.output) {
-                    Ok(_) => { println!("Done.") },
-                    Err(error) => { println!("Erred: {:?}.", error) }
-                }
+                let mut extracted = match libformats::dat::extract(&file, &header) {
+                    Ok(value) => value,
+                    Err(error) => { println!("Erred: {:?}.", error); continue; }
+                };
 
+                let filename = cmd.output.to_owned() + &header.path;
+                let path = std::path::Path::new(&filename);
+                
+                let directory = match path.parent() {
+                    None => { println!("Couldn't unwrap path."); continue; }
+                    Some(directory) => directory
+                };
+
+                if let Err(error) = std::fs::create_dir_all(&directory) { println!("Erred: {:?}.", error); continue; }
+
+                let mut created = match std::fs::File::create(&path) {
+                    Err(error) => { println!("Erred: {:?}.", error); continue; },
+                    Ok(created) => created
+                };
+
+                let written = match created.write(&mut extracted) {
+                    Err(error) => { println!("Erred: {:?}.", error); continue; },
+                    Ok(value) => value
+                } as u32;
+
+                if extracted.len() != written as usize { println!("Written bytes aren't equal to extracted.") }
             }
         },
         Subcommand::List(subject) => {
