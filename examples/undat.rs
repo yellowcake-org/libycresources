@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Clap)]
+#[clap(version, author)]
 struct Options {
     input: String,
     #[clap(subcommand)]
@@ -12,14 +13,22 @@ struct Options {
 
 #[derive(Clap)]
 enum Subcommand {
+    /// Lists all directories contained within provided file.
     Dirs,
-    Files,
-    Extract(Extract)
+    /// Lists all files, including full path. Filtered, if directory specified.
+    Files(Files),
+    /// Extracts all contents to destination directory.
+    Unpack(Unpack)
 }
 
 #[derive(Clap)]
-struct Extract {
+struct Unpack {
     output: String
+}
+
+#[derive(Clap)]
+struct Files {
+    directory: Option<String>
 }
 
 fn main() {
@@ -35,12 +44,16 @@ fn main() {
                 println!("[{:?}]: {:?}", idx, dir);
             }
         },
-        Subcommand::Files => {
+        Subcommand::Files(options) => {
             for (idx, file) in files.iter().enumerate() {
+                if let Some(name) = &options.directory {
+                    if !file.path.starts_with(name) { continue }
+                }
+
                 println!("[{:?}]: {:?}", idx, file.path);
             }
         },
-        Subcommand::Extract(cmd) => {
+        Subcommand::Unpack(cmd) => {
             println!("Extracting {:?} files...", &files.len());
 
             for header in files {
@@ -56,7 +69,7 @@ fn main() {
                 let path = joined.as_path();
                 
                 let directory = match path.parent() {
-                    None => { println!("Parent for path \"{:?}\" is no valid!", path); continue; }
+                    None => { println!("Parent for path \"{:?}\" is not valid!", path); continue; }
                     Some(directory) => directory
                 };
 
