@@ -1,10 +1,5 @@
 use std::string::String;
 
-pub struct Dirs {
-    pub names: Vec<String>,
-    pub(crate) offset: u64,
-}
-
 pub enum Size {
     Plain(u32),
     Packed { compressed: u32, plain: u32 },

@@ -23,14 +23,7 @@ fn main() {
         Ok(value) => value,
     };
 
-    let dirs = match libformats::dat::dirs(&file) {
-        Err(error) => {
-            eprintln!("Dirs listing error: {:?}.", error);
-            return;
-        }
-        Ok(value) => value,
-    };
-    let files = match libformats::dat::files(&file, &dirs) {
+    let files = match libformats::dat::files(&file) {
         Err(error) => {
             eprintln!("Files listing error: {:?}.", error);
             return;
@@ -39,8 +32,8 @@ fn main() {
     };
 
     if options.list {
-        for file in &files {
-            println!("{:?}", file.path);
+        for header in &files {
+            println!("{:?}", &header.path);
         }
     }
 
