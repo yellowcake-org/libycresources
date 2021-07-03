@@ -2,7 +2,7 @@ use clap::Clap;
 use libycresources::dat;
 
 use std::fs::File;
-use std::io::{Read, Seek};
+use std::io::{Read, Seek, Write};
 
 #[derive(Clap)]
 #[clap(name = "undat", version)]
@@ -17,12 +17,15 @@ struct Options {
 fn main() {
     let options = Options::parse();
 
-    let reader = |range: std::ops::Range<usize>| {
-        let mut file = match File::open(&options.input) {
-            Err(error) => return Err(error),
-            Ok(value) => value,
-        };
+    let mut file = match File::open(&options.input) {
+        Err(error) => {
+            eprintln!("Couldn't open input file: {:?}.", error);
+            return;
+        }
+        Ok(value) => value,
+    };
 
+    let mut reader = |range: std::ops::Range<usize>| {
         if let Err(error) = file.seek(std::io::SeekFrom::Start(range.start as u64)) {
             return Err(error);
         }
@@ -34,7 +37,7 @@ fn main() {
         }
     };
 
-    let entries = match dat::list::entries(reader) {
+    let entries = match dat::list::entries(&mut reader) {
         Err(error) => {
             eprintln!("Files listing error: {:?}.", error);
             return;
@@ -67,15 +70,17 @@ fn main() {
                 continue;
             }
 
-            let created = match std::fs::File::create(&path) {
+            let mut created = match std::fs::File::create(&path) {
                 Err(error) => {
-                    eprintln!("File creation error: {:?}.", error);
+                    eprintln!("Couldn't create output file: {:?}.", error);
                     continue;
                 }
                 Ok(created) => created,
             };
 
-            if let Err(error) = dat::extract::entry(reader, &entry, &created) {
+            let mut writer = |bytes: &[u8]| created.write(bytes);
+
+            if let Err(error) = dat::extract::entry(&mut reader, &entry, &mut writer) {
                 eprintln!("Extraction error: {:?}.", error)
             }
         }

@@ -1,22 +1,24 @@
 use super::Entry;
 
-use std::fs::File;
-use std::io::Write;
-
 use std::convert::TryInto;
 use std::mem::size_of;
 
 #[derive(Debug)]
-pub enum Error<R> {
-    Write,
+pub enum Error<R, W> {
+    Write(W),
     Reader,
     Read(R),
     Decompress,
 }
 
-pub fn entry<R, E>(reader: R, entry: &Entry, mut output: &File) -> Result<(), Error<E>>
+pub fn entry<R, W, RE, WE>(
+    reader: &mut R,
+    entry: &Entry,
+    writer: &mut W,
+) -> Result<(), Error<RE, WE>>
 where
-    R: Fn(std::ops::Range<usize>) -> Result<Vec<u8>, E>,
+    R: FnMut(std::ops::Range<usize>) -> Result<Vec<u8>, RE>,
+    W: FnMut(&[u8]) -> Result<usize, WE>,
 {
     let plain = entry.size;
     let archived = entry.range.end - entry.range.start;
@@ -40,7 +42,7 @@ where
                     },
                 },
             );
-            processed += 2; //size_of::<i16> as usize;
+            processed += 2;
 
             if count == 0 {
                 break;
@@ -64,10 +66,10 @@ where
                             },
                         },
                     );
-                    processed += 1; //size_of::<u8> as usize;
+                    processed += 1;
 
-                    written += match output.write(&mut [byte]) {
-                        Err(_) => return Err(Error::Write),
+                    written += match writer(&[byte]) {
+                        Err(error) => return Err(Error::Write(error)),
                         Ok(value) => value,
                     };
                 }
@@ -94,7 +96,7 @@ where
                             },
                         },
                     ) as u16;
-                    processed += 1; //size_of::<u8> as usize;
+                    processed += 1;
 
                     for _ in 0..8 {
                         if processed >= end {
@@ -116,10 +118,10 @@ where
                                     },
                                 },
                             );
-                            processed += 1; //size_of::<u8> as usize;
+                            processed += 1;
 
-                            written += match output.write(&mut [byte]) {
-                                Err(_) => return Err(Error::Write),
+                            written += match writer(&[byte]) {
+                                Err(error) => return Err(Error::Write(error)),
                                 Ok(value) => value,
                             };
 
@@ -144,7 +146,7 @@ where
                                     },
                                 },
                             ) as u16;
-                            processed += 1; //size_of::<u8> as usize;
+                            processed += 1;
 
                             let mut length: u16 = u8::from_be_bytes(
                                 match reader(
@@ -160,7 +162,7 @@ where
                                     },
                                 },
                             ) as u16;
-                            processed += 1; //size_of::<u8> as usize;
+                            processed += 1;
 
                             offset_w |= (0xF0 & length) << 4;
                             length &= 0x0F;
@@ -169,8 +171,8 @@ where
                                 let byte = buffer[offset_w as usize];
 
                                 buffer[offset_r as usize] = byte;
-                                written += match output.write(&mut [byte]) {
-                                    Err(_) => return Err(Error::Write),
+                                written += match writer(&[byte]) {
+                                    Err(error) => return Err(Error::Write(error)),
                                     Ok(value) => value,
                                 };
 
@@ -203,8 +205,8 @@ where
             Ok(value) => value,
         };
 
-        if let Err(_) = output.write(&bytes) {
-            return Err(Error::Write);
+        if let Err(error) = writer(&bytes) {
+            return Err(Error::Write(error));
         }
 
         Ok(())

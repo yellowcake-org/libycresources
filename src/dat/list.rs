@@ -11,9 +11,9 @@ pub enum Error<R> {
     Reader,
 }
 
-pub fn entries<R, E>(reader: R) -> Result<Vec<Entry>, Error<E>>
+pub fn entries<R, E>(reader: &mut R) -> Result<Vec<Entry>, Error<E>>
 where
-    R: Fn(std::ops::Range<usize>) -> Result<Vec<u8>, E>,
+    R: FnMut(std::ops::Range<usize>) -> Result<Vec<u8>, E>,
 {
     let mut offset = 0;
 
