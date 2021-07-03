@@ -1,4 +1,5 @@
 use clap::Clap;
+use libycresources::dat;
 
 use std::fs::File;
 use std::io::Write;
@@ -23,7 +24,7 @@ fn main() {
         Ok(value) => value,
     };
 
-    let files = match libformats::dat::files(&file) {
+    let files = match dat::files(&file) {
         Err(error) => {
             eprintln!("Files listing error: {:?}.", error);
             return;
@@ -41,7 +42,7 @@ fn main() {
         for header in &files {
             println!("Extracting {:?}...", &header.path);
 
-            let mut extracted = match libformats::dat::bytes(&file, &header) {
+            let mut extracted = match dat::bytes(&file, &header) {
                 Ok(value) => value,
                 Err(error) => {
                     eprintln!("Extraction error: {:?}.", error);
