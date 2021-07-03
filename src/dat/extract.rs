@@ -4,11 +4,10 @@ use super::Entry;
 use super::Error;
 
 use std::fs::File;
-use std::io::Read;
-use std::io::Seek;
+use std::io::{Read, Seek, Write};
 
-pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
-    if let Err(error) = file.seek(std::io::SeekFrom::Start(entry.range.start as u64)) {
+pub fn entry(mut input: &File, entry: &Entry, mut output: &File) -> Result<(), Error> {
+    if let Err(error) = input.seek(std::io::SeekFrom::Start(entry.range.start as u64)) {
         return Err(Error::Read(error));
     }
 
@@ -16,11 +15,11 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
     let archived = entry.range.end - entry.range.start;
 
     if plain != archived {
-        let mut output: Vec<u8> = Vec::new();
+        let mut written: usize = 0;
         let mut processed: usize = 0;
 
         while processed < archived as usize {
-            let count = match fetch::i16(file, None) {
+            let count = match fetch::i16(input, None) {
                 Err(error) => return Err(error),
                 Ok(value) => value,
             };
@@ -33,13 +32,17 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
             if count < 0 {
                 let end = processed + count.abs() as usize;
 
-                while processed < end && output.len() < plain as usize {
-                    output.push(match fetch::u8(file, None) {
+                while processed < end && written < plain as usize {
+                    let byte = match fetch::u8(input, None) {
                         Err(error) => return Err(error),
                         Ok(value) => value,
-                    });
-
+                    };
                     processed += 1;
+
+                    written += match output.write(&mut [byte]) {
+                        Err(error) => return Err(Error::Write(error)),
+                        Ok(value) => value,
+                    };
                 }
             } else {
                 const MATCH_MIN: u16 = 3;
@@ -50,7 +53,7 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
 
                 let end = processed + count as usize;
                 while processed < end {
-                    let mut flags = match fetch::u8(file, None) {
+                    let mut flags = match fetch::u8(input, None) {
                         Err(error) => return Err(error),
                         Ok(value) => value,
                     } as u16;
@@ -62,13 +65,16 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
                         }
 
                         if (flags & 1) != 0 {
-                            let byte = match fetch::u8(file, None) {
+                            let byte = match fetch::u8(input, None) {
                                 Err(error) => return Err(error),
                                 Ok(value) => value,
                             };
                             processed += 1;
 
-                            output.push(byte);
+                            written += match output.write(&mut [byte]) {
+                                Err(error) => return Err(Error::Write(error)),
+                                Ok(value) => value,
+                            };
 
                             buffer[offset_r as usize] = byte;
                             offset_r += 1;
@@ -77,13 +83,13 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
                                 offset_r = 0
                             }
                         } else {
-                            let mut offset_w = match fetch::u8(file, None) {
+                            let mut offset_w = match fetch::u8(input, None) {
                                 Err(error) => return Err(error),
                                 Ok(value) => value,
                             } as u16;
                             processed += 1;
 
-                            let mut length = match fetch::u8(file, None) {
+                            let mut length = match fetch::u8(input, None) {
                                 Err(error) => return Err(error),
                                 Ok(value) => value,
                             } as u16;
@@ -95,8 +101,11 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
                             for _ in 0..(length + MATCH_MIN) {
                                 let byte = buffer[offset_w as usize];
 
-                                output.push(byte);
                                 buffer[offset_r as usize] = byte;
+                                written += match output.write(&mut [byte]) {
+                                    Err(error) => return Err(Error::Write(error)),
+                                    Ok(value) => value,
+                                };
 
                                 offset_w += 1;
                                 offset_r += 1;
@@ -116,17 +125,22 @@ pub fn entry(mut file: &File, entry: &Entry) -> Result<Vec<u8>, Error> {
             }
         }
 
-        if plain != output.len() {
+        if plain != written {
             return Err(Error::Decompress);
         }
 
-        Ok(output)
+        Ok(())
     } else {
         let mut bytes = vec![0u8; plain];
-        if let Err(error) = file.read_exact(&mut bytes) {
+
+        if let Err(error) = input.read_exact(&mut bytes) {
             return Err(Error::Read(error));
         }
 
-        Ok(bytes)
+        if let Err(error) = output.write(&mut bytes) {
+            return Err(Error::Write(error));
+        }
+
+        Ok(())
     }
 }

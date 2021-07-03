@@ -2,7 +2,6 @@ use clap::Clap;
 use libycresources::dat;
 
 use std::fs::File;
-use std::io::Write;
 
 #[derive(Clap)]
 #[clap(name = "undat", version)]
@@ -40,14 +39,6 @@ fn main() {
         for entry in &entries {
             println!("Extracting {:?}...", &entry.path);
 
-            let mut extracted = match dat::extract::entry(&file, &entry) {
-                Ok(value) => value,
-                Err(error) => {
-                    eprintln!("Extraction error: {:?}.", error);
-                    continue;
-                }
-            };
-
             let root = std::path::Path::new(&output);
             let joined = root.join(&entry.path);
             let path = joined.as_path();
@@ -65,7 +56,7 @@ fn main() {
                 continue;
             }
 
-            let mut created = match std::fs::File::create(&path) {
+            let created = match std::fs::File::create(&path) {
                 Err(error) => {
                     eprintln!("File creation error: {:?}.", error);
                     continue;
@@ -73,17 +64,8 @@ fn main() {
                 Ok(created) => created,
             };
 
-            let written = match created.write(&mut extracted) {
-                Err(error) => {
-                    eprintln!("File writing error: {:?}.", error);
-                    continue;
-                }
-                Ok(value) => value,
-            } as u32;
-
-            if extracted.len() != written as usize {
-                eprintln!("Attention! Written bytes aren't equal to extracted.");
-                eprintln!("Hence the file is corrupted.")
+            if let Err(error) = dat::extract::entry(&file, &entry, &created) {
+                eprintln!("Extraction error: {:?}.", error)
             }
         }
     } else {

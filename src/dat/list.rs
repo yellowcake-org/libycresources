@@ -72,7 +72,7 @@ pub fn entries(mut file: &File) -> Result<Vec<Entry>, Error> {
                 Ok(value) => value,
             } as usize;
 
-            entries.push(super::Entry {
+            entries.push(Entry {
                 path,
                 range: offset..offset + {
                     if packed_size > 0 {
