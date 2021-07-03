@@ -36,9 +36,7 @@ fn main() {
         for header in &files {
             println!("{:?}", &header.path);
         }
-    }
-
-    if let Some(output) = options.extract {
+    } else if let Some(output) = options.extract {
         for header in &files {
             println!("Extracting {:?}...", &header.path);
 
@@ -88,5 +86,7 @@ fn main() {
                 eprintln!("Hence the file is corrupted.")
             }
         }
+    } else {
+        eprintln!("No command passed.");
     }
 }
