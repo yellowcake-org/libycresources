@@ -2,6 +2,7 @@ use clap::Clap;
 use libycresources::dat;
 
 use std::fs::File;
+use std::io::{Read, Seek};
 
 #[derive(Clap)]
 #[clap(name = "undat", version)]
@@ -15,15 +16,25 @@ struct Options {
 
 fn main() {
     let options = Options::parse();
-    let file = match File::open(options.input) {
-        Err(error) => {
-            eprintln!("File opening error: {:?}.", error);
-            return;
+
+    let reader = |range: std::ops::Range<usize>| {
+        let mut file = match File::open(&options.input) {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
+
+        if let Err(error) = file.seek(std::io::SeekFrom::Start(range.start as u64)) {
+            return Err(error);
         }
-        Ok(value) => value,
+
+        let mut buffer = vec![0u8; range.end - range.start];
+        match file.read(&mut buffer) {
+            Err(error) => Err(error),
+            Ok(_) => Ok(buffer),
+        }
     };
 
-    let entries = match dat::list::entries(&file) {
+    let entries = match dat::list::entries(reader) {
         Err(error) => {
             eprintln!("Files listing error: {:?}.", error);
             return;
@@ -35,7 +46,7 @@ fn main() {
         for entry in &entries {
             println!("{:}", &entry.path);
         }
-    } else if let Some(output) = options.extract {
+    } else if let Some(output) = &options.extract {
         for entry in &entries {
             println!("Extracting {:?}...", &entry.path);
 
@@ -64,7 +75,7 @@ fn main() {
                 Ok(created) => created,
             };
 
-            if let Err(error) = dat::extract::entry(&file, &entry, &created) {
+            if let Err(error) = dat::extract::entry(reader, &entry, &created) {
                 eprintln!("Extraction error: {:?}.", error)
             }
         }
