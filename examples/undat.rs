@@ -25,16 +25,14 @@ fn main() {
         Ok(value) => value,
     };
 
-    let mut reader = |range: std::ops::Range<usize>| {
-        if let Err(error) = file.seek(std::io::SeekFrom::Start(range.start as u64)) {
-            return Err(error);
-        }
+    let mut buffer: Vec<u8> = Vec::new();
+    if let Err(error) = file.read_to_end(&mut buffer) {
+        eprintln!("Couldn't read from input file: {:?}.", error)
+    }
 
-        let mut buffer = vec![0u8; range.end - range.start];
-        match file.read(&mut buffer) {
-            Err(error) => Err(error),
-            Ok(_) => Ok(buffer),
-        }
+    let mut reader = |range: std::ops::Range<usize>| {
+        let result: Result<Vec<u8>, ()> = Ok(buffer[range].to_vec());
+        result
     };
 
     let entries = match dat::list::entries(&mut reader) {
