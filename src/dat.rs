@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::{Read, Seek};
 
 use std::str::FromStr;
-use std::string::String;
 
 #[derive(Debug)]
 pub enum Error {

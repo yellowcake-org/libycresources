@@ -1,5 +1,3 @@
-use std::string::String;
-
 pub enum Size {
     Plain(u32),
     Packed { compressed: u32, plain: u32 },
