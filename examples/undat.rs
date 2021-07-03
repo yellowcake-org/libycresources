@@ -2,7 +2,7 @@ use clap::Clap;
 use libycresources::dat;
 
 use std::fs::File;
-use std::io::{Read, Seek, Write};
+use std::io::{Read, Write};
 
 #[derive(Clap)]
 #[clap(name = "undat", version)]
