@@ -13,7 +13,7 @@ pub enum Error {
     Decompression,
 }
 
-pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
+pub fn files(mut file: &File) -> Result<Vec<headers::File>, Error> {
     let count = match fetch_u32(file, Some(0)) {
         Err(error) => return Err(error),
         Ok(value) => value,
@@ -38,25 +38,9 @@ pub fn dirs(mut file: &File) -> Result<headers::Dirs, Error> {
         names.push(name);
     }
 
-    let offset = match file.seek(std::io::SeekFrom::Current(0)) {
-        Err(error) => return Err(Error::File(error)),
-        Ok(value) => value,
-    };
-
-    Ok(headers::Dirs { names, offset })
-}
-
-pub fn files(mut file: &File, within: &headers::Dirs) -> Result<Vec<headers::File>, Error> {
-    let count = within.names.len();
-    assert!(count != 0);
-
-    if let Err(error) = file.seek(std::io::SeekFrom::Start(within.offset as u64)) {
-        return Err(Error::File(error));
-    }
-
     let mut files = Vec::new();
 
-    for dir in &within.names {
+    for dir in &names {
         let file_count = match fetch_u32(file, None) {
             Err(error) => return Err(error),
             Ok(value) => value,
