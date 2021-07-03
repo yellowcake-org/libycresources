@@ -78,10 +78,19 @@ fn main() {
                 Ok(created) => created,
             };
 
-            let mut writer = |bytes: &[u8]| created.write(bytes);
+            let mut buffer: Vec<u8> = Vec::new();
+            if let Err(error) = dat::extract::entry(&mut reader, &entry, &mut |bytes: &[u8]| {
+                buffer.extend_from_slice(bytes);
+                let result: Result<usize, ()> = Ok(bytes.len());
+                result
+            }) {
+                eprintln!("Extraction error: {:?}.", error);
+                continue;
+            }
 
-            if let Err(error) = dat::extract::entry(&mut reader, &entry, &mut writer) {
-                eprintln!("Extraction error: {:?}.", error)
+            if let Err(error) = created.write(buffer.as_slice()) {
+                eprintln!("Writing file error: {:?}.", error);
+                continue;
             }
         }
     } else {
