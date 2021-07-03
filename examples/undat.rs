@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Clap)]
-#[clap(version, author)]
+#[clap(name = "undat", version)]
 struct Options {
     input: String,
     #[clap(short, long)]
