@@ -24,7 +24,7 @@ fn main() {
         Ok(value) => value,
     };
 
-    let files = match dat::files(&file) {
+    let entries = match dat::list::entries(&file) {
         Err(error) => {
             eprintln!("Files listing error: {:?}.", error);
             return;
@@ -33,14 +33,14 @@ fn main() {
     };
 
     if options.list {
-        for header in &files {
-            println!("{:?}", &header.path);
+        for entry in &entries {
+            println!("{:}", &entry.path);
         }
     } else if let Some(output) = options.extract {
-        for header in &files {
-            println!("Extracting {:?}...", &header.path);
+        for entry in &entries {
+            println!("Extracting {:?}...", &entry.path);
 
-            let mut extracted = match dat::bytes(&file, &header) {
+            let mut extracted = match dat::extract::entry(&file, &entry) {
                 Ok(value) => value,
                 Err(error) => {
                     eprintln!("Extraction error: {:?}.", error);
@@ -49,7 +49,7 @@ fn main() {
             };
 
             let root = std::path::Path::new(&output);
-            let joined = root.join(&header.path);
+            let joined = root.join(&entry.path);
             let path = joined.as_path();
 
             let directory = match path.parent() {
