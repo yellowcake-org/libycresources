@@ -29,11 +29,14 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
         result
     };
 
-    let limit: usize = 20 * 1024 * 1024;
-    let mut buffer: Vec<u8> = Vec::new();
+    let limit: usize = 1 * 1024 * 1024;
+    let mut written: usize;
+
+    let mut w_buffer: Vec<u8> = Vec::new();
 
     for item in entries {
-        buffer.clear();
+        written = 0;
+        w_buffer.clear();
 
         println!("Extracting {:?}...", item.path);
 
@@ -56,14 +59,16 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
         };
 
         let mut writer = |bytes: &[u8]| {
-            buffer.extend_from_slice(bytes);
+            w_buffer.extend_from_slice(bytes);
+            written += bytes.len();
 
-            if limit <= buffer.len() {
-                if let Err(error) = created.write(buffer.as_slice()) {
+            if limit <= written {
+                if let Err(error) = created.write(w_buffer.as_slice()) {
                     return Err(error);
                 }
 
-                buffer.clear();
+                w_buffer.clear();
+                written = 0;
             }
 
             Ok(bytes.len())
@@ -76,6 +81,10 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
                 dat::extract::Error::Write(error) => Err(Error::Write(error)),
                 dat::extract::Error::Decompress => Err(Error::Decompress),
             };
+        }
+
+        if let Err(error) = created.write(w_buffer.as_slice()) {
+            return Err(Error::Write(error));
         }
     }
 
