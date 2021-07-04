@@ -2,6 +2,7 @@ use libycresources::dat;
 
 use std::fs::File;
 use std::io::{Read, Write};
+use std::io::{Seek, SeekFrom};
 
 #[derive(Debug)]
 pub(crate) enum Error {
@@ -18,15 +19,33 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
         Ok(value) => value,
     };
 
+    let limit: usize = 1 * 1024 * 1024;
+    let mut buffered = 0..0;
     let mut buffer: Vec<u8> = Vec::new();
 
-    if let Err(error) = file.read_to_end(&mut buffer) {
-        return Err(Error::Read(error));
-    }
+    let mut reader = |requested: std::ops::Range<usize>| {
+        // TODO: Better buffering! Do not overwrite here
+        if requested.start < buffered.start || requested.end > buffered.end {
+            buffered = requested.start..std::cmp::max(requested.start + limit, requested.end);
+            buffer.clear();
 
-    let mut reader = |range: std::ops::Range<usize>| {
-        let result: Result<Vec<u8>, ()> = Ok(buffer[range].to_vec());
-        result
+            if let Err(error) = file.seek(SeekFrom::Start(buffered.start as u64)) {
+                return Err(error);
+            }
+
+            let size = buffered.end - buffered.start;
+            let mut temp = vec![0u8; size];
+            let read = match file.read(&mut temp) {
+                Err(error) => return Err(error),
+                Ok(value) => value,
+            };
+
+            // TODO: Additional checks on requested here!
+            buffered.end -= size - read;
+            buffer = temp[0..std::cmp::min(size, read)].to_vec();
+        }
+
+        Ok(buffer[(requested.start - buffered.start)..(requested.end - buffered.start)].to_vec())
     };
 
     let limit: usize = 1 * 1024 * 1024;
@@ -76,15 +95,17 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
 
         if let Err(error) = dat::extract::entry(&mut reader, &item, &mut writer) {
             return match error {
-                dat::extract::Error::Read(_) => Err(Error::Buffer),
+                dat::extract::Error::Read(error) => Err(Error::Read(error)),
                 dat::extract::Error::Reader => Err(Error::Buffer),
                 dat::extract::Error::Write(error) => Err(Error::Write(error)),
                 dat::extract::Error::Decompress => Err(Error::Decompress),
             };
         }
 
-        if let Err(error) = created.write(w_buffer.as_slice()) {
-            return Err(Error::Write(error));
+        if 0 < written {
+            if let Err(error) = created.write(w_buffer.as_slice()) {
+                return Err(Error::Write(error));
+            }
         }
     }
 

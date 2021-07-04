@@ -2,8 +2,7 @@ use libycresources::dat;
 
 use std::fs::File;
 use std::io::Read;
-use std::io::Seek;
-use std::io::SeekFrom;
+use std::io::{Seek, SeekFrom};
 
 #[derive(Debug)]
 pub(crate) enum Error {
