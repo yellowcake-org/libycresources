@@ -6,6 +6,7 @@ use clap::Clap;
 #[derive(Clap)]
 #[clap(name = "undat", version)]
 struct Options {
+    /// Path to the input arhive file
     #[clap(short, long)]
     input: String,
     #[clap(subcommand)]
@@ -14,9 +15,9 @@ struct Options {
 
 #[derive(Clap)]
 enum Action {
-    #[clap()]
+    /// Prints arhive contents
     List,
-    #[clap()]
+    /// Extracts all archive contents to specified directory
     Extract(Extract),
 }
 
