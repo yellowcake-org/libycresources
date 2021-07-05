@@ -6,11 +6,23 @@ use clap::Clap;
 #[derive(Clap)]
 #[clap(name = "undat", version)]
 struct Options {
+    #[clap(short, long)]
     input: String,
-    #[clap(short, long)]
-    list: bool,
-    #[clap(short, long)]
-    extract: Option<String>,
+    #[clap(subcommand)]
+    action: Action,
+}
+
+#[derive(Clap)]
+enum Action {
+    #[clap()]
+    List,
+    #[clap()]
+    Extract(Extract),
+}
+
+#[derive(Clap)]
+struct Extract {
+    output: String,
 }
 
 fn main() {
@@ -24,15 +36,18 @@ fn main() {
         Ok(value) => value,
     };
 
-    if options.list {
-        for entry in &entries {
-            println!("{:}", &entry.path);
+    match options.action {
+        Action::List => {
+            for entry in &entries {
+                println!("{:}", &entry.path);
+            }
         }
-    } else if let Some(output) = &options.extract {
-        if let Err(error) = extract::entry(&options.input, entries.as_slice(), &output) {
-            eprintln!("Error occured: {:?}", error);
+        Action::Extract(arguments) => {
+            let result = extract::entry(&options.input, entries.as_slice(), &arguments.output);
+
+            if let Err(error) = result {
+                eprintln!("Error occured: {:?}", error);
+            }
         }
-    } else {
-        eprintln!("No command passed.");
     }
 }
