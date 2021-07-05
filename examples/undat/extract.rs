@@ -24,7 +24,6 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
     let mut buffer: Vec<u8> = Vec::new();
 
     let mut reader = |requested: std::ops::Range<usize>| {
-        // TODO: Better buffering! Do not overwrite here
         if requested.start < buffered.start || requested.end > buffered.end {
             buffered = requested.start..std::cmp::max(requested.start + limit, requested.end);
             buffer.clear();
