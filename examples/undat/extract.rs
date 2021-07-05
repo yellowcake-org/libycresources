@@ -33,16 +33,25 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
                 return Err(error);
             }
 
-            let size = buffered.end - buffered.start;
-            let mut temp = vec![0u8; size];
-            let read = match file.read(&mut temp) {
+            let mut required = vec![0u8; requested.end - requested.start];
+            match file.read_exact(&mut required) {
                 Err(error) => return Err(error),
                 Ok(value) => value,
             };
 
-            // TODO: Additional checks on requested here!
-            buffered.end -= size - read;
-            buffer = temp[0..std::cmp::min(size, read)].to_vec();
+            buffer.extend_from_slice(&required);
+
+            let extra_size = (buffered.end - buffered.start) - (requested.end - requested.start);
+            if extra_size > 0 {
+                let mut extra_buffer = vec![0u8; extra_size];
+                let read = match file.read(&mut extra_buffer) {
+                    Err(error) => return Err(error),
+                    Ok(value) => value,
+                };
+
+                buffer.extend_from_slice(&extra_buffer);
+                buffered.end -= extra_size - read;
+            }
         }
 
         Ok(buffer[(requested.start - buffered.start)..(requested.end - buffered.start)].to_vec())
