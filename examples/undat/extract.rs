@@ -103,10 +103,10 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
 
         if let Err(error) = dat::extract::entry(&mut reader, &item, &mut writer) {
             return match error {
-                dat::extract::Error::Read(error) => Err(Error::Read(error)),
                 dat::extract::Error::Reader => Err(Error::Buffer),
-                dat::extract::Error::Write(error) => Err(Error::Write(error)),
                 dat::extract::Error::Decompress => Err(Error::Decompress),
+                dat::extract::Error::Read(error) => Err(Error::Read(error)),
+                dat::extract::Error::Write(error) => Err(Error::Write(error)),
             };
         }
 

@@ -44,7 +44,7 @@ fn main() {
             }
         }
         Action::Extract(arguments) => {
-            let result = extract::entry(&options.input, entries.as_slice(), &arguments.output);
+            let result = extract::entry(&options.input, &entries, &arguments.output);
 
             if let Err(error) = result {
                 eprintln!("Error occured: {:?}", error);
