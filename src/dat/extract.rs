@@ -1,3 +1,6 @@
+use super::super::platform::Reader;
+use super::super::platform::Writer;
+
 use super::Entry;
 
 use std::convert::TryInto;
@@ -17,8 +20,8 @@ pub fn entry<R, W, RE, WE>(
     writer: &mut W,
 ) -> Result<(), Error<RE, WE>>
 where
-    R: FnMut(std::ops::Range<usize>) -> Result<Vec<u8>, RE>,
-    W: FnMut(&[u8]) -> Result<usize, WE>,
+    R: Reader<RE>,
+    W: Writer<WE>,
 {
     let plain = entry.size;
     let archived = entry.range.end - entry.range.start;
@@ -29,11 +32,12 @@ where
 
         while processed < archived as usize {
             let count = i16::from_be_bytes(
-                match reader(
-                    (entry.range.start + processed)
-                        ..size_of::<i16>() + (entry.range.start + processed),
-                )
-                .map(|vec| vec.try_into())
+                match reader
+                    .read(
+                        (entry.range.start + processed)
+                            ..size_of::<i16>() + (entry.range.start + processed),
+                    )
+                    .map(|vec| vec.try_into())
                 {
                     Err(error) => return Err(Error::Read(error)),
                     Ok(value) => match value {
@@ -53,11 +57,12 @@ where
 
                 while processed < end && written < plain as usize {
                     let byte = u8::from_be_bytes(
-                        match reader(
-                            (entry.range.start + processed)
-                                ..size_of::<u8>() + (entry.range.start + processed),
-                        )
-                        .map(|vec| vec.try_into())
+                        match reader
+                            .read(
+                                (entry.range.start + processed)
+                                    ..size_of::<u8>() + (entry.range.start + processed),
+                            )
+                            .map(|vec| vec.try_into())
                         {
                             Err(error) => return Err(Error::Read(error)),
                             Ok(value) => match value {
@@ -68,7 +73,7 @@ where
                     );
                     processed += 1;
 
-                    written += match writer(&[byte]) {
+                    written += match writer.append(&[byte]) {
                         Err(error) => return Err(Error::Write(error)),
                         Ok(value) => value,
                     };
@@ -83,11 +88,12 @@ where
                 let end = processed + count as usize;
                 while processed < end {
                     let mut flags: u16 = u8::from_be_bytes(
-                        match reader(
-                            (entry.range.start + processed)
-                                ..size_of::<u8>() + (entry.range.start + processed),
-                        )
-                        .map(|vec| vec.try_into())
+                        match reader
+                            .read(
+                                (entry.range.start + processed)
+                                    ..size_of::<u8>() + (entry.range.start + processed),
+                            )
+                            .map(|vec| vec.try_into())
                         {
                             Err(error) => return Err(Error::Read(error)),
                             Ok(value) => match value {
@@ -105,11 +111,12 @@ where
 
                         if (flags & 1) != 0 {
                             let byte = u8::from_be_bytes(
-                                match reader(
-                                    (entry.range.start + processed)
-                                        ..size_of::<u8>() + (entry.range.start + processed),
-                                )
-                                .map(|vec| vec.try_into())
+                                match reader
+                                    .read(
+                                        (entry.range.start + processed)
+                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                    )
+                                    .map(|vec| vec.try_into())
                                 {
                                     Err(error) => return Err(Error::Read(error)),
                                     Ok(value) => match value {
@@ -120,7 +127,7 @@ where
                             );
                             processed += 1;
 
-                            written += match writer(&[byte]) {
+                            written += match writer.append(&[byte]) {
                                 Err(error) => return Err(Error::Write(error)),
                                 Ok(value) => value,
                             };
@@ -133,11 +140,12 @@ where
                             }
                         } else {
                             let mut offset_w: u16 = u8::from_be_bytes(
-                                match reader(
-                                    (entry.range.start + processed)
-                                        ..size_of::<u8>() + (entry.range.start + processed),
-                                )
-                                .map(|vec| vec.try_into())
+                                match reader
+                                    .read(
+                                        (entry.range.start + processed)
+                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                    )
+                                    .map(|vec| vec.try_into())
                                 {
                                     Err(error) => return Err(Error::Read(error)),
                                     Ok(value) => match value {
@@ -149,11 +157,12 @@ where
                             processed += 1;
 
                             let mut length: u16 = u8::from_be_bytes(
-                                match reader(
-                                    (entry.range.start + processed)
-                                        ..size_of::<u8>() + (entry.range.start + processed),
-                                )
-                                .map(|vec| vec.try_into())
+                                match reader
+                                    .read(
+                                        (entry.range.start + processed)
+                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                    )
+                                    .map(|vec| vec.try_into())
                                 {
                                     Err(error) => return Err(Error::Read(error)),
                                     Ok(value) => match value {
@@ -171,7 +180,7 @@ where
                                 let byte = buffer[offset_w as usize];
 
                                 buffer[offset_r as usize] = byte;
-                                written += match writer(&[byte]) {
+                                written += match writer.append(&[byte]) {
                                     Err(error) => return Err(Error::Write(error)),
                                     Ok(value) => value,
                                 };
@@ -200,12 +209,12 @@ where
 
         Ok(())
     } else {
-        let bytes = match reader(entry.range.start..entry.range.end) {
+        let bytes = match reader.read(entry.range.start..entry.range.end) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
-        if let Err(error) = writer(&bytes) {
+        if let Err(error) = writer.append(&bytes) {
             return Err(Error::Write(error));
         }
 

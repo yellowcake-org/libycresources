@@ -1,3 +1,4 @@
+use super::super::platform::Reader;
 use super::Entry;
 
 use std::convert::TryInto;
@@ -13,12 +14,15 @@ pub enum Error<R> {
 
 pub fn entries<R, E>(reader: &mut R) -> Result<Vec<Entry>, Error<E>>
 where
-    R: FnMut(std::ops::Range<usize>) -> Result<Vec<u8>, E>,
+    R: Reader<E>,
 {
     let mut offset = 0;
 
     let count = u32::from_be_bytes(
-        match reader(offset..offset + size_of::<u32>()).map(|vec| vec.try_into()) {
+        match reader
+            .read(offset..offset + size_of::<u32>())
+            .map(|vec| vec.try_into())
+        {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => match value {
                 Err(_) => return Err(Error::Reader),
@@ -34,7 +38,10 @@ where
 
     for _ in 0..count {
         let length = u8::from_be_bytes(
-            match reader(offset..offset + size_of::<u8>()).map(|vec| vec.try_into()) {
+            match reader
+                .read(offset..offset + size_of::<u8>())
+                .map(|vec| vec.try_into())
+            {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => match value {
                     Err(_) => return Err(Error::Reader),
@@ -45,7 +52,7 @@ where
 
         offset += size_of::<u8>();
 
-        let mut name: String = match String::from_utf8(match reader(offset..offset + length) {
+        let mut name: String = match String::from_utf8(match reader.read(offset..offset + length) {
             Err(_) => return Err(Error::Reader),
             Ok(value) => value,
         }) {
@@ -66,7 +73,10 @@ where
 
     for dir in &dirs {
         let file_count = u32::from_be_bytes(
-            match reader(offset..offset + size_of::<u32>()).map(|vec| vec.try_into()) {
+            match reader
+                .read(offset..offset + size_of::<u32>())
+                .map(|vec| vec.try_into())
+            {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => match value {
                     Err(_) => return Err(Error::Reader),
@@ -80,7 +90,10 @@ where
 
         for _ in 0..file_count {
             let length = u8::from_be_bytes(
-                match reader(offset..offset + size_of::<u8>()).map(|vec| vec.try_into()) {
+                match reader
+                    .read(offset..offset + size_of::<u8>())
+                    .map(|vec| vec.try_into())
+                {
                     Err(error) => return Err(Error::Read(error)),
                     Ok(value) => match value {
                         Err(_) => return Err(Error::Reader),
@@ -91,7 +104,7 @@ where
 
             offset += size_of::<u8>();
 
-            let name: String = match String::from_utf8(match reader(offset..offset + length) {
+            let name: String = match String::from_utf8(match reader.read(offset..offset + length) {
                 Err(_) => return Err(Error::Reader),
                 Ok(value) => value,
             }) {
@@ -103,7 +116,10 @@ where
             offset += size_of::<u32>(); // skip attributes
 
             let start = u32::from_be_bytes(
-                match reader(offset..offset + size_of::<u32>()).map(|vec| vec.try_into()) {
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
                     Err(error) => return Err(Error::Read(error)),
                     Ok(value) => match value {
                         Err(_) => return Err(Error::Reader),
@@ -114,7 +130,10 @@ where
             offset += size_of::<u32>();
 
             let size = u32::from_be_bytes(
-                match reader(offset..offset + size_of::<u32>()).map(|vec| vec.try_into()) {
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
                     Err(error) => return Err(Error::Read(error)),
                     Ok(value) => match value {
                         Err(_) => return Err(Error::Reader),
@@ -125,7 +144,10 @@ where
             offset += size_of::<u32>();
 
             let packed_size = u32::from_be_bytes(
-                match reader(offset..offset + size_of::<u32>()).map(|vec| vec.try_into()) {
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
                     Err(error) => return Err(Error::Read(error)),
                     Ok(value) => match value {
                         Err(_) => return Err(Error::Reader),

@@ -1,7 +1,10 @@
 pub(crate) mod extract;
-pub(crate) mod list;
+pub(crate) mod platform;
+
+use libycresources::dat;
 
 use clap::Clap;
+use std::fs::File;
 
 #[derive(Clap)]
 #[clap(name = "undat", version)]
@@ -29,7 +32,18 @@ struct Extract {
 fn main() {
     let options = Options::parse();
 
-    let entries = match list::entries(&options.input) {
+    let mut file = match File::open(&options.input) {
+        Err(error) => {
+            eprintln!("Couldn't open input file: {:?}", error);
+            return;
+        }
+        Ok(value) => value,
+    };
+
+    let buffer_read_size: usize = 1 * 1024 * 1024;
+    let mut reader = platform::reader::from(&mut file, buffer_read_size);
+
+    let entries = match dat::list::entries(&mut reader) {
         Err(error) => {
             eprintln!("Error occured: {:?}", error);
             return;
@@ -44,7 +58,7 @@ fn main() {
             }
         }
         Action::Extract(arguments) => {
-            let result = extract::entry(&options.input, &entries, &arguments.output);
+            let result = extract::entries(&mut reader, &entries, &arguments.output);
 
             if let Err(error) = result {
                 eprintln!("Error occured: {:?}", error);
