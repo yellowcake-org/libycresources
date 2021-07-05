@@ -90,7 +90,7 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
             buffered += bytes.len();
 
             if limit <= buffered {
-                if let Err(error) = created.write(buffer.as_slice()) {
+                if let Err(error) = created.write(&buffer) {
                     return Err(error);
                 }
 
@@ -111,7 +111,7 @@ pub(crate) fn entry(input: &String, entries: &[dat::Entry], output: &String) -> 
         }
 
         if 0 < buffered {
-            if let Err(error) = created.write(buffer.as_slice()) {
+            if let Err(error) = created.write(&buffer) {
                 return Err(Error::Write(error));
             }
         }
