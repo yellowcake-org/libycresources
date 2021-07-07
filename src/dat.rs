@@ -1,8 +1,14 @@
 pub mod extract;
-pub mod list;
+pub mod tree;
 
-pub struct Entry {
-    pub path: String,
+pub struct File {
+    pub name: String,
     pub size: usize,
     pub range: std::ops::Range<usize>,
+}
+
+pub struct Directory {
+    pub name: String,
+    pub files: Vec<File>,
+    pub children: Vec<Directory>,
 }
