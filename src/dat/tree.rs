@@ -68,37 +68,39 @@ where
             path = String::from(".\\") + &path;
         }
 
-        let mut current: Option<&mut Directory> = None;
+        let mut current: &Option<Directory> = &tree;
         for (index, component) in path.split('\\').enumerate() {
             if index == 0 {
-                if let Some(mut root) = tree {
+                if let Some(root) = tree {
                     if component == root.name {
-                        current = Some(&mut root);
+                        current = &tree;
                     } else {
                         return Err(Error::Format);
                     }
                 } else {
-                    let mut created = Directory {
+                    let created = Directory {
                         name: String::from(component),
                         files: Vec::new(),
                         children: Vec::new(),
                     };
 
                     tree = Some(created);
-                    current = Some(&mut created);
+                    current = &tree;
                 }
             } else {
                 if let Some(node) = current {
-                    if let Some(existed) = node.children.iter_mut().find(|n| n.name == component) {
-                        current = Some(existed);
-                    } else {
-                        node.children.push(Directory {
-                            name: String::from(component),
-                            files: Vec::new(),
-                            children: Vec::new(),
-                        });
+                    let existing = node.children.into_iter().find(|n| n.name == component);
 
-                        current = Some(node.children.last_mut().unwrap());
+                    if existing.is_none() {
+                        // node.children.push(Directory {
+                        //     name: String::from(component),
+                        //     files: Vec::new(),
+                        //     children: Vec::new(),
+                        // });
+
+                        // current = Some(*(node.children.last().unwrap()));
+                    } else {
+                        current = &existing;
                     }
                 } else {
                     return Err(Error::Format);

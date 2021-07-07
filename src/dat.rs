@@ -4,7 +4,7 @@ pub mod tree;
 pub struct File {
     pub name: String,
     pub size: usize,
-    pub range: std::ops::Range<usize>,
+    pub(crate) range: std::ops::Range<usize>,
 }
 
 pub struct Directory {
