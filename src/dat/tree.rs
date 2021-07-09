@@ -11,7 +11,7 @@ pub enum Error<R> {
     Reader,
 }
 
-pub fn entries<R, E>(reader: &mut R) -> Result<Option<Directory>, Error<E>>
+pub fn entries<R, E>(reader: &mut R) -> Result<Directory, Error<E>>
 where
     R: Reader<E>,
 {
@@ -33,7 +33,11 @@ where
     offset += size_of::<u32>();
     offset += 3 * size_of::<u32>(); // skip attributes
 
-    let mut tree: Option<Directory> = None;
+    let mut tree: Directory = Directory {
+        name: String::from("."),
+        files: Vec::new(),
+        children: Vec::new(),
+    };
     // let mut flatten = Vec::<&mut Directory>::with_capacity(count as usize);
 
     for _ in 0..count as usize {
@@ -68,42 +72,19 @@ where
             path = String::from(".\\") + &path;
         }
 
-        let mut current: &Option<Directory> = &tree;
+        let mut current: &mut Directory = &mut tree;
         for (index, component) in path.split('\\').enumerate() {
-            if index == 0 {
-                if let Some(root) = tree {
-                    if component == root.name {
-                        current = &tree;
-                    } else {
-                        return Err(Error::Format);
-                    }
+            if index > 0 {
+                if let Some(existed) = current.children.iter_mut().find(|n| n.name == component) {
+                    current = existed;
                 } else {
-                    let created = Directory {
-                        name: String::from(component),
-                        files: Vec::new(),
-                        children: Vec::new(),
-                    };
+                    // current.children.push(Directory {
+                    //     name: String::from(component),
+                    //     files: Vec::new(),
+                    //     children: Vec::new(),
+                    // });
 
-                    tree = Some(created);
-                    current = &tree;
-                }
-            } else {
-                if let Some(node) = current {
-                    let existing = node.children.into_iter().find(|n| n.name == component);
-
-                    if existing.is_none() {
-                        // node.children.push(Directory {
-                        //     name: String::from(component),
-                        //     files: Vec::new(),
-                        //     children: Vec::new(),
-                        // });
-
-                        // current = Some(*(node.children.last().unwrap()));
-                    } else {
-                        current = &existing;
-                    }
-                } else {
-                    return Err(Error::Format);
+                    // current = current.children.last_mut().unwrap();
                 }
             }
         }
