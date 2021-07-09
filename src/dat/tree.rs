@@ -38,9 +38,9 @@ where
         files: Vec::new(),
         children: Vec::new(),
     };
-    // let mut flatten = Vec::<&mut Directory>::with_capacity(count as usize);
+    let mut flatten = Vec::<&mut Directory>::with_capacity(count as usize);
 
-    for _ in 0..count as usize {
+    for dindex in 0..count as usize {
         let length = u8::from_be_bytes(
             match reader
                 .read(offset..offset + size_of::<u8>())
@@ -75,25 +75,27 @@ where
         let mut current: &mut Directory = &mut tree;
         for (index, component) in path.split('\\').enumerate() {
             if index > 0 {
-                if let Some(existed) = current.children.iter_mut().find(|n| n.name == component) {
-                    current = existed;
+                let found_index = current
+                    .children
+                    .iter()
+                    .enumerate()
+                    .find(|n| n.1.name == component)
+                    .map(|v| v.0);
+                if let Some(existed_index) = found_index {
+                    current = &mut current.children[existed_index];
                 } else {
-                    // current.children.push(Directory {
-                    //     name: String::from(component),
-                    //     files: Vec::new(),
-                    //     children: Vec::new(),
-                    // });
+                    current.children.push(Directory {
+                        name: String::from(component),
+                        files: Vec::new(),
+                        children: Vec::new(),
+                    });
 
-                    // current = current.children.last_mut().unwrap();
+                    current = current.children.last_mut().unwrap();
                 }
             }
         }
 
-        // if let Some(mut node) = current {
-        //     flatten[index] = &mut node;
-        // } else {
-        //     return Err(Error::Format);
-        // }
+        // flatten[dindex] = current;
     }
 
     // assert_ne!(flatten.len(), count);
