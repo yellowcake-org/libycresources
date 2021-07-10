@@ -14,7 +14,7 @@ pub enum Error<R, W> {
     Decompress,
 }
 
-pub fn entry<R, W, RE, WE>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error<RE, WE>>
+pub fn file<R, W, RE, WE>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error<RE, WE>>
 where
     R: Reader<RE>,
     W: Writer<WE>,

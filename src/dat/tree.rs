@@ -1,3 +1,5 @@
+pub mod iterator;
+
 use super::super::platform::Reader;
 use super::{Directory, File};
 
@@ -11,7 +13,7 @@ pub enum Error<R> {
     Reader,
 }
 
-pub fn entries<R, E>(reader: &mut R) -> Result<Option<Directory>, Error<E>>
+pub fn read<R, E>(reader: &mut R) -> Result<Option<Directory>, Error<E>>
 where
     R: Reader<E>,
 {
@@ -88,8 +90,8 @@ where
                     .find(|n| n.1.name == component)
                     .map(|v| v.0);
                 if let Some(existed_index) = found_index {
-                    current = &mut current.children[existed_index];
                     index_path.push(Some(existed_index));
+                    current = &mut current.children[existed_index];
                 } else {
                     current.children.push(Directory {
                         name: String::from(component),
@@ -97,15 +99,15 @@ where
                         children: Vec::new(),
                     });
 
+                    index_path.push(Some(current.children.len() - 1));
                     current = current.children.last_mut().unwrap();
-                    index_path.push(Some(current.children.iter().count()));
                 }
             } else {
                 index_path.push(None);
             }
         }
 
-        tree_paths[index] = index_path;
+        tree_paths.push(index_path);
     }
 
     for path in &tree_paths {
