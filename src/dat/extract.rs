@@ -1,7 +1,7 @@
 use super::super::platform::Reader;
 use super::super::platform::Writer;
 
-use super::Entry;
+use super::File;
 
 use std::convert::TryInto;
 use std::mem::size_of;
@@ -14,17 +14,13 @@ pub enum Error<R, W> {
     Decompress,
 }
 
-pub fn entry<R, W, RE, WE>(
-    reader: &mut R,
-    entry: &Entry,
-    writer: &mut W,
-) -> Result<(), Error<RE, WE>>
+pub fn file<R, W, RE, WE>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error<RE, WE>>
 where
     R: Reader<RE>,
     W: Writer<WE>,
 {
-    let plain = entry.size;
-    let archived = entry.range.end - entry.range.start;
+    let plain = file.size;
+    let archived = file.range.end - file.range.start;
 
     if plain != archived {
         let mut written: usize = 0;
@@ -34,8 +30,8 @@ where
             let count = i16::from_be_bytes(
                 match reader
                     .read(
-                        (entry.range.start + processed)
-                            ..size_of::<i16>() + (entry.range.start + processed),
+                        (file.range.start + processed)
+                            ..size_of::<i16>() + (file.range.start + processed),
                     )
                     .map(|vec| vec.try_into())
                 {
@@ -59,8 +55,8 @@ where
                     let byte = u8::from_be_bytes(
                         match reader
                             .read(
-                                (entry.range.start + processed)
-                                    ..size_of::<u8>() + (entry.range.start + processed),
+                                (file.range.start + processed)
+                                    ..size_of::<u8>() + (file.range.start + processed),
                             )
                             .map(|vec| vec.try_into())
                         {
@@ -90,8 +86,8 @@ where
                     let mut flags: u16 = u8::from_be_bytes(
                         match reader
                             .read(
-                                (entry.range.start + processed)
-                                    ..size_of::<u8>() + (entry.range.start + processed),
+                                (file.range.start + processed)
+                                    ..size_of::<u8>() + (file.range.start + processed),
                             )
                             .map(|vec| vec.try_into())
                         {
@@ -113,8 +109,8 @@ where
                             let byte = u8::from_be_bytes(
                                 match reader
                                     .read(
-                                        (entry.range.start + processed)
-                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                        (file.range.start + processed)
+                                            ..size_of::<u8>() + (file.range.start + processed),
                                     )
                                     .map(|vec| vec.try_into())
                                 {
@@ -142,8 +138,8 @@ where
                             let mut offset_w: u16 = u8::from_be_bytes(
                                 match reader
                                     .read(
-                                        (entry.range.start + processed)
-                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                        (file.range.start + processed)
+                                            ..size_of::<u8>() + (file.range.start + processed),
                                     )
                                     .map(|vec| vec.try_into())
                                 {
@@ -159,8 +155,8 @@ where
                             let mut length: u16 = u8::from_be_bytes(
                                 match reader
                                     .read(
-                                        (entry.range.start + processed)
-                                            ..size_of::<u8>() + (entry.range.start + processed),
+                                        (file.range.start + processed)
+                                            ..size_of::<u8>() + (file.range.start + processed),
                                     )
                                     .map(|vec| vec.try_into())
                                 {
@@ -209,7 +205,7 @@ where
 
         Ok(())
     } else {
-        let bytes = match reader.read(entry.range.start..entry.range.end) {
+        let bytes = match reader.read(file.range.start..file.range.end) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };

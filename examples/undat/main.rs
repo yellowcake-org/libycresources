@@ -1,5 +1,6 @@
 pub(crate) mod extract;
 pub(crate) mod platform;
+pub(crate) mod tree;
 
 use libycresources::dat;
 
@@ -19,7 +20,7 @@ struct Options {
 #[derive(Clap)]
 enum Action {
     /// Prints arhive contents
-    List,
+    Tree,
     /// Extracts all archive contents to specified directory
     Extract(Extract),
 }
@@ -43,26 +44,25 @@ fn main() {
     let buffer_read_size: usize = 1 * 1024 * 1024;
     let mut reader = platform::reader::from(&mut file, buffer_read_size);
 
-    let entries = match dat::list::entries(&mut reader) {
+    if let Some(tree) = match dat::tree::read(&mut reader) {
         Err(error) => {
             eprintln!("Error occured: {:?}", error);
             return;
         }
         Ok(value) => value,
-    };
-
-    match options.action {
-        Action::List => {
-            for entry in &entries {
-                println!("{:}", &entry.path);
+    } {
+        match options.action {
+            Action::Tree => {
+                tree::print(&tree);
+            }
+            Action::Extract(arguments) => {
+                let result = extract::tree(&mut reader, &tree, &arguments.output);
+                if let Err(error) = result {
+                    eprintln!("Error occured: {:?}", error);
+                }
             }
         }
-        Action::Extract(arguments) => {
-            let result = extract::entries(&mut reader, &entries, &arguments.output);
-
-            if let Err(error) = result {
-                eprintln!("Error occured: {:?}", error);
-            }
-        }
+    } else {
+        println!("Input file has zero directories.");
     }
 }

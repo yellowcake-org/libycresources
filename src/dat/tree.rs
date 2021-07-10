@@ -1,9 +1,10 @@
+pub mod iterator;
+
 use super::super::platform::Reader;
-use super::Entry;
+use super::{Directory, File};
 
 use std::convert::TryInto;
 use std::mem::size_of;
-use std::str::FromStr;
 
 #[derive(Debug)]
 pub enum Error<R> {
@@ -12,7 +13,7 @@ pub enum Error<R> {
     Reader,
 }
 
-pub fn entries<R, E>(reader: &mut R) -> Result<Vec<Entry>, Error<E>>
+pub fn read<R, E>(reader: &mut R) -> Result<Option<Directory>, Error<E>>
 where
     R: Reader<E>,
 {
@@ -31,12 +32,21 @@ where
         },
     );
 
+    if count == 0 {
+        return Ok(None);
+    }
+
     offset += size_of::<u32>();
     offset += 3 * size_of::<u32>(); // skip attributes
 
-    let mut dirs = Vec::new();
+    let mut tree_paths = Vec::with_capacity(count as usize);
+    let mut tree: Directory = Directory {
+        name: String::from("."),
+        files: Vec::new(),
+        children: Vec::new(),
+    };
 
-    for _ in 0..count {
+    for _ in 0..count as usize {
         let length = u8::from_be_bytes(
             match reader
                 .read(offset..offset + size_of::<u8>())
@@ -52,26 +62,62 @@ where
 
         offset += size_of::<u8>();
 
-        let mut name: String = match String::from_utf8(match reader.read(offset..offset + length) {
+        let mut path = match String::from_utf8(match reader.read(offset..offset + length) {
             Err(_) => return Err(Error::Reader),
             Ok(value) => value,
         }) {
             Err(_) => return Err(Error::Format),
             Ok(value) => value,
-        }
-        .split('\\')
-        .map(|dir| dir.to_owned() + "/")
-        .collect();
+        };
 
         offset += length;
 
-        name.pop();
-        dirs.push(name);
+        // i have no idea why original Fallout™ archives use . for root folder and
+        // do not use .\ at start for all it's children, so...
+        if path != "." {
+            path = String::from(".\\") + &path;
+        }
+
+        let mut current: &mut Directory = &mut tree;
+        let mut index_path = Vec::new();
+
+        for (level, component) in path.split('\\').enumerate() {
+            if level > 0 {
+                let found_index = current
+                    .children
+                    .iter()
+                    .enumerate()
+                    .find(|n| n.1.name == component)
+                    .map(|v| v.0);
+                if let Some(existed_index) = found_index {
+                    index_path.push(Some(existed_index));
+                    current = &mut current.children[existed_index];
+                } else {
+                    current.children.push(Directory {
+                        name: String::from(component),
+                        files: Vec::new(),
+                        children: Vec::new(),
+                    });
+
+                    index_path.push(Some(current.children.len() - 1));
+                    current = current.children.last_mut().unwrap();
+                }
+            } else {
+                index_path.push(None);
+            }
+        }
+
+        tree_paths.push(index_path);
     }
 
-    let mut entries = Vec::new();
+    for path in &tree_paths {
+        let mut directory = &mut tree;
+        for component in path {
+            if let Some(index) = component {
+                directory = &mut directory.children[*index];
+            }
+        }
 
-    for dir in &dirs {
         let file_count = u32::from_be_bytes(
             match reader
                 .read(offset..offset + size_of::<u32>())
@@ -157,8 +203,8 @@ where
             ) as usize;
             offset += size_of::<u32>();
 
-            entries.push(Entry {
-                path: String::from_str(&dir).unwrap() + "/" + &name,
+            directory.files.push(File {
+                name: name,
                 range: start..start + {
                     if packed_size > 0 {
                         packed_size
@@ -171,5 +217,5 @@ where
         }
     }
 
-    Ok(entries)
+    Ok(Some(tree))
 }
