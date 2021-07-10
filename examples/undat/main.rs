@@ -1,5 +1,6 @@
 pub(crate) mod extract;
 pub(crate) mod platform;
+pub(crate) mod tree;
 
 use libycresources::dat;
 
@@ -19,7 +20,7 @@ struct Options {
 #[derive(Clap)]
 enum Action {
     /// Prints arhive contents
-    List,
+    Tree,
     /// Extracts all archive contents to specified directory
     Extract(Extract),
 }
@@ -51,46 +52,14 @@ fn main() {
         Ok(value) => value,
     } {
         match options.action {
-            Action::List => {
-                for (depth, is_last, directory) in tree.iter() {
-                    if depth > 0 {
-                        for _ in 0..depth - 1 {
-                            print!("    ");
-                        }
-
-                        if is_last {
-                            print!("└");
-                        } else {
-                            print!("├");
-                        }
-                        print!("───");
-                    }
-
-                    println!("{:}", directory.name);
-
-                    for (index, file) in directory.files.iter().enumerate() {
-                        let is_last_file = index == directory.files.iter().count() - 1
-                            && directory.children.iter().count() == 0;
-
-                        for _ in 0..depth {
-                            print!("    ");
-                        }
-
-                        if is_last_file {
-                            print!("└");
-                        } else {
-                            print!("├");
-                        }
-                        print!("───");
-                        println!("{:}", file.name);
-                    }
-                }
+            Action::Tree => {
+                tree::print(&tree);
             }
             Action::Extract(arguments) => {
-                // let result = extract::entries(&mut reader, &entries, &arguments.output);
-                // if let Err(error) = result {
-                //     eprintln!("Error occured: {:?}", error);
-                // }
+                let result = extract::tree(&mut reader, &tree, &arguments.output);
+                if let Err(error) = result {
+                    eprintln!("Error occured: {:?}", error);
+                }
             }
         }
     } else {
