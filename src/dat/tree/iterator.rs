@@ -1,11 +1,5 @@
 use super::super::Directory;
 
-pub struct TreeIterator<'a> {
-    children: &'a [Directory],
-    parent: Option<Box<Self>>,
-    depth: usize,
-}
-
 impl Directory {
     pub fn iter(&self) -> TreeIterator<'_> {
         TreeIterator {
@@ -16,8 +10,14 @@ impl Directory {
     }
 }
 
+pub struct TreeIterator<'a> {
+    children: &'a [Directory],
+    parent: Option<Box<Self>>,
+    depth: usize,
+}
+
 impl<'a> Iterator for TreeIterator<'a> {
-    type Item = (usize, &'a Directory);
+    type Item = (usize, bool, &'a Directory);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.children.get(0) {
@@ -30,6 +30,7 @@ impl<'a> Iterator for TreeIterator<'a> {
             },
             Some(node) => {
                 self.children = &self.children[1..];
+                let is_last = self.children.len() == 0;
 
                 let depth = self.depth;
                 *self = Self {
@@ -38,7 +39,7 @@ impl<'a> Iterator for TreeIterator<'a> {
                     depth: depth + 1,
                 };
 
-                Some((self.depth - 1, node))
+                Some((self.depth - 1, is_last, node))
             }
         }
     }

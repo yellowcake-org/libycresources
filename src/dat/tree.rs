@@ -46,7 +46,7 @@ where
         children: Vec::new(),
     };
 
-    for index in 0..count as usize {
+    for _ in 0..count as usize {
         let length = u8::from_be_bytes(
             match reader
                 .read(offset..offset + size_of::<u8>())
