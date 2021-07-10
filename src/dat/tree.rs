@@ -11,7 +11,7 @@ pub enum Error<R> {
     Reader,
 }
 
-pub fn entries<R, E>(reader: &mut R) -> Result<Directory, Error<E>>
+pub fn entries<R, E>(reader: &mut R) -> Result<Option<Directory>, Error<E>>
 where
     R: Reader<E>,
 {
@@ -30,17 +30,21 @@ where
         },
     );
 
+    if count == 0 {
+        return Ok(None);
+    }
+
     offset += size_of::<u32>();
     offset += 3 * size_of::<u32>(); // skip attributes
 
+    let mut tree_paths = Vec::with_capacity(count as usize);
     let mut tree: Directory = Directory {
         name: String::from("."),
         files: Vec::new(),
         children: Vec::new(),
     };
-    let mut flatten = Vec::<&mut Directory>::with_capacity(count as usize);
 
-    for dindex in 0..count as usize {
+    for index in 0..count as usize {
         let length = u8::from_be_bytes(
             match reader
                 .read(offset..offset + size_of::<u8>())
@@ -73,8 +77,10 @@ where
         }
 
         let mut current: &mut Directory = &mut tree;
-        for (index, component) in path.split('\\').enumerate() {
-            if index > 0 {
+        let mut index_path = Vec::new();
+
+        for (level, component) in path.split('\\').enumerate() {
+            if level > 0 {
                 let found_index = current
                     .children
                     .iter()
@@ -83,6 +89,7 @@ where
                     .map(|v| v.0);
                 if let Some(existed_index) = found_index {
                     current = &mut current.children[existed_index];
+                    index_path.push(Some(existed_index));
                 } else {
                     current.children.push(Directory {
                         name: String::from(component),
@@ -91,114 +98,122 @@ where
                     });
 
                     current = current.children.last_mut().unwrap();
+                    index_path.push(Some(current.children.iter().count()));
                 }
+            } else {
+                index_path.push(None);
             }
         }
 
-        // flatten[dindex] = current;
+        tree_paths[index] = index_path;
     }
 
-    // assert_ne!(flatten.len(), count);
+    for path in &tree_paths {
+        let mut directory = &mut tree;
+        for component in path {
+            if let Some(index) = component {
+                directory = &mut directory.children[*index];
+            }
+        }
 
-    // for dir in &flatten {
-    //     let file_count = u32::from_be_bytes(
-    //         match reader
-    //             .read(offset..offset + size_of::<u32>())
-    //             .map(|vec| vec.try_into())
-    //         {
-    //             Err(error) => return Err(Error::Read(error)),
-    //             Ok(value) => match value {
-    //                 Err(_) => return Err(Error::Reader),
-    //                 Ok(value) => value,
-    //             },
-    //         },
-    //     );
+        let file_count = u32::from_be_bytes(
+            match reader
+                .read(offset..offset + size_of::<u32>())
+                .map(|vec| vec.try_into())
+            {
+                Err(error) => return Err(Error::Read(error)),
+                Ok(value) => match value {
+                    Err(_) => return Err(Error::Reader),
+                    Ok(value) => value,
+                },
+            },
+        );
 
-    //     offset += size_of::<u32>();
-    //     offset += 3 * size_of::<u32>(); // skip attributes
+        offset += size_of::<u32>();
+        offset += 3 * size_of::<u32>(); // skip attributes
 
-    //     for _ in 0..file_count {
-    //         let length = u8::from_be_bytes(
-    //             match reader
-    //                 .read(offset..offset + size_of::<u8>())
-    //                 .map(|vec| vec.try_into())
-    //             {
-    //                 Err(error) => return Err(Error::Read(error)),
-    //                 Ok(value) => match value {
-    //                     Err(_) => return Err(Error::Reader),
-    //                     Ok(value) => value,
-    //                 },
-    //             },
-    //         ) as usize;
+        for _ in 0..file_count {
+            let length = u8::from_be_bytes(
+                match reader
+                    .read(offset..offset + size_of::<u8>())
+                    .map(|vec| vec.try_into())
+                {
+                    Err(error) => return Err(Error::Read(error)),
+                    Ok(value) => match value {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    },
+                },
+            ) as usize;
 
-    //         offset += size_of::<u8>();
+            offset += size_of::<u8>();
 
-    //         let name: String = match String::from_utf8(match reader.read(offset..offset + length) {
-    //             Err(_) => return Err(Error::Reader),
-    //             Ok(value) => value,
-    //         }) {
-    //             Err(_) => return Err(Error::Format),
-    //             Ok(value) => value,
-    //         };
+            let name: String = match String::from_utf8(match reader.read(offset..offset + length) {
+                Err(_) => return Err(Error::Reader),
+                Ok(value) => value,
+            }) {
+                Err(_) => return Err(Error::Format),
+                Ok(value) => value,
+            };
 
-    //         offset += length;
-    //         offset += size_of::<u32>(); // skip attributes
+            offset += length;
+            offset += size_of::<u32>(); // skip attributes
 
-    //         let start = u32::from_be_bytes(
-    //             match reader
-    //                 .read(offset..offset + size_of::<u32>())
-    //                 .map(|vec| vec.try_into())
-    //             {
-    //                 Err(error) => return Err(Error::Read(error)),
-    //                 Ok(value) => match value {
-    //                     Err(_) => return Err(Error::Reader),
-    //                     Ok(value) => value,
-    //                 },
-    //             },
-    //         ) as usize;
-    //         offset += size_of::<u32>();
+            let start = u32::from_be_bytes(
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
+                    Err(error) => return Err(Error::Read(error)),
+                    Ok(value) => match value {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    },
+                },
+            ) as usize;
+            offset += size_of::<u32>();
 
-    //         let size = u32::from_be_bytes(
-    //             match reader
-    //                 .read(offset..offset + size_of::<u32>())
-    //                 .map(|vec| vec.try_into())
-    //             {
-    //                 Err(error) => return Err(Error::Read(error)),
-    //                 Ok(value) => match value {
-    //                     Err(_) => return Err(Error::Reader),
-    //                     Ok(value) => value,
-    //                 },
-    //             },
-    //         ) as usize;
-    //         offset += size_of::<u32>();
+            let size = u32::from_be_bytes(
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
+                    Err(error) => return Err(Error::Read(error)),
+                    Ok(value) => match value {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    },
+                },
+            ) as usize;
+            offset += size_of::<u32>();
 
-    //         let packed_size = u32::from_be_bytes(
-    //             match reader
-    //                 .read(offset..offset + size_of::<u32>())
-    //                 .map(|vec| vec.try_into())
-    //             {
-    //                 Err(error) => return Err(Error::Read(error)),
-    //                 Ok(value) => match value {
-    //                     Err(_) => return Err(Error::Reader),
-    //                     Ok(value) => value,
-    //                 },
-    //             },
-    //         ) as usize;
-    //         offset += size_of::<u32>();
+            let packed_size = u32::from_be_bytes(
+                match reader
+                    .read(offset..offset + size_of::<u32>())
+                    .map(|vec| vec.try_into())
+                {
+                    Err(error) => return Err(Error::Read(error)),
+                    Ok(value) => match value {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    },
+                },
+            ) as usize;
+            offset += size_of::<u32>();
 
-    //         dir.files.push(File {
-    //             name: name,
-    //             range: start..start + {
-    //                 if packed_size > 0 {
-    //                     packed_size
-    //                 } else {
-    //                     size
-    //                 }
-    //             },
-    //             size: size as usize,
-    //         })
-    //     }
-    // }
+            directory.files.push(File {
+                name: name,
+                range: start..start + {
+                    if packed_size > 0 {
+                        packed_size
+                    } else {
+                        size
+                    }
+                },
+                size: size as usize,
+            })
+        }
+    }
 
-    Ok(tree)
+    Ok(Some(tree))
 }
