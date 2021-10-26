@@ -1,5 +1,4 @@
 pub(crate) mod extract;
-pub(crate) mod platform;
 pub(crate) mod tree;
 
 use libycresources::dat;
@@ -33,7 +32,7 @@ struct Extract {
 fn main() {
     let options = Options::parse();
 
-    let mut file = match File::open(&options.input) {
+    let file = match File::open(&options.input) {
         Err(error) => {
             eprintln!("Couldn't open input file: {:?}", error);
             return;
@@ -41,8 +40,7 @@ fn main() {
         Ok(value) => value,
     };
 
-    let buffer_read_size: usize = 1 * 1024 * 1024;
-    let mut reader = platform::reader::from(&mut file, buffer_read_size);
+    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
 
     if let Some(tree) = match dat::tree::read(&mut reader) {
         Err(error) => {

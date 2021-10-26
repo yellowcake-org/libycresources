@@ -1,24 +1,20 @@
-use super::platform;
 use libycresources::dat;
 
+use std::io::{Read, Seek};
 use std::path::PathBuf;
 
 #[derive(Debug)]
-pub(crate) enum Error<E> {
+pub(crate) enum Error {
     Path,
     Buffer,
     Decompress,
-    Read(E),
+    Read(std::io::Error),
     Write(std::io::Error),
 }
 
-pub(crate) fn tree<R, E>(
-    reader: &mut R,
-    tree: &dat::Directory,
-    output: &String,
-) -> Result<(), Error<E>>
+pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error>
 where
-    R: libycresources::platform::Reader<E>,
+    R: Read + Seek,
 {
     let mut path = PathBuf::new();
 
@@ -56,8 +52,7 @@ where
                 Ok(created) => created,
             };
 
-            let buffer_write_size: usize = 1 * 1024 * 1024;
-            let mut writer = platform::writer::from(&mut created, buffer_write_size);
+            let mut writer = std::io::BufWriter::with_capacity(1 * 1024 * 1024, &mut created);
 
             if let Err(error) = dat::extract::file(reader, &file, &mut writer) {
                 return match error {
@@ -66,10 +61,6 @@ where
                     dat::extract::Error::Read(error) => Err(Error::Read(error)),
                     dat::extract::Error::Write(error) => Err(Error::Write(error)),
                 };
-            }
-
-            if let Err(error) = writer.finalize() {
-                return Err(Error::Write(error));
             }
         }
     }

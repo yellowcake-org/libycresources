@@ -1,47 +1,44 @@
-use super::super::platform::Reader;
-use super::super::platform::Writer;
-
 use super::File;
 
 use std::convert::TryInto;
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::mem::size_of;
 
 #[derive(Debug)]
-pub enum Error<R, W> {
-    Write(W),
+pub enum Error {
+    Write(std::io::Error),
     Reader,
-    Read(R),
+    Read(std::io::Error),
     Decompress,
 }
 
-pub fn file<R, W, RE, WE>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error<RE, WE>>
+pub fn file<R, W>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error>
 where
-    R: Reader<RE>,
-    W: Writer<WE>,
+    R: Read + Seek,
+    W: Write + Seek,
 {
     let plain = file.size;
     let archived = file.range.end - file.range.start;
+
+    if let Err(error) = reader.seek(SeekFrom::Start(file.range.start as u64)) {
+        return Err(Error::Read(error));
+    }
 
     if plain != archived {
         let mut written: usize = 0;
         let mut processed: usize = 0;
 
         while processed < archived as usize {
-            let count = i16::from_be_bytes(
-                match reader
-                    .read(
-                        (file.range.start + processed)
-                            ..size_of::<i16>() + (file.range.start + processed),
-                    )
-                    .map(|vec| vec.try_into())
-                {
-                    Err(error) => return Err(Error::Read(error)),
-                    Ok(value) => match value {
-                        Err(_) => return Err(Error::Reader),
-                        Ok(value) => value,
-                    },
-                },
-            );
+            let mut count_bytes = vec![0u8; size_of::<i16>()];
+            match reader.read_exact(&mut count_bytes) {
+                Err(error) => return Err(Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let count = i16::from_be_bytes(match count_bytes.try_into() {
+                Err(_) => return Err(Error::Reader),
+                Ok(value) => value,
+            });
             processed += 2;
 
             if count == 0 {
@@ -52,24 +49,19 @@ where
                 let end = processed + count.abs() as usize;
 
                 while processed < end && written < plain as usize {
-                    let byte = u8::from_be_bytes(
-                        match reader
-                            .read(
-                                (file.range.start + processed)
-                                    ..size_of::<u8>() + (file.range.start + processed),
-                            )
-                            .map(|vec| vec.try_into())
-                        {
-                            Err(error) => return Err(Error::Read(error)),
-                            Ok(value) => match value {
-                                Err(_) => return Err(Error::Reader),
-                                Ok(value) => value,
-                            },
-                        },
-                    );
+                    let mut byte_bytes = vec![0u8; size_of::<u8>()];
+                    match reader.read_exact(&mut byte_bytes) {
+                        Err(error) => return Err(Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let byte = u8::from_be_bytes(match byte_bytes.try_into() {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    });
                     processed += 1;
 
-                    written += match writer.append(&[byte]) {
+                    written += match writer.write(&[byte]) {
                         Err(error) => return Err(Error::Write(error)),
                         Ok(value) => value,
                     };
@@ -83,21 +75,16 @@ where
 
                 let end = processed + count as usize;
                 while processed < end {
-                    let mut flags: u16 = u8::from_be_bytes(
-                        match reader
-                            .read(
-                                (file.range.start + processed)
-                                    ..size_of::<u8>() + (file.range.start + processed),
-                            )
-                            .map(|vec| vec.try_into())
-                        {
-                            Err(error) => return Err(Error::Read(error)),
-                            Ok(value) => match value {
-                                Err(_) => return Err(Error::Reader),
-                                Ok(value) => value,
-                            },
-                        },
-                    ) as u16;
+                    let mut flags_bytes = vec![0u8; size_of::<u8>()];
+                    match reader.read_exact(&mut flags_bytes) {
+                        Err(error) => return Err(Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let mut flags = u8::from_be_bytes(match flags_bytes.try_into() {
+                        Err(_) => return Err(Error::Reader),
+                        Ok(value) => value,
+                    }) as u16;
                     processed += 1;
 
                     for _ in 0..8 {
@@ -106,24 +93,19 @@ where
                         }
 
                         if (flags & 1) != 0 {
-                            let byte = u8::from_be_bytes(
-                                match reader
-                                    .read(
-                                        (file.range.start + processed)
-                                            ..size_of::<u8>() + (file.range.start + processed),
-                                    )
-                                    .map(|vec| vec.try_into())
-                                {
-                                    Err(error) => return Err(Error::Read(error)),
-                                    Ok(value) => match value {
-                                        Err(_) => return Err(Error::Reader),
-                                        Ok(value) => value,
-                                    },
-                                },
-                            );
+                            let mut byte_bytes = vec![0u8; size_of::<u8>()];
+                            match reader.read_exact(&mut byte_bytes) {
+                                Err(error) => return Err(Error::Read(error)),
+                                Ok(value) => value,
+                            };
+
+                            let byte = u8::from_be_bytes(match byte_bytes.try_into() {
+                                Err(_) => return Err(Error::Reader),
+                                Ok(value) => value,
+                            });
                             processed += 1;
 
-                            written += match writer.append(&[byte]) {
+                            written += match writer.write(&[byte]) {
                                 Err(error) => return Err(Error::Write(error)),
                                 Ok(value) => value,
                             };
@@ -135,38 +117,28 @@ where
                                 offset_r = 0
                             }
                         } else {
-                            let mut offset_w: u16 = u8::from_be_bytes(
-                                match reader
-                                    .read(
-                                        (file.range.start + processed)
-                                            ..size_of::<u8>() + (file.range.start + processed),
-                                    )
-                                    .map(|vec| vec.try_into())
-                                {
-                                    Err(error) => return Err(Error::Read(error)),
-                                    Ok(value) => match value {
-                                        Err(_) => return Err(Error::Reader),
-                                        Ok(value) => value,
-                                    },
-                                },
-                            ) as u16;
+                            let mut offset_w_bytes = vec![0u8; size_of::<u8>()];
+                            match reader.read_exact(&mut offset_w_bytes) {
+                                Err(error) => return Err(Error::Read(error)),
+                                Ok(value) => value,
+                            };
+
+                            let mut offset_w = u8::from_be_bytes(match offset_w_bytes.try_into() {
+                                Err(_) => return Err(Error::Reader),
+                                Ok(value) => value,
+                            }) as u16;
                             processed += 1;
 
-                            let mut length: u16 = u8::from_be_bytes(
-                                match reader
-                                    .read(
-                                        (file.range.start + processed)
-                                            ..size_of::<u8>() + (file.range.start + processed),
-                                    )
-                                    .map(|vec| vec.try_into())
-                                {
-                                    Err(error) => return Err(Error::Read(error)),
-                                    Ok(value) => match value {
-                                        Err(_) => return Err(Error::Reader),
-                                        Ok(value) => value,
-                                    },
-                                },
-                            ) as u16;
+                            let mut length_bytes = vec![0u8; size_of::<u8>()];
+                            match reader.read_exact(&mut length_bytes) {
+                                Err(error) => return Err(Error::Read(error)),
+                                Ok(value) => value,
+                            };
+
+                            let mut length = u8::from_be_bytes(match length_bytes.try_into() {
+                                Err(_) => return Err(Error::Reader),
+                                Ok(value) => value,
+                            }) as u16;
                             processed += 1;
 
                             offset_w |= (0xF0 & length) << 4;
@@ -176,7 +148,7 @@ where
                                 let byte = buffer[offset_w as usize];
 
                                 buffer[offset_r as usize] = byte;
-                                written += match writer.append(&[byte]) {
+                                written += match writer.write(&[byte]) {
                                     Err(error) => return Err(Error::Write(error)),
                                     Ok(value) => value,
                                 };
@@ -205,12 +177,13 @@ where
 
         Ok(())
     } else {
-        let bytes = match reader.read(file.range.start..file.range.end) {
+        let mut bytes = vec![0u8; archived];
+        match reader.read_exact(&mut bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
-        if let Err(error) = writer.append(&bytes) {
+        if let Err(error) = writer.write(&bytes) {
             return Err(Error::Write(error));
         }
 
