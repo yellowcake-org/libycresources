@@ -7,20 +7,20 @@ use std::mem::size_of;
 #[derive(Debug)]
 pub enum Error {
     Write(std::io::Error),
-    Reader,
+    Source,
     Read(std::io::Error),
     Decompress,
 }
 
-pub fn file<R, W>(reader: &mut R, file: &File, writer: &mut W) -> Result<(), Error>
+pub fn file<S, O>(source: &mut S, file: &File, output: &mut O) -> Result<(), Error>
 where
-    R: Read + Seek,
-    W: Write + Seek,
+    S: Read + Seek,
+    O: Write,
 {
     let plain = file.size;
     let archived = file.range.end - file.range.start;
 
-    if let Err(error) = reader.seek(SeekFrom::Start(file.range.start as u64)) {
+    if let Err(error) = source.seek(SeekFrom::Start(file.range.start as u64)) {
         return Err(Error::Read(error));
     }
 
@@ -30,13 +30,13 @@ where
 
         while processed < archived as usize {
             let mut count_bytes = vec![0u8; size_of::<i16>()];
-            match reader.read_exact(&mut count_bytes) {
+            match source.read_exact(&mut count_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let count = i16::from_be_bytes(match count_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             });
             processed += 2;
@@ -50,18 +50,18 @@ where
 
                 while processed < end && written < plain as usize {
                     let mut byte_bytes = vec![0u8; size_of::<u8>()];
-                    match reader.read_exact(&mut byte_bytes) {
+                    match source.read_exact(&mut byte_bytes) {
                         Err(error) => return Err(Error::Read(error)),
                         Ok(value) => value,
                     };
 
                     let byte = u8::from_be_bytes(match byte_bytes.try_into() {
-                        Err(_) => return Err(Error::Reader),
+                        Err(_) => return Err(Error::Source),
                         Ok(value) => value,
                     });
                     processed += 1;
 
-                    written += match writer.write(&[byte]) {
+                    written += match output.write(&[byte]) {
                         Err(error) => return Err(Error::Write(error)),
                         Ok(value) => value,
                     };
@@ -76,13 +76,13 @@ where
                 let end = processed + count as usize;
                 while processed < end {
                     let mut flags_bytes = vec![0u8; size_of::<u8>()];
-                    match reader.read_exact(&mut flags_bytes) {
+                    match source.read_exact(&mut flags_bytes) {
                         Err(error) => return Err(Error::Read(error)),
                         Ok(value) => value,
                     };
 
                     let mut flags = u8::from_be_bytes(match flags_bytes.try_into() {
-                        Err(_) => return Err(Error::Reader),
+                        Err(_) => return Err(Error::Source),
                         Ok(value) => value,
                     }) as u16;
                     processed += 1;
@@ -94,18 +94,18 @@ where
 
                         if (flags & 1) != 0 {
                             let mut byte_bytes = vec![0u8; size_of::<u8>()];
-                            match reader.read_exact(&mut byte_bytes) {
+                            match source.read_exact(&mut byte_bytes) {
                                 Err(error) => return Err(Error::Read(error)),
                                 Ok(value) => value,
                             };
 
                             let byte = u8::from_be_bytes(match byte_bytes.try_into() {
-                                Err(_) => return Err(Error::Reader),
+                                Err(_) => return Err(Error::Source),
                                 Ok(value) => value,
                             });
                             processed += 1;
 
-                            written += match writer.write(&[byte]) {
+                            written += match output.write(&[byte]) {
                                 Err(error) => return Err(Error::Write(error)),
                                 Ok(value) => value,
                             };
@@ -118,25 +118,25 @@ where
                             }
                         } else {
                             let mut offset_w_bytes = vec![0u8; size_of::<u8>()];
-                            match reader.read_exact(&mut offset_w_bytes) {
+                            match source.read_exact(&mut offset_w_bytes) {
                                 Err(error) => return Err(Error::Read(error)),
                                 Ok(value) => value,
                             };
 
                             let mut offset_w = u8::from_be_bytes(match offset_w_bytes.try_into() {
-                                Err(_) => return Err(Error::Reader),
+                                Err(_) => return Err(Error::Source),
                                 Ok(value) => value,
                             }) as u16;
                             processed += 1;
 
                             let mut length_bytes = vec![0u8; size_of::<u8>()];
-                            match reader.read_exact(&mut length_bytes) {
+                            match source.read_exact(&mut length_bytes) {
                                 Err(error) => return Err(Error::Read(error)),
                                 Ok(value) => value,
                             };
 
                             let mut length = u8::from_be_bytes(match length_bytes.try_into() {
-                                Err(_) => return Err(Error::Reader),
+                                Err(_) => return Err(Error::Source),
                                 Ok(value) => value,
                             }) as u16;
                             processed += 1;
@@ -148,7 +148,7 @@ where
                                 let byte = buffer[offset_w as usize];
 
                                 buffer[offset_r as usize] = byte;
-                                written += match writer.write(&[byte]) {
+                                written += match output.write(&[byte]) {
                                     Err(error) => return Err(Error::Write(error)),
                                     Ok(value) => value,
                                 };
@@ -178,12 +178,12 @@ where
         Ok(())
     } else {
         let mut bytes = vec![0u8; archived];
-        match reader.read_exact(&mut bytes) {
+        match source.read_exact(&mut bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
-        if let Err(error) = writer.write(&bytes) {
+        if let Err(error) = output.write(&bytes) {
             return Err(Error::Write(error));
         }
 

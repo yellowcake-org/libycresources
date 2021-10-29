@@ -56,7 +56,7 @@ where
 
             if let Err(error) = dat::extract::file(reader, &file, &mut writer) {
                 return match error {
-                    dat::extract::Error::Reader => Err(Error::Buffer),
+                    dat::extract::Error::Source => Err(Error::Buffer),
                     dat::extract::Error::Decompress => Err(Error::Decompress),
                     dat::extract::Error::Read(error) => Err(Error::Read(error)),
                     dat::extract::Error::Write(error) => Err(Error::Write(error)),

@@ -10,22 +10,22 @@ use std::mem::size_of;
 pub enum Error {
     Read(std::io::Error),
     Format,
-    Reader,
+    Source,
 }
 
-pub fn read<R: Read + Seek>(reader: &mut R) -> Result<Option<Directory>, Error> {
-    if let Err(error) = reader.seek(SeekFrom::Start(0)) {
+pub fn read<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> {
+    if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
 
     let mut count_bytes = vec![0u8; size_of::<u32>()];
-    match reader.read_exact(&mut count_bytes) {
+    match source.read_exact(&mut count_bytes) {
         Err(error) => return Err(Error::Read(error)),
         Ok(value) => value,
     };
 
     let count = u32::from_be_bytes(match count_bytes.try_into() {
-        Err(_) => return Err(Error::Reader),
+        Err(_) => return Err(Error::Source),
         Ok(value) => value,
     });
 
@@ -34,7 +34,8 @@ pub fn read<R: Read + Seek>(reader: &mut R) -> Result<Option<Directory>, Error> 
     }
 
     // skip attributes
-    if let Err(error) = reader.seek(SeekFrom::Current((3 * size_of::<u32>()) as i64)) {
+    let mut skip_bytes = vec![0u8; 3 * size_of::<u32>()];
+    if let Err(error) = source.read_exact(&mut skip_bytes) {
         return Err(Error::Read(error));
     }
 
@@ -47,24 +48,24 @@ pub fn read<R: Read + Seek>(reader: &mut R) -> Result<Option<Directory>, Error> 
 
     for _ in 0..count as usize {
         let mut length_bytes = vec![0u8; size_of::<u8>()];
-        match reader.read_exact(&mut length_bytes) {
+        match source.read_exact(&mut length_bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
         let length = u8::from_be_bytes(match length_bytes.try_into() {
-            Err(_) => return Err(Error::Reader),
+            Err(_) => return Err(Error::Source),
             Ok(value) => value,
         }) as usize;
 
         let mut path_bytes = vec![0u8; length];
-        match reader.read_exact(&mut path_bytes) {
+        match source.read_exact(&mut path_bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
         let mut path = match String::from_utf8(match path_bytes.try_into() {
-            Err(_) => return Err(Error::Reader),
+            Err(_) => return Err(Error::Source),
             Ok(value) => value,
         }) {
             Err(_) => return Err(Error::Format),
@@ -118,41 +119,41 @@ pub fn read<R: Read + Seek>(reader: &mut R) -> Result<Option<Directory>, Error> 
         }
 
         let mut file_count_bytes = vec![0u8; size_of::<u32>()];
-        match reader.read_exact(&mut file_count_bytes) {
+        match source.read_exact(&mut file_count_bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,
         };
 
         let file_count = u32::from_be_bytes(match file_count_bytes.try_into() {
-            Err(_) => return Err(Error::Reader),
+            Err(_) => return Err(Error::Source),
             Ok(value) => value,
         }) as usize;
 
         // skip attributes
-        if let Err(error) = reader.seek(SeekFrom::Current((3 * size_of::<u32>()) as i64)) {
+        if let Err(error) = source.read_exact(&mut skip_bytes) {
             return Err(Error::Read(error));
         }
 
         for _ in 0..file_count {
             let mut length_bytes = vec![0u8; size_of::<u8>()];
-            match reader.read_exact(&mut length_bytes) {
+            match source.read_exact(&mut length_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let length = u8::from_be_bytes(match length_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
 
             let mut name_bytes = vec![0u8; length];
-            match reader.read_exact(&mut name_bytes) {
+            match source.read_exact(&mut name_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let name = match String::from_utf8(match name_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) {
                 Err(_) => return Err(Error::Format),
@@ -160,40 +161,41 @@ pub fn read<R: Read + Seek>(reader: &mut R) -> Result<Option<Directory>, Error> 
             };
 
             // skip attributes
-            if let Err(error) = reader.seek(SeekFrom::Current(size_of::<u32>() as i64)) {
+            let mut file_skip_bytes = vec![0u8; size_of::<u32>()];
+            if let Err(error) = source.read_exact(&mut file_skip_bytes) {
                 return Err(Error::Read(error));
             }
 
             let mut start_bytes = vec![0u8; size_of::<u32>()];
-            match reader.read_exact(&mut start_bytes) {
+            match source.read_exact(&mut start_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let start = u32::from_be_bytes(match start_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
 
             let mut size_bytes = vec![0u8; size_of::<u32>()];
-            match reader.read_exact(&mut size_bytes) {
+            match source.read_exact(&mut size_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let size = u32::from_be_bytes(match size_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
 
             let mut packed_size_bytes = vec![0u8; size_of::<u32>()];
-            match reader.read_exact(&mut packed_size_bytes) {
+            match source.read_exact(&mut packed_size_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
             let packed_size = u32::from_be_bytes(match packed_size_bytes.try_into() {
-                Err(_) => return Err(Error::Reader),
+                Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
 
