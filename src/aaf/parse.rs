@@ -68,14 +68,14 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         }) as usize;
 
         let mut sizes = [(0, 0); 256];
-        for &(mut size) in sizes.iter() {
+        for index in 0..sizes.len() {
             let mut width_bytes = vec![0u8; size_of::<u16>()];
             match source.read_exact(&mut width_bytes) {
                 Err(error) => return Err(Error::Read(error)),
                 Ok(value) => value,
             };
 
-            size.0 = u16::from_be_bytes(match width_bytes.try_into() {
+            sizes[index].0 = u16::from_be_bytes(match width_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
@@ -86,7 +86,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
                 Ok(value) => value,
             };
 
-            size.1 = u16::from_be_bytes(match height_bytes.try_into() {
+            sizes[index].1 = u16::from_be_bytes(match height_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
             }) as usize;
@@ -115,7 +115,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
                 .iter()
                 .map(|byte| Pixel {
                     value: *byte as usize,
-                    scale: 9,
+                    scale: 10,
                 })
                 .collect(),
         });
