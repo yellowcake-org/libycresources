@@ -13,7 +13,7 @@ pub enum Error {
     Source,
 }
 
-pub fn read<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> {
+pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
