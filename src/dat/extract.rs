@@ -12,11 +12,11 @@ pub enum Error {
     Decompress,
 }
 
-pub fn file<S, O>(source: &mut S, file: &File, output: &mut O) -> Result<(), Error>
-where
-    S: Read + Seek,
-    O: Write,
-{
+pub fn file<S: Read + Seek, O: Write>(
+    source: &mut S,
+    file: &File,
+    output: &mut O,
+) -> Result<(), Error> {
     let plain = file.size;
     let archived = file.range.end - file.range.start;
 
