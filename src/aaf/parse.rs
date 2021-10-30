@@ -11,7 +11,7 @@ pub enum Error {
     Source,
 }
 
-pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
+pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
