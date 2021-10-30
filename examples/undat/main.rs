@@ -1,5 +1,5 @@
 pub(crate) mod extract;
-pub(crate) mod tree;
+pub(crate) mod print;
 
 use libycresources::dat;
 
@@ -51,7 +51,7 @@ fn main() {
     } {
         match options.action {
             Action::Tree => {
-                tree::print(&tree);
+                print::tree(&tree);
             }
             Action::Extract(arguments) => {
                 let result = extract::tree(&mut reader, &tree, &arguments.output);
