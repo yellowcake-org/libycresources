@@ -1,9 +1,9 @@
 use libycresources::dat;
 
-pub(crate) fn print(tree: &dat::Directory) {
+pub(crate) fn tree(root: &dat::Directory) {
     let mut flag_path = Vec::new();
 
-    for (depth, is_last, directory) in tree.iter() {
+    for (depth, is_last, directory) in root.iter() {
         if depth > flag_path.iter().count() {
             flag_path.push((is_last, &directory.name));
         } else {

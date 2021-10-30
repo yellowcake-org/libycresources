@@ -32,7 +32,7 @@ impl<'a> Iterator for TreeIterator<'a> {
                 self.children = &self.children[1..];
 
                 let depth = self.depth;
-                let is_last = self.children.len() == 0;
+                let is_last = self.children.is_empty();
 
                 *self = Self {
                     children: node.children.as_slice(),

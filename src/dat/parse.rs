@@ -64,10 +64,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
             Ok(value) => value,
         };
 
-        let mut path = match String::from_utf8(match path_bytes.try_into() {
-            Err(_) => return Err(Error::Source),
-            Ok(value) => value,
-        }) {
+        let mut path = match String::from_utf8(path_bytes) {
             Err(_) => return Err(Error::Format),
             Ok(value) => value,
         };
@@ -112,10 +109,8 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
 
     for path in &tree_paths {
         let mut directory = &mut tree;
-        for component in path {
-            if let Some(index) = component {
-                directory = &mut directory.children[*index];
-            }
+        for index in path.iter().flatten() {
+            directory = &mut directory.children[*index];
         }
 
         let mut file_count_bytes = vec![0u8; size_of::<u32>()];
@@ -152,10 +147,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
                 Ok(value) => value,
             };
 
-            let name = match String::from_utf8(match name_bytes.try_into() {
-                Err(_) => return Err(Error::Source),
-                Ok(value) => value,
-            }) {
+            let name = match String::from_utf8(name_bytes) {
                 Err(_) => return Err(Error::Format),
                 Ok(value) => value,
             };
@@ -200,7 +192,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
             }) as usize;
 
             directory.files.push(File {
-                name: name,
+                name,
                 range: start..start + {
                     if packed_size > 0 {
                         packed_size

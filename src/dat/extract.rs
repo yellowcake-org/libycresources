@@ -12,11 +12,11 @@ pub enum Error {
     Decompress,
 }
 
-pub fn file<S, O>(source: &mut S, file: &File, output: &mut O) -> Result<(), Error>
-where
-    S: Read + Seek,
-    O: Write,
-{
+pub fn file<S: Read + Seek, O: Write>(
+    source: &mut S,
+    file: &File,
+    output: &mut O,
+) -> Result<(), Error> {
     let plain = file.size;
     let archived = file.range.end - file.range.start;
 
@@ -92,13 +92,13 @@ where
                             break;
                         }
 
-                        if (flags & 1) != 0 {
-                            let mut byte_bytes = vec![0u8; size_of::<u8>()];
-                            match source.read_exact(&mut byte_bytes) {
-                                Err(error) => return Err(Error::Read(error)),
-                                Ok(value) => value,
-                            };
+                        let mut byte_bytes = vec![0u8; size_of::<u8>()];
+                        match source.read_exact(&mut byte_bytes) {
+                            Err(error) => return Err(Error::Read(error)),
+                            Ok(value) => value,
+                        };
 
+                        if (flags & 1) != 0 {
                             let byte = u8::from_be_bytes(match byte_bytes.try_into() {
                                 Err(_) => return Err(Error::Source),
                                 Ok(value) => value,
@@ -117,13 +117,7 @@ where
                                 offset_r = 0
                             }
                         } else {
-                            let mut offset_w_bytes = vec![0u8; size_of::<u8>()];
-                            match source.read_exact(&mut offset_w_bytes) {
-                                Err(error) => return Err(Error::Read(error)),
-                                Ok(value) => value,
-                            };
-
-                            let mut offset_w = u8::from_be_bytes(match offset_w_bytes.try_into() {
+                            let mut offset_w = u8::from_be_bytes(match byte_bytes.try_into() {
                                 Err(_) => return Err(Error::Source),
                                 Ok(value) => value,
                             }) as u16;
