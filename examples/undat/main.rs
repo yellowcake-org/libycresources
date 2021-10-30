@@ -42,7 +42,7 @@ fn main() {
 
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
 
-    if let Some(tree) = match dat::tree::read(&mut reader) {
+    if let Some(tree) = match dat::parse::tree(&mut reader) {
         Err(error) => {
             eprintln!("Error occured: {:?}", error);
             return;
@@ -55,6 +55,7 @@ fn main() {
             }
             Action::Extract(arguments) => {
                 let result = extract::tree(&mut reader, &tree, &arguments.output);
+
                 if let Err(error) = result {
                     eprintln!("Error occured: {:?}", error);
                 }

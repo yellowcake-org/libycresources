@@ -30,16 +30,17 @@ impl<'a> Iterator for TreeIterator<'a> {
             },
             Some(node) => {
                 self.children = &self.children[1..];
-                let is_last = self.children.len() == 0;
 
                 let depth = self.depth;
+                let is_last = self.children.len() == 0;
+
                 *self = Self {
                     children: node.children.as_slice(),
                     parent: Some(Box::new(std::mem::take(self))),
                     depth: depth + 1,
                 };
 
-                Some((self.depth - 1, is_last, node))
+                Some((depth, is_last, node))
             }
         }
     }

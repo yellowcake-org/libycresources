@@ -1,5 +1,5 @@
 pub mod extract;
-pub mod tree;
+pub mod parse;
 
 pub struct File {
     pub name: String,
