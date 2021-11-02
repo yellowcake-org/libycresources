@@ -1,9 +1,6 @@
 pub mod parse;
 
-pub struct Pixel {
-    pub value: usize,
-    pub scale: usize,
-}
+use super::super::common::graphics::Pixel;
 
 pub struct Glyph {
     pub width: usize,

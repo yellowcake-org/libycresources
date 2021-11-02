@@ -1,7 +1,7 @@
 pub(crate) mod extract;
 pub(crate) mod print;
 
-use libycresources::dat;
+use libycresources::formats::dat;
 
 use clap::Clap;
 use std::fs::File;

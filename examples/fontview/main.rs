@@ -1,6 +1,6 @@
 pub(crate) mod print;
 
-use libycresources::aaf;
+use libycresources::formats::aaf;
 
 use clap::Clap;
 use std::fs::File;
@@ -67,7 +67,7 @@ fn main() {
                     let glyph = &font.glyphs[char as usize];
                     print::glyph(&glyph);
                 } else {
-                    eprintln!("Non-ASCII char found within provided string. Aborting.");
+                    eprintln!("Non-ASCII char was found within provided string. Aborting.");
                     return;
                 }
             }

@@ -1,4 +1,4 @@
-use libycresources::aaf;
+use libycresources::formats::aaf;
 
 pub fn glyph(glyph: &aaf::Glyph) {
     if !glyph.pixels.is_empty() {
