@@ -9,7 +9,7 @@ use std::fs::File;
 #[derive(Parser)]
 #[clap(name = "undat", version)]
 struct Options {
-    /// Path to the input arhive file
+    /// Path to the input arhive file (.dat)
     #[clap(short, long)]
     input: String,
     #[clap(subcommand)]
