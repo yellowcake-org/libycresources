@@ -16,6 +16,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         return Err(Error::Read(error));
     }
 
+    let scale = 0..64;
     let mut colors: [(usize, usize, usize, bool); 256] = [(0, 0, 0, false); 256];
 
     for color in &mut colors {
@@ -52,7 +53,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
             Ok(value) => value,
         }) as usize;
 
-        if red < 64 && green < 64 && blue < 64 {
+        if scale.contains(&red) && scale.contains(&green) && scale.contains(&blue) {
             *color = (red, green, blue, true)
         }
     }
@@ -62,15 +63,15 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
             Some(ColorPixel {
                 red: Pixel {
                     value: red,
-                    scale: 0..64,
+                    scale: scale.start..scale.end,
                 },
                 green: Pixel {
                     value: green,
-                    scale: 0..64,
+                    scale: scale.start..scale.end,
                 },
                 blue: Pixel {
                     value: blue,
-                    scale: 0..64,
+                    scale: scale.start..scale.end,
                 },
             })
         } else {
