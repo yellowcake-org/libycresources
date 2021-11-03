@@ -1,7 +1,7 @@
 use super::super::*;
 use super::*;
 
-pub fn regular(source: &RawColorValues) -> Palette {
+pub fn regular(source: &RawColorValues) -> Regular {
     let scale = 0..64;
     let color_mapper = |color: RawColorValue| {
         if scale.contains(&(color.red as usize))
@@ -27,12 +27,12 @@ pub fn regular(source: &RawColorValues) -> Palette {
         }
     };
 
-    Palette {
+    Regular {
         colors: source.values.map(color_mapper),
     }
 }
 
-pub fn animated(source: &RawColorValues) -> AnimatedPalette {
+pub fn animated(source: &RawColorValues) -> Animated {
     let scale = 0..256;
     let animated_color_mapper = |color: &RawColorValue| -> ColorPixel {
         ColorPixel {
@@ -97,31 +97,31 @@ pub fn animated(source: &RawColorValues) -> AnimatedPalette {
         alarm_values.push(alarm_value_mapper(i));
     }
 
-    AnimatedPalette {
-        alarm: AnimatedColors {
+    Animated {
+        alarm: FrameColors {
             values: alarm_values,
-            frametime: std::time::Duration::from_millis(33),
+            duration: std::time::Duration::from_millis(33),
         },
-        slime: AnimatedColors {
+        slime: FrameColors {
             values: slime_values,
-            frametime: std::time::Duration::from_millis(200),
+            duration: std::time::Duration::from_millis(200),
         },
-        shore: AnimatedColors {
+        shore: FrameColors {
             values: shore_values,
-            frametime: std::time::Duration::from_millis(200),
+            duration: std::time::Duration::from_millis(200),
         },
-        screen: AnimatedColors {
+        screen: FrameColors {
             values: screen_values,
-            frametime: std::time::Duration::from_millis(100),
+            duration: std::time::Duration::from_millis(100),
         },
 
-        fire_slow: AnimatedColors {
+        fire_slow: FrameColors {
             values: fire_slow_values,
-            frametime: std::time::Duration::from_millis(200),
+            duration: std::time::Duration::from_millis(200),
         },
-        fire_fast: AnimatedColors {
+        fire_fast: FrameColors {
             values: fire_fast_values,
-            frametime: std::time::Duration::from_millis(142),
+            duration: std::time::Duration::from_millis(142),
         },
     }
 }

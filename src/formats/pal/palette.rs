@@ -2,21 +2,21 @@ pub mod calculate;
 
 use crate::common::graphics::*;
 
-pub struct Palette {
+pub struct Regular {
     pub colors: [Option<ColorPixel>; 256],
 }
 
-pub struct AnimatedColors {
+pub struct FrameColors {
     pub values: Vec<ColorPixel>,
-    pub frametime: std::time::Duration,
+    pub duration: std::time::Duration,
 }
 
-pub struct AnimatedPalette {
-    pub alarm: AnimatedColors,
-    pub slime: AnimatedColors,
-    pub shore: AnimatedColors,
-    pub screen: AnimatedColors,
+pub struct Animated {
+    pub alarm: FrameColors,
+    pub slime: FrameColors,
+    pub shore: FrameColors,
+    pub screen: FrameColors,
 
-    pub fire_slow: AnimatedColors,
-    pub fire_fast: AnimatedColors,
+    pub fire_slow: FrameColors,
+    pub fire_fast: FrameColors,
 }
