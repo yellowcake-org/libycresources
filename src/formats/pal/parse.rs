@@ -1,5 +1,4 @@
-use super::{AnimatedColors, Palette};
-use crate::common::graphics::{ColorPixel, Pixel};
+use super::*;
 
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
@@ -11,15 +10,12 @@ pub enum Error {
     Source,
 }
 
-pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
+pub fn colors<S: Read + Seek>(source: &mut S) -> Result<RawPalette, Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
 
-    let scale_regular = 0..64;
-    let scale_animated = 0..256;
-
-    let mut colors: [(usize, usize, usize, bool); 256] = [(0, 0, 0, false); 256];
+    let mut colors = [(0, 0, 0); 256];
 
     for color in &mut colors {
         let mut red_bytes = vec![0u8; size_of::<u8>()];
@@ -31,7 +27,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         let red = u8::from_le_bytes(match red_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut green_bytes = vec![0u8; size_of::<u8>()];
         match source.read_exact(&mut green_bytes) {
@@ -42,7 +38,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         let green = u8::from_le_bytes(match green_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut blue_bytes = vec![0u8; size_of::<u8>()];
         match source.read_exact(&mut blue_bytes) {
@@ -53,123 +49,12 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         let blue = u8::from_le_bytes(match blue_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
-        if scale_regular.contains(&red)
-            && scale_regular.contains(&green)
-            && scale_regular.contains(&blue)
-        {
-            *color = (red, green, blue, true)
-        }
+        *color = (red, green, blue);
     }
 
-    let color_mapper = |(red, green, blue, is_mapped)| {
-        if is_mapped {
-            Some(ColorPixel {
-                red: Pixel {
-                    value: red,
-                    scale: scale_regular.start..scale_regular.end,
-                },
-                green: Pixel {
-                    value: green,
-                    scale: scale_regular.start..scale_regular.end,
-                },
-                blue: Pixel {
-                    value: blue,
-                    scale: scale_regular.start..scale_regular.end,
-                },
-            })
-        } else {
-            None
-        }
-    };
-
-    let animated_color_mapper =
-        |(red, green, blue, _): &(usize, usize, usize, bool)| -> ColorPixel {
-            ColorPixel {
-                red: Pixel {
-                    value: *red,
-                    scale: scale_animated.start..scale_animated.end,
-                },
-                green: Pixel {
-                    value: *green,
-                    scale: scale_animated.start..scale_animated.end,
-                },
-                blue: Pixel {
-                    value: *blue,
-                    scale: scale_animated.start..scale_animated.end,
-                },
-            }
-        };
-
-    let mut slime_values = Vec::new();
-    for color in &colors[229..233] {
-        slime_values.push(animated_color_mapper(color));
-    }
-
-    let mut screen_values = Vec::new();
-    for color in &colors[233..238] {
-        screen_values.push(animated_color_mapper(color));
-    }
-
-    let mut fire_slow_values = Vec::new();
-    for color in &colors[238..243] {
-        fire_slow_values.push(animated_color_mapper(color));
-    }
-
-    let mut fire_fast_values = Vec::new();
-    for color in &colors[243..248] {
-        fire_fast_values.push(animated_color_mapper(color));
-    }
-
-    let mut shore_values = Vec::new();
-    for color in &colors[248..254] {
-        shore_values.push(animated_color_mapper(color));
-    }
-
-    // original Fallout™ engine calculates these values
-    // using color at index 254 for char overflow arithmetics, hardcoded
-    // so we hardcode it too, just another way
-    let mut alarm_values = Vec::new();
-    let alarm_value_mapper = |index: usize| {
-        let color = (index * 4, 0, 0, false);
-        animated_color_mapper(&color)
-    };
-
-    for i in 1..16 {
-        alarm_values.push(alarm_value_mapper(i));
-    }
-
-    for i in (0..15).rev() {
-        alarm_values.push(alarm_value_mapper(i));
-    }
-
-    Ok(Palette {
-        colors: colors.map(color_mapper),
-        alarm: AnimatedColors {
-            values: alarm_values,
-            frametime: std::time::Duration::from_millis(33),
-        },
-        slime: AnimatedColors {
-            values: slime_values,
-            frametime: std::time::Duration::from_millis(200),
-        },
-        shore: AnimatedColors {
-            values: shore_values,
-            frametime: std::time::Duration::from_millis(200),
-        },
-        screen: AnimatedColors {
-            values: screen_values,
-            frametime: std::time::Duration::from_millis(100),
-        },
-
-        fire_slow: AnimatedColors {
-            values: fire_slow_values,
-            frametime: std::time::Duration::from_millis(200),
-        },
-        fire_fast: AnimatedColors {
-            values: fire_fast_values,
-            frametime: std::time::Duration::from_millis(142),
-        },
+    Ok(RawPalette {
+        colors: colors.map(|(red, green, blue)| RawPaletteColor { red, green, blue }),
     })
 }
