@@ -10,7 +10,7 @@ pub enum Error {
     Source,
 }
 
-pub fn colors<S: Read + Seek>(source: &mut S) -> Result<RawPalette, Error> {
+pub fn values<S: Read + Seek>(source: &mut S) -> Result<RawColorValues, Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
@@ -54,7 +54,7 @@ pub fn colors<S: Read + Seek>(source: &mut S) -> Result<RawPalette, Error> {
         *color = (red, green, blue);
     }
 
-    Ok(RawPalette {
-        colors: colors.map(|(red, green, blue)| RawPaletteColor { red, green, blue }),
+    Ok(RawColorValues {
+        values: colors.map(|(red, green, blue)| RawColorValue { red, green, blue }),
     })
 }
