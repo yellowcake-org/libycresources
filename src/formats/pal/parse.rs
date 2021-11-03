@@ -8,7 +8,6 @@ use std::mem::size_of;
 #[derive(Debug)]
 pub enum Error {
     Read(std::io::Error),
-    Format,
     Source,
 }
 
@@ -17,7 +16,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         return Err(Error::Read(error));
     }
 
-    let mut colors: [Option<ColorPixel>; 256] = [None; 256];
+    let mut colors: [(usize, usize, usize, bool); 256] = [(0, 0, 0, false); 256];
 
     for color in &mut colors {
         let mut red_bytes = vec![0u8; size_of::<u8>()];
@@ -54,22 +53,30 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         }) as usize;
 
         if red < 64 && green < 64 && blue < 64 {
-            *color = Some(ColorPixel {
+            *color = (red, green, blue, true)
+        }
+    }
+
+    let colors = colors.map(|(red, green, blue, is_mapped)| {
+        if is_mapped {
+            Some(ColorPixel {
                 red: Pixel {
                     value: red,
-                    scale: 64,
+                    scale: 0..64,
                 },
                 green: Pixel {
                     value: green,
-                    scale: 64,
+                    scale: 0..64,
                 },
                 blue: Pixel {
                     value: blue,
-                    scale: 64,
+                    scale: 0..64,
                 },
             })
+        } else {
+            None
         }
-    }
+    });
 
     Ok(Palette { colors })
 }

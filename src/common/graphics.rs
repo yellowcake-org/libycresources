@@ -1,8 +1,6 @@
-pub mod traits;
-
 pub struct Pixel {
     pub value: usize,
-    pub scale: usize,
+    pub scale: std::ops::Range<usize>,
 }
 
 pub struct ColorPixel {
@@ -11,7 +9,7 @@ pub struct ColorPixel {
     pub blue: Pixel,
 }
 
-pub struct AnimatedColorPixel {
-    pub elements: Vec<ColorPixel>,
+pub struct AnimatedColorPixel<'a> {
+    pub elements: Vec<&'a ColorPixel>,
     pub frametime: std::time::Duration,
 }
