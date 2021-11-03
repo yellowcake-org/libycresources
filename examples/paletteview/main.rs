@@ -1,10 +1,10 @@
 use libycresources::common::graphics::*;
 use libycresources::formats::pal;
 
-use clap::Clap;
+use clap::Parser;
 use std::fs::File;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(name = "paletteview", version)]
 struct Options {
     /// Path to the input palette file (.pal)
@@ -14,7 +14,7 @@ struct Options {
     action: Action,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum Action {
     /// Prints out summary about regular and animated palettes
     Info,
@@ -22,7 +22,7 @@ enum Action {
     Render(Render),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Render {
     directory: String,
 }
@@ -97,7 +97,18 @@ fn main() {
             );
         }
         Action::Render(arguments) => {
-            //
+            let output = std::path::Path::new(&arguments.directory);
+            if !output.exists() {
+                eprintln!("Output path does not exist. Aborting.");
+                return;
+            }
+
+            if !output.is_dir() {
+                eprintln!("Output path is not a directory. Aborting.");
+                return;
+            }
+
+            let palette_path = output.join("/palette.bmp").as_path();
         }
     }
 }

@@ -3,10 +3,10 @@ pub(crate) mod print;
 
 use libycresources::formats::dat;
 
-use clap::Clap;
+use clap::Parser;
 use std::fs::File;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(name = "undat", version)]
 struct Options {
     /// Path to the input arhive file
@@ -16,7 +16,7 @@ struct Options {
     action: Action,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum Action {
     /// Prints arhive contents
     Tree,
@@ -24,7 +24,7 @@ enum Action {
     Extract(Extract),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Extract {
     output: String,
 }
