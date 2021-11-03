@@ -8,8 +8,3 @@ pub struct ColorPixel {
     pub green: Pixel,
     pub blue: Pixel,
 }
-
-pub struct AnimatedColors<'a> {
-    pub elements: Vec<&'a ColorPixel>,
-    pub frametime: std::time::Duration,
-}

@@ -1,4 +1,4 @@
-use super::Palette;
+use super::{Palette, RotatedColors};
 use crate::common::graphics::{ColorPixel, Pixel};
 
 use std::convert::TryInto;
@@ -79,5 +79,32 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         }
     });
 
-    Ok(Palette { colors })
+    Ok(Palette {
+        colors,
+        alarm: RotatedColors {
+            range: 254..254,
+            frametime: std::time::Duration::from_millis(33),
+        },
+        slime: RotatedColors {
+            range: 229..233,
+            frametime: std::time::Duration::from_millis(200),
+        },
+        shore: RotatedColors {
+            range: 248..254,
+            frametime: std::time::Duration::from_millis(200),
+        },
+        screen: RotatedColors {
+            range: 233..238,
+            frametime: std::time::Duration::from_millis(100),
+        },
+
+        fire_slow: RotatedColors {
+            range: 238..243,
+            frametime: std::time::Duration::from_millis(200),
+        },
+        fire_fast: RotatedColors {
+            range: 243..248,
+            frametime: std::time::Duration::from_millis(142),
+        },
+    })
 }
