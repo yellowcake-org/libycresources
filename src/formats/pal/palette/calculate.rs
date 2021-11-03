@@ -93,7 +93,7 @@ pub fn animated(source: &RawColorValues) -> Animated {
         alarm_values.push(alarm_value_mapper(i));
     }
 
-    for i in (0..15).rev() {
+    for i in (2..15).rev() {
         alarm_values.push(alarm_value_mapper(i));
     }
 
