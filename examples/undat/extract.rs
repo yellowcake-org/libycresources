@@ -1,4 +1,4 @@
-use libycresources::dat;
+use libycresources::formats::dat;
 
 use std::io::{Read, Seek};
 use std::path::PathBuf;

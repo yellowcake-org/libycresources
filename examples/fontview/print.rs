@@ -1,4 +1,4 @@
-use libycresources::aaf;
+use libycresources::formats::aaf;
 
 pub fn glyph(glyph: &aaf::Glyph) {
     if !glyph.pixels.is_empty() {
@@ -7,7 +7,10 @@ pub fn glyph(glyph: &aaf::Glyph) {
                 let pixel = &glyph.pixels[row * glyph.width + column];
                 let levels = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
 
-                print!("{:}", levels[levels.len() * pixel.value / pixel.scale])
+                print!(
+                    "{:}",
+                    levels[levels.len() * pixel.value / (pixel.scale.end - pixel.scale.start)]
+                )
             }
 
             if row != glyph.height {

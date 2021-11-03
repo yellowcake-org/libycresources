@@ -1,11 +1,11 @@
 pub(crate) mod print;
 
-use libycresources::aaf;
+use libycresources::formats::aaf;
 
-use clap::Clap;
+use clap::Parser;
 use std::fs::File;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(name = "fontview", version)]
 struct Options {
     /// Path to the input font file (.aaf)
@@ -15,7 +15,7 @@ struct Options {
     action: Action,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum Action {
     /// Prints all glyphs from specified font
     Dump,
@@ -23,7 +23,7 @@ enum Action {
     Print(Print),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Print {
     string: String,
 }
@@ -67,7 +67,7 @@ fn main() {
                     let glyph = &font.glyphs[char as usize];
                     print::glyph(&glyph);
                 } else {
-                    eprintln!("Non-ASCII char found within provided string. Aborting.");
+                    eprintln!("Non-ASCII char was found within provided string. Aborting.");
                     return;
                 }
             }

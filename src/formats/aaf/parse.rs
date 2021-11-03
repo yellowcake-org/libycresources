@@ -115,7 +115,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
                 .iter()
                 .map(|byte| Pixel {
                     value: *byte as usize,
-                    scale: 10,
+                    scale: 0..10,
                 })
                 .collect(),
         });
