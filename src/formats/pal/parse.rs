@@ -124,9 +124,21 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         shore_values.push(animated_color_mapper(color));
     }
 
+    // original Fallout™ engine calculates these values
+    // using color at index 254 for char overflow arithmetics, hardcoded
+    // so we hardcode it too, just another way
     let mut alarm_values = Vec::new();
-    for color in &colors[254..254] {
-        alarm_values.push(animated_color_mapper(color));
+    let alarm_value_mapper = |index: usize| {
+        let color = (index * 4, 0, 0, false);
+        animated_color_mapper(&color)
+    };
+
+    for i in 1..16 {
+        alarm_values.push(alarm_value_mapper(i));
+    }
+
+    for i in (0..15).rev() {
+        alarm_values.push(alarm_value_mapper(i));
     }
 
     Ok(Palette {
