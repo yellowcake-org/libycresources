@@ -1,4 +1,5 @@
-use super::*;
+use super::Palette;
+use crate::common::graphics::{ColorPixel, Pixel};
 
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
@@ -10,12 +11,13 @@ pub enum Error {
     Source,
 }
 
-pub fn values<S: Read + Seek>(source: &mut S) -> Result<RawColorValues, Error> {
+pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
         return Err(Error::Read(error));
     }
 
-    let mut colors = [(0, 0, 0); 256];
+    let scale = 0..64;
+    let mut colors = [(0, 0, 0, false); 256];
 
     for color in &mut colors {
         let mut red_bytes = vec![0u8; size_of::<u8>()];
@@ -24,10 +26,10 @@ pub fn values<S: Read + Seek>(source: &mut S) -> Result<RawColorValues, Error> {
             Ok(value) => value,
         };
 
-        let red = u8::from_le_bytes(match red_bytes.try_into() {
+        let red = u8::from_be_bytes(match red_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        });
+        }) as usize;
 
         let mut green_bytes = vec![0u8; size_of::<u8>()];
         match source.read_exact(&mut green_bytes) {
@@ -35,10 +37,10 @@ pub fn values<S: Read + Seek>(source: &mut S) -> Result<RawColorValues, Error> {
             Ok(value) => value,
         };
 
-        let green = u8::from_le_bytes(match green_bytes.try_into() {
+        let green = u8::from_be_bytes(match green_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        });
+        }) as usize;
 
         let mut blue_bytes = vec![0u8; size_of::<u8>()];
         match source.read_exact(&mut blue_bytes) {
@@ -46,15 +48,38 @@ pub fn values<S: Read + Seek>(source: &mut S) -> Result<RawColorValues, Error> {
             Ok(value) => value,
         };
 
-        let blue = u8::from_le_bytes(match blue_bytes.try_into() {
+        let blue = u8::from_be_bytes(match blue_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        });
+        }) as usize;
 
-        *color = (red, green, blue);
+        if scale.contains(&red) && scale.contains(&green) && scale.contains(&blue) {
+            *color = (red, green, blue, true);
+        }
     }
 
-    Ok(RawColorValues {
-        values: colors.map(|(red, green, blue)| RawColorValue { red, green, blue }),
-    })
+    let colors = colors.map(
+        |(red, green, blue, is_regular): (usize, usize, usize, bool)| {
+            if is_regular {
+                Some(ColorPixel {
+                    red: Pixel {
+                        value: red,
+                        scale: scale.start..scale.end,
+                    },
+                    green: Pixel {
+                        value: green,
+                        scale: scale.start..scale.end,
+                    },
+                    blue: Pixel {
+                        value: blue,
+                        scale: scale.start..scale.end,
+                    },
+                })
+            } else {
+                None
+            }
+        },
+    );
+
+    Ok(Palette { colors })
 }
