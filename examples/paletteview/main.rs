@@ -98,6 +98,7 @@ fn main() {
         }
         Action::Render(arguments) => {
             let output = std::path::Path::new(&arguments.directory);
+
             if !output.exists() {
                 eprintln!("Output path does not exist. Aborting.");
                 return;
@@ -108,37 +109,49 @@ fn main() {
                 return;
             }
 
-            let width = 8;
-            let height = palette_regular.colors.len() / width;
+            {
+                let width = 8;
+                let height = palette_regular.colors.len() / width;
 
-            let palette_pixels = palette_regular.colors.map(|color| match color {
-                None => bmp::Pixel::new(0, 0, 0),
-                Some(color) => {
-                    let red = ((color.red.value * std::u8::MAX as usize)
-                        / ((color.red.scale.end - color.red.scale.start) as usize))
-                        as u8;
-                    let green = ((color.green.value * std::u8::MAX as usize)
-                        / ((color.green.scale.end - color.green.scale.start) as usize))
-                        as u8;
-                    let blue = ((color.blue.value * std::u8::MAX as usize)
-                        / ((color.blue.scale.end - color.blue.scale.start) as usize))
-                        as u8;
+                let palette_pixels = palette_regular.colors.map(|color| match color {
+                    None => bmp::Pixel::new(0, 0, 0),
+                    Some(color) => {
+                        let red = ((color.red.value * std::u8::MAX as usize)
+                            / ((color.red.scale.end - color.red.scale.start) as usize))
+                            as u8;
+                        let green = ((color.green.value * std::u8::MAX as usize)
+                            / ((color.green.scale.end - color.green.scale.start) as usize))
+                            as u8;
+                        let blue = ((color.blue.value * std::u8::MAX as usize)
+                            / ((color.blue.scale.end - color.blue.scale.start) as usize))
+                            as u8;
 
-                    bmp::Pixel::new(red, green, blue)
+                        bmp::Pixel::new(red, green, blue)
+                    }
+                });
+
+                let mut palette_image = bmp::Image::new(width as u32, height as u32);
+
+                for (x, y) in palette_image.coordinates() {
+                    palette_image.set_pixel(x, y, palette_pixels[(width as u32 * y + x) as usize]);
                 }
-            });
 
-            let mut palette_image = bmp::Image::new(width as u32, height as u32);
+                let filename = match std::path::Path::new(&options.input).file_stem() {
+                    Some(value) => value,
+                    None => {
+                        eprintln!("Couldn't determine palette output filename.");
+                        return;
+                    }
+                };
 
-            for (x, y) in palette_image.coordinates() {
-                palette_image.set_pixel(x, y, palette_pixels[(width as u32 * y + x) as usize]);
-            }
+                let path = output.join(filename).with_extension("bmp");
 
-            match palette_image.save(output.join("palette.bmp")) {
-                Ok(_) => {}
-                Err(error) => {
-                    eprintln!("Couldn't write palette.bmp: {:}", error);
-                    return;
+                match palette_image.save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write palette bitmap: {:}", error);
+                        return;
+                    }
                 }
             }
         }
