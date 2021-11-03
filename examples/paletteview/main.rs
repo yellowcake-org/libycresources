@@ -1,3 +1,5 @@
+pub mod render;
+
 use libycresources::common::graphics;
 use libycresources::formats::pal;
 
@@ -55,6 +57,7 @@ fn main() {
         Action::Info => {
             let flatten_colors: Vec<graphics::ColorPixel> =
                 palette_regular.colors.into_iter().flatten().collect();
+
             println!(
                 "Regular palette has {:} valid colors.",
                 flatten_colors.len()
@@ -109,47 +112,153 @@ fn main() {
                 return;
             }
 
-            {
-                let width = 8;
-                let height = palette_regular.colors.len() / width;
-
-                let palette_pixels = palette_regular.colors.map(|color| match color {
-                    None => bmp::Pixel::new(0, 0, 0),
-                    Some(color) => {
-                        let red = ((color.red.value * std::u8::MAX as usize)
-                            / ((color.red.scale.end - color.red.scale.start) as usize))
-                            as u8;
-                        let green = ((color.green.value * std::u8::MAX as usize)
-                            / ((color.green.scale.end - color.green.scale.start) as usize))
-                            as u8;
-                        let blue = ((color.blue.value * std::u8::MAX as usize)
-                            / ((color.blue.scale.end - color.blue.scale.start) as usize))
-                            as u8;
-
-                        bmp::Pixel::new(red, green, blue)
-                    }
-                });
-
-                let mut palette_image = bmp::Image::new(width as u32, height as u32);
-
-                for (x, y) in palette_image.coordinates() {
-                    palette_image.set_pixel(x, y, palette_pixels[(width as u32 * y + x) as usize]);
+            let filename = match std::path::Path::new(&options.input).file_stem() {
+                Some(value) => value,
+                None => {
+                    eprintln!("Couldn't determine palette output filename.");
+                    return;
                 }
+            };
 
-                let filename = match std::path::Path::new(&options.input).file_stem() {
-                    Some(value) => value,
-                    None => {
-                        eprintln!("Couldn't determine palette output filename.");
-                        return;
-                    }
-                };
-
+            {
                 let path = output.join(filename).with_extension("bmp");
 
-                match palette_image.save(path) {
+                match render::image(&palette_regular.colors, 8).save(path) {
                     Ok(_) => {}
                     Err(error) => {
                         eprintln!("Couldn't write palette bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("alarm")
+                    .with_extension("bmp");
+
+                let alarm: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .alarm
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(alarm.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write alarm bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("slime")
+                    .with_extension("bmp");
+
+                let slime: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .slime
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(slime.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write slime bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("shore")
+                    .with_extension("bmp");
+
+                let shore: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .shore
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(shore.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write shore bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("screen")
+                    .with_extension("bmp");
+
+                let screen: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .screen
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(screen.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write screen bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("fire_slow")
+                    .with_extension("bmp");
+
+                let fire_slow: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .fire_slow
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(fire_slow.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write fire_slow bitmap: {:}", error);
+                        return;
+                    }
+                }
+            }
+
+            {
+                let path = output
+                    .join(filename)
+                    .with_file_name("fire_fast")
+                    .with_extension("bmp");
+
+                let fire_fast: Vec<Option<graphics::ColorPixel>> = palette_animated
+                    .fire_fast
+                    .values
+                    .into_iter()
+                    .map(|v| Some(v))
+                    .collect();
+
+                match render::image(fire_fast.as_slice(), 1).save(path) {
+                    Ok(_) => {}
+                    Err(error) => {
+                        eprintln!("Couldn't write fire_fast bitmap: {:}", error);
                         return;
                     }
                 }
