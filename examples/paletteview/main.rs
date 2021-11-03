@@ -1,4 +1,4 @@
-use libycresources::common::graphics::*;
+use libycresources::common::graphics;
 use libycresources::formats::pal;
 
 use clap::Parser;
@@ -53,7 +53,7 @@ fn main() {
 
     match options.action {
         Action::Info => {
-            let flatten_colors: Vec<ColorPixel> =
+            let flatten_colors: Vec<graphics::ColorPixel> =
                 palette_regular.colors.into_iter().flatten().collect();
             println!(
                 "Regular palette has {:} valid colors.",
@@ -108,7 +108,39 @@ fn main() {
                 return;
             }
 
-            let palette_path = output.join("/palette.bmp").as_path();
+            let width = 8;
+            let height = palette_regular.colors.len() / width;
+
+            let palette_pixels = palette_regular.colors.map(|color| match color {
+                None => bmp::Pixel::new(0, 0, 0),
+                Some(color) => {
+                    let red = ((color.red.value * std::u8::MAX as usize)
+                        / ((color.red.scale.end - color.red.scale.start) as usize))
+                        as u8;
+                    let green = ((color.green.value * std::u8::MAX as usize)
+                        / ((color.green.scale.end - color.green.scale.start) as usize))
+                        as u8;
+                    let blue = ((color.blue.value * std::u8::MAX as usize)
+                        / ((color.blue.scale.end - color.blue.scale.start) as usize))
+                        as u8;
+
+                    bmp::Pixel::new(red, green, blue)
+                }
+            });
+
+            let mut palette_image = bmp::Image::new(width as u32, height as u32);
+
+            for (x, y) in palette_image.coordinates() {
+                palette_image.set_pixel(x, y, palette_pixels[(width as u32 * y + x) as usize]);
+            }
+
+            match palette_image.save(output.join("palette.bmp")) {
+                Ok(_) => {}
+                Err(error) => {
+                    eprintln!("Couldn't write palette.bmp: {:}", error);
+                    return;
+                }
+            }
         }
     }
 }
