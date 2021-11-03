@@ -16,7 +16,7 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         return Err(Error::Read(error));
     }
 
-    let scale = 0..64;
+    let scale_regular = 0..64;
     let scale_animated = 0..256;
 
     let mut colors: [(usize, usize, usize, bool); 256] = [(0, 0, 0, false); 256];
@@ -55,7 +55,10 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
             Ok(value) => value,
         }) as usize;
 
-        if scale.contains(&red) && scale.contains(&green) && scale.contains(&blue) {
+        if scale_regular.contains(&red)
+            && scale_regular.contains(&green)
+            && scale_regular.contains(&blue)
+        {
             *color = (red, green, blue, true)
         }
     }
@@ -65,15 +68,15 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
             Some(ColorPixel {
                 red: Pixel {
                     value: red,
-                    scale: scale.start..scale.end,
+                    scale: scale_regular.start..scale_regular.end,
                 },
                 green: Pixel {
                     value: green,
-                    scale: scale.start..scale.end,
+                    scale: scale_regular.start..scale_regular.end,
                 },
                 blue: Pixel {
                     value: blue,
-                    scale: scale.start..scale.end,
+                    scale: scale_regular.start..scale_regular.end,
                 },
             })
         } else {
