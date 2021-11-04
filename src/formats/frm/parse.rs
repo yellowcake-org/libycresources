@@ -174,7 +174,8 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
                         Ok(value) => value,
                     });
 
-                    let mut pixels = vec![0u8; (width * height) as usize * size_of::<u8>()];
+                    let square = (width as u32 * height as u32) as usize;
+                    let mut pixels = vec![0u8; square * size_of::<u8>()];
                     match source.read_exact(&mut pixels) {
                         Err(error) => return Err(Error::Read(error)),
                         Ok(value) => value,
