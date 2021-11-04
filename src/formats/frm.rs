@@ -1,6 +1,8 @@
+pub mod parse;
+
 pub struct Size {
     pub width: u16,
-    pub hegith: u16,
+    pub height: u16,
 }
 
 pub struct Shift {
@@ -8,10 +10,11 @@ pub struct Shift {
     pub y: u16,
 }
 
-type ColorIndex = u8;
+pub type ColorIndex = u8;
 
 pub struct Frame {
     pub size: Size,
+    pub shift: Shift,
     pub pixels: Vec<ColorIndex>,
 }
 
@@ -20,8 +23,8 @@ pub struct Animation {
     pub frames: Vec<Frame>,
 }
 
-type FrameIndex = u16;
-type AnimationIndex = u8;
+pub type FrameIndex = u16;
+pub type AnimationIndex = u8;
 
 pub struct Sprite {
     pub fps: u16,
