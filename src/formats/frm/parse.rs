@@ -113,12 +113,12 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
     let mut animations: Vec<Animation> = Vec::new();
     let mut orientations = [0 as AnimationIndex; 6];
 
-    for i in 0..6 {
-        let offset = &frame_offsets[i];
+    for orientation_idx in 0..6 {
+        let offset = &frame_offsets[orientation_idx];
 
         match map.get(offset) {
-            Some(index) => {
-                orientations[i] = *index;
+            Some(animation_index) => {
+                orientations[orientation_idx] = *animation_index;
             }
             None => {
                 let mut frames: Vec<Frame> = Vec::new();
@@ -192,8 +192,8 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
 
                 let animation = Animation {
                     shift: Shift {
-                        x: animation_shifts_x[i],
-                        y: animation_shifts_y[i],
+                        x: animation_shifts_x[orientation_idx],
+                        y: animation_shifts_y[orientation_idx],
                     },
                     frames,
                 };
