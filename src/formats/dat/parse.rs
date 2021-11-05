@@ -167,7 +167,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
             let start = u32::from_be_bytes(match start_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
-            }) as usize;
+            });
 
             let mut size_bytes = vec![0u8; size_of::<u32>()];
             match source.read_exact(&mut size_bytes) {
@@ -178,7 +178,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
             let size = u32::from_be_bytes(match size_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
-            }) as usize;
+            });
 
             let mut packed_size_bytes = vec![0u8; size_of::<u32>()];
             match source.read_exact(&mut packed_size_bytes) {
@@ -189,7 +189,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
             let packed_size = u32::from_be_bytes(match packed_size_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
-            }) as usize;
+            });
 
             directory.files.push(File {
                 name,
@@ -200,7 +200,7 @@ pub fn tree<S: Read + Seek>(source: &mut S) -> Result<Option<Directory>, Error> 
                         size
                     }
                 },
-                size: size as usize,
+                size,
             })
         }
     }

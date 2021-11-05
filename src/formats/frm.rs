@@ -1,3 +1,4 @@
+pub mod merge;
 pub mod parse;
 
 pub struct Size {

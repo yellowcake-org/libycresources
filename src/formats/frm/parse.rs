@@ -111,7 +111,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
     let mut map: HashMap<u32, AnimationIndex> = HashMap::new();
 
     let mut animations: Vec<Animation> = Vec::new();
-    let mut orientations = [0 as AnimationIndex; 6];
+    let mut orientations = [0; 6];
 
     for orientation_idx in 0..6 {
         let offset = &frame_offsets[orientation_idx];
@@ -206,7 +206,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
     }
 
     Ok(Sprite {
-        fps: fps,
+        fps,
         count: fpo,
         keyframe: keyframe_idx as FrameIndex,
         animations,

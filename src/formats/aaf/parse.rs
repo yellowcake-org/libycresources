@@ -32,7 +32,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         let height = u16::from_be_bytes(match height_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut h_spacing_bytes = vec![0u8; size_of::<u16>()];
         match source.read_exact(&mut h_spacing_bytes) {
@@ -43,7 +43,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         let h_spacing = u16::from_be_bytes(match h_spacing_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut space_width_bytes = vec![0u8; size_of::<u16>()];
         match source.read_exact(&mut space_width_bytes) {
@@ -54,7 +54,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         let space_width = u16::from_be_bytes(match space_width_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut v_spacing_bytes = vec![0u8; size_of::<u16>()];
         match source.read_exact(&mut v_spacing_bytes) {
@@ -65,7 +65,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         let v_spacing = u16::from_be_bytes(match v_spacing_bytes.try_into() {
             Err(_) => return Err(Error::Source),
             Ok(value) => value,
-        }) as usize;
+        });
 
         let mut sizes = [(0, 0); 256];
         for size in &mut sizes {
@@ -78,7 +78,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
             size.0 = u16::from_be_bytes(match width_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
-            }) as usize;
+            });
 
             let mut height_bytes = vec![0u8; size_of::<u16>()];
             match source.read_exact(&mut height_bytes) {
@@ -89,7 +89,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
             size.1 = u16::from_be_bytes(match height_bytes.try_into() {
                 Err(_) => return Err(Error::Source),
                 Ok(value) => value,
-            }) as usize;
+            });
 
             let mut _offset_bytes = vec![0u8; size_of::<u32>()];
             match source.read_exact(&mut _offset_bytes) {
@@ -100,7 +100,8 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
 
         sizes[b' ' as usize].0 = space_width;
 
-        let mut data = sizes.map(|(width, height)| (width, height, vec![0u8; width * height]));
+        let mut data = sizes
+            .map(|(width, height)| (width, height, vec![0u8; width as usize * height as usize]));
         for bytes in &mut data {
             match source.read_exact(&mut bytes.2) {
                 Err(error) => return Err(Error::Read(error)),

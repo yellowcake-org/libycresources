@@ -165,13 +165,13 @@ pub fn file<S: Read + Seek, O: Write>(
             }
         }
 
-        if plain != written {
+        if plain != written as u32 {
             return Err(Error::Decompress);
         }
 
         Ok(())
     } else {
-        let mut bytes = vec![0u8; archived];
+        let mut bytes = vec![0u8; archived as usize];
         match source.read_exact(&mut bytes) {
             Err(error) => return Err(Error::Read(error)),
             Ok(value) => value,

@@ -3,19 +3,19 @@ pub mod parse;
 use super::super::common::graphics::Pixel;
 
 pub struct Glyph {
-    pub width: usize,
-    pub height: usize,
+    pub width: u16,
+    pub height: u16,
 
     pub pixels: Vec<Pixel>,
 }
 
 pub struct Spacing {
-    pub vertical: usize,
-    pub horizontal: usize,
+    pub vertical: u16,
+    pub horizontal: u16,
 }
 
 pub struct Font {
-    pub height: usize,
+    pub height: u16,
     pub spacing: Spacing,
 
     pub glyphs: [Glyph; 256],
