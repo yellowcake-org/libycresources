@@ -11,18 +11,12 @@ pub fn sprites(source: [Sprite; 6]) -> Result<Sprite, Error> {
     let keyframe = source[0].keyframe;
     let animations_len = 1;
 
-    let is_fps_consistent = source
+    let is_fps_consistent = source.iter().all(|next| next.fps == fps);
+    let is_count_consistent = source.iter().all(|next| next.count == count);
+    let is_keyframe_consistent = source.iter().all(|next| next.keyframe == keyframe);
+    let is_animations_len_consistent = source
         .iter()
-        .fold(true, |accum, next| accum && next.fps == fps);
-    let is_count_consistent = source
-        .iter()
-        .fold(true, |accum, next| accum && next.count == count);
-    let is_keyframe_consistent = source
-        .iter()
-        .fold(true, |accum, next| accum && next.keyframe == keyframe);
-    let is_animations_len_consistent = source.iter().fold(true, |accum, next| {
-        accum && next.animations.len() == animations_len
-    });
+        .all(|next| next.animations.len() == animations_len);
 
     let is_source_consistent = is_fps_consistent
         && is_count_consistent
