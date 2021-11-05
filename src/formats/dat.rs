@@ -3,8 +3,8 @@ pub mod parse;
 
 pub struct File {
     pub name: String,
-    pub size: usize,
-    pub(crate) range: std::ops::Range<usize>,
+    pub size: u32,
+    pub(crate) range: std::ops::Range<u32>,
 }
 
 pub struct Directory {
