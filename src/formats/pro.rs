@@ -189,7 +189,46 @@ pub mod object {
         }
 
         pub mod weapon {
-            pub struct Instance {}
+            pub mod damage {
+                pub enum Type {
+                    Default,
+                    Laser,
+                    Fire,
+                    Plasma,
+                    Electrical,
+                    Emp,
+                    Explosive,
+                }
+
+                pub struct Instance {
+                    pub r#type: Type,
+                    pub value: std::ops::RangeInclusive<u32>,
+                }
+            }
+
+            pub struct Attack {
+                pub cost: u16,
+                pub range: std::ops::RangeInclusive<u16>,
+            }
+
+            pub struct Instance {
+                pub strength: u16,
+                pub failure: u16, // table?
+
+                pub damage: damage::Instance,
+                pub attacks: [Attack; 2],
+
+                pub caliber_id: Option<u16>, //proto.msg - 300 + id
+                pub burst_count: u16,
+                pub ammo_count: u16,
+
+                pub animation_code: u8,
+                pub projectile_id: u32,
+                pub perk_id: u32,
+                pub ammo_id: u32,
+
+                pub _sounds_ids: u16, // TODO: It represents multiple sounds, no info
+            }
         }
 
         pub mod ammo {
