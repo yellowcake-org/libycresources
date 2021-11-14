@@ -50,12 +50,47 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
-        pub enum Material {}
+        use crate::common::types::ScaledValue;
 
-        pub struct Light {}
-        pub struct Script {}
-        pub struct Actions {}
-        pub struct Destination {}
+        pub enum Material {
+            Glass,
+            Metal,
+            Plastic,
+            Wood,
+            Dirt,
+            Stone,
+            Cement,
+            Leather,
+        }
+
+        pub enum Light {
+            Vertical,
+            Horizontal,
+            North,
+            South,
+            East,
+            West,
+        }
+
+        pub struct Destination {
+            pub tile: ScaledValue<u16, u16>,
+            pub floor: ScaledValue<u16, u16>,
+        }
+
+        pub mod actions {
+            pub struct Usage {
+                pub itself: bool,
+                pub something: bool,
+                pub knees_down: bool,
+            }
+
+            pub enum Instance {
+                Look,
+                Talk,
+                PickUp,
+                Usage(Usage),
+            }
+        }
     }
 
     pub enum Type {
