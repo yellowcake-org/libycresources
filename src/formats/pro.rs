@@ -8,7 +8,6 @@ pub mod meta {
     pub struct Info {
         pub light: info::Light,
         pub flags: std::collections::HashSet<info::flags::Instance>,
-
         pub connections: info::Connections,
     }
 
@@ -22,7 +21,7 @@ pub mod meta {
 
         pub struct Connections {
             pub sprite_id: u32,
-            pub message_id: u16,
+            pub message_id: u32,
         }
 
         pub mod flags {
@@ -73,7 +72,7 @@ pub mod object {
         }
 
         pub struct Destination {
-            pub tile: ScaledValue<u16, u16>,
+            pub tile: ScaledValue<u16, u16>, // TODO: Coordinates!
             pub floor: ScaledValue<u16, u16>,
         }
 
@@ -115,18 +114,78 @@ pub mod object {
 
         pub struct Instance {
             pub r#type: Type,
+
+            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub material: super::common::Material,
+
+            pub cost: u16,
+            pub size: u16,
+            pub weight: u16,
+
+            pub is_hidden: bool,
+
+            pub script_id: Option<u16>,
+            pub sprite_id: u8,
+
+            pub _sounds_ids: u16, // TODO: It represents multiple sounds, no info
         }
 
         pub mod armor {
-            pub struct Instance {}
+            pub struct Threshold {}
+            pub struct Resistance {}
+
+            pub struct Instance {
+                pub class: u32,
+                pub threshold: Threshold,
+                pub resistance: Resistance,
+
+                pub perk_id: Option<u32>,
+                pub male_sprite_id: Option<u32>,
+                pub female_sprite_id: Option<u32>,
+            }
         }
 
         pub mod container {
-            pub struct Instance {}
+            pub enum Flags {
+                NoPickUp,
+                MagicHands,
+            }
+
+            pub struct Instance {
+                pub size: u32,
+                pub flags: std::collections::HashSet<Flags>,
+            }
         }
 
         pub mod drug {
-            pub struct Instance {}
+            use crate::common::types::ScaledValue;
+
+            pub enum Amount {
+                Fixed(u32),
+                Random(std::ops::RangeInclusive<u32>),
+            }
+
+            pub struct Impact {
+                pub amount: Amount,
+                pub delay: Option<std::time::Duration>,
+            }
+
+            pub struct Effect {
+                pub stat_id: u32,
+                pub impacts: [Impact; 3],
+            }
+
+            pub struct Addiction {
+                pub perk_id: Option<u32>,
+
+                pub delay: std::time::Duration,
+                pub chance: ScaledValue<u8, u8>,
+            }
+
+            pub struct Instance {
+                pub effects: [Effect; 3],
+                pub addiction: Addiction,
+            }
         }
 
         pub mod weapon {
