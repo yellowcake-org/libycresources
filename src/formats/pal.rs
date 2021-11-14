@@ -1,5 +1,7 @@
 pub mod parse;
 
+use crate::common::graphics::Pixel;
+
 pub struct Palette {
-    pub colors: [Option<crate::common::graphics::ColorPixel>; 256],
+    pub colors: [Option<Pixel>; 256],
 }

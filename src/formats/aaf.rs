@@ -1,12 +1,12 @@
 pub mod parse;
 
-use super::super::common::graphics::Pixel;
+use crate::common::types::ScaledValue;
 
 pub struct Glyph {
     pub width: u16,
     pub height: u16,
 
-    pub pixels: Vec<Pixel>,
+    pub dots: Vec<ScaledValue<usize, usize>>,
 }
 
 pub struct Spacing {

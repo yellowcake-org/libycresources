@@ -52,7 +52,7 @@ fn main() {
 
     match options.action {
         Action::Info => {
-            let flatten_colors: Vec<graphics::ColorPixel> =
+            let flatten_colors: Vec<graphics::Pixel> =
                 palette.colors.into_iter().flatten().collect();
 
             println!("Palette contains {:} valid colors.", flatten_colors.len());

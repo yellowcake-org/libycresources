@@ -1,6 +1,6 @@
-use libycresources::common::graphics::ColorPixel;
+use libycresources::common::graphics::Pixel;
 
-pub fn image(pixels: &[Option<ColorPixel>], width: usize) -> bmp::Image {
+pub fn image(pixels: &[Option<Pixel>], width: usize) -> bmp::Image {
     let height = pixels.len() / width;
 
     let pixels: Vec<bmp::Pixel> = pixels
