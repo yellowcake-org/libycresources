@@ -72,11 +72,14 @@ pub mod object {
         }
 
         pub mod map {
-            use crate::common::types::ScaledValue;
+            pub enum Map {
+                Local(u32),
+                World,
+            }
 
             pub struct Destination {
-                pub tile: ScaledValue<u16, u16>, // TODO: Coordinates!
-                pub floor: ScaledValue<u16, u16>,
+                pub tile: u16, // TODO: Coordinates!
+                pub floor: u8,
             }
         }
 
@@ -278,7 +281,7 @@ pub mod object {
         Scenery(scenery::Instance),
         Wall(wall::Instance),
         Tile(tile::Instance),
-        Misc(misc::Instance),
+        Misc,
     }
 
     pub mod item {
@@ -549,24 +552,55 @@ pub mod object {
             Ladder(ladder::Instance),
         }
 
+        pub struct Connections {
+            pub script_id: u32,
+            pub _sounds_ids: u32,
+        }
+
         pub struct Instance {
             pub r#type: Type,
+
+            pub light: super::common::world::Light,
+            pub material: super::common::world::Material,
+
+            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub connections: Connections,
         }
 
         pub mod door {
-            pub struct Instance {}
+            pub struct Instance {
+                pub can_pass: bool,
+            }
         }
 
         pub mod stairs {
-            pub struct Instance {}
+            pub struct Destination {
+                pub map: super::super::common::map::Map,
+                pub target: super::super::common::map::Destination,
+            }
+
+            pub struct Instance {
+                pub destination: Destination,
+            }
         }
 
         pub mod elevator {
-            pub struct Instance {}
+            pub struct Instance {
+                pub floor: u8,
+                pub r#type: u8, // 0...23, hardcoded, do something?
+            }
         }
 
         pub mod ladder {
-            pub struct Instance {}
+            pub enum Direction {
+                Top,
+                Bottom,
+            }
+
+            pub struct Instance {
+                pub direction: Direction,
+                pub destination: super::super::common::map::Destination,
+            }
         }
     }
 
@@ -587,12 +621,6 @@ pub mod object {
     pub mod tile {
         pub struct Instance {
             pub material: super::common::world::Material,
-        }
-    }
-
-    pub mod misc {
-        pub struct Instance {
-            pub _unknown: u32,
         }
     }
 }
