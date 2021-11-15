@@ -398,7 +398,25 @@ pub mod object {
         }
 
         pub mod ammo {
-            pub struct Instance {}
+            pub mod adjustments {
+                pub struct Armor {
+                    pub class: u32,
+
+                    pub resistance: u32,
+                    pub resistance_divider: u32,
+                    pub resistance_multiplier: u32,
+                }
+
+                pub struct Instance {
+                    pub armor: Armor,
+                }
+            }
+
+            pub struct Instance {
+                pub count: u32,
+                pub caliber: Option<super::super::common::weapons::Caliber>,
+                pub adjustments: adjustments::Instance,
+            }
         }
 
         pub mod misc {
