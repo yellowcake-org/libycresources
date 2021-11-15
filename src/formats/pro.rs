@@ -571,14 +571,28 @@ pub mod object {
     }
 
     pub mod wall {
-        pub struct Instance {}
+        pub struct Connections {
+            pub script_id: u32,
+        }
+
+        pub struct Instance {
+            pub light: super::common::world::Light,
+            pub material: super::common::world::Material,
+
+            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub connections: Connections,
+        }
     }
 
     pub mod tile {
-        pub struct Instance {}
+        pub struct Instance {
+            pub material: super::common::world::Material,
+        }
     }
 
     pub mod misc {
-        pub struct Instance {}
+        pub struct Instance {
+            pub _unknown: u32,
+        }
     }
 }
