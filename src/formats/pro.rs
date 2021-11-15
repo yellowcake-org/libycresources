@@ -80,7 +80,7 @@ pub mod object {
             }
         }
 
-        pub mod character {
+        pub mod critter {
             pub enum Statistic {
                 Strength,
                 Perception,
@@ -189,9 +189,38 @@ pub mod object {
                 CombatArmor,
             }
 
+            pub enum Skill {
+                SmallGuns,
+                BigGuns,
+                EnergyWeapons,
+                Unarmed,
+                MeleeWeapons,
+                Throwing,
+                FirstAid,
+                Doctor,
+                Sneak,
+                Lockpick,
+                Steal,
+                Traps,
+                Science,
+                Repair,
+                Speech,
+                Barter,
+                Gambling,
+                Outdoorsman,
+            }
+
             pub enum Gender {
                 Male,
                 Female,
+            }
+
+            pub mod body {
+                pub enum Type {
+                    Biped,
+                    Quadruped,
+                    Robotic,
+                }
             }
         }
 
@@ -289,7 +318,7 @@ pub mod object {
             use std::collections::HashMap;
 
             pub struct Appearance {
-                pub gender: super::super::common::character::Gender,
+                pub gender: super::super::common::critter::Gender,
                 pub sprite_id: u32,
             }
 
@@ -299,20 +328,20 @@ pub mod object {
                 pub threshold: HashMap<damage::Type, u16>,
                 pub resistance: HashMap<damage::Type, u16>,
 
-                pub perk: Option<super::super::common::character::Perk>,
+                pub perk: Option<super::super::common::critter::Perk>,
                 pub appearance: Appearance,
             }
         }
 
         pub mod container {
-            pub enum Flags {
+            pub enum Flag {
                 NoPickUp,
                 MagicHands,
             }
 
             pub struct Instance {
                 pub size: u32,
-                pub flags: std::collections::HashSet<Flags>,
+                pub flags: std::collections::HashSet<Flag>,
             }
         }
 
@@ -331,11 +360,11 @@ pub mod object {
 
             pub struct Effect {
                 pub impacts: [Impact; 3],
-                pub statistic: super::super::common::character::Statistic,
+                pub statistic: super::super::common::critter::Statistic,
             }
 
             pub struct Addiction {
-                pub perk: Option<super::super::common::character::Perk>,
+                pub perk: Option<super::super::common::critter::Perk>,
 
                 pub delay: std::time::Duration,
                 pub chance: ScaledValue<u8, u8>,
@@ -392,7 +421,7 @@ pub mod object {
                 pub capacity: u16,
                 pub burst_count: u16,
 
-                pub perk: Option<super::super::common::character::Perk>,
+                pub perk: Option<super::super::common::critter::Perk>,
                 pub connections: Connections,
             }
         }
@@ -433,7 +462,82 @@ pub mod object {
     }
 
     pub mod critter {
-        pub struct Instance {}
+        use std::collections::{HashMap, HashSet};
+
+        pub enum Flag {
+            Barter,
+            Steal,
+            Drop,
+            Limbs,
+            Ages,
+            Heal,
+            Invulnerable,
+            Flatten,
+            Special,
+            Range,
+            Knock,
+        }
+
+        pub mod murder {
+            pub enum Type {
+                Men,
+                Women,
+                Children,
+                SuperMutants,
+                Ghouls,
+                Brahmin,
+                Radscorpions,
+                Rats,
+                Floaters,
+                Centaurs,
+                Robots,
+                Dogs,
+                Manti,
+                DeathClaws,
+                Plants,
+                Geckos,
+                Aliens,
+                GiantAnts,
+                BigBadBoss,
+            }
+
+            pub struct Result {
+                pub r#type: Type,
+                pub experience: u16,
+            }
+        }
+
+        pub struct Parameters {
+            pub age: u8,
+            pub gender: super::common::critter::Gender,
+
+            pub statistics: HashMap<super::common::critter::Statistic, u16>,
+            pub threshold: HashMap<super::common::combat::damage::Type, u16>,
+            pub resistance: HashMap<super::common::combat::damage::Type, u16>,
+        }
+
+        pub struct Connections {
+            pub sprite_id: Option<u32>,
+            pub script_id: Option<u32>,
+            pub ai_packet_idx: u32,
+        }
+
+        pub struct Instance {
+            pub team: u32,
+
+            pub murder: murder::Result,
+            pub damage: super::common::combat::damage::Type,
+
+            pub body: super::common::critter::body::Type,
+            pub flags: HashSet<Flag>,
+            pub skills: HashSet<super::common::critter::Skill>,
+            pub actions: HashSet<super::common::actions::Instance>,
+
+            pub basic: Parameters,
+            pub bonuses: Parameters,
+
+            pub connections: Connections,
+        }
     }
 
     pub mod scenery {
