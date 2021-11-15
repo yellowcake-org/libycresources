@@ -21,7 +21,7 @@ pub mod meta {
 
         pub struct Connections {
             pub sprite_id: u32,
-            pub message_id: u32,
+            pub description_id: u32,
         }
 
         pub mod flags {
@@ -49,31 +49,182 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
-        use crate::common::types::ScaledValue;
+        pub mod world {
+            pub enum Material {
+                Glass,
+                Metal,
+                Plastic,
+                Wood,
+                Dirt,
+                Stone,
+                Cement,
+                Leather,
+            }
 
-        pub enum Material {
-            Glass,
-            Metal,
-            Plastic,
-            Wood,
-            Dirt,
-            Stone,
-            Cement,
-            Leather,
+            pub enum Light {
+                Vertical,
+                Horizontal,
+                NorthCorner,
+                SouthCorner,
+                EastCorner,
+                WestCorner,
+            }
         }
 
-        pub enum Light {
-            Vertical,
-            Horizontal,
-            North,
-            South,
-            East,
-            West,
+        pub mod map {
+            use crate::common::types::ScaledValue;
+
+            pub struct Destination {
+                pub tile: ScaledValue<u16, u16>, // TODO: Coordinates!
+                pub floor: ScaledValue<u16, u16>,
+            }
         }
 
-        pub struct Destination {
-            pub tile: ScaledValue<u16, u16>, // TODO: Coordinates!
-            pub floor: ScaledValue<u16, u16>,
+        pub mod character {
+            pub enum Statistic {
+                Strength,
+                Perception,
+                Endurance,
+                Charisma,
+                Intelligence,
+                Agility,
+                Luck,
+                MaximumHitPoints,
+                MaximumActionPoints,
+                ArmorClass,
+                UnarmedDamage,
+                MeleeDamage,
+                CarryWeight,
+                Sequence,
+                HealingRate,
+                CriticalChance,
+                BetterCriticals,
+                DamageThreshold,
+                DamageThresholdLaser,
+                DamageThresholdFire,
+                DamageThresholdPlasma,
+                DamageThresholdElectrical,
+                DamageThresholdEMP,
+                DamageThresholdExplosion,
+                DamageResistance,
+                DamageResistanceLaser,
+                DamageResistanceFire,
+                DamageResistancePlasma,
+                DamageResistanceElectrical,
+                DamageResistanceEMP,
+                DamageResistanceExplosion,
+                RadiationResistance,
+                PoisonResistance,
+                Age,
+                Gender,
+                CurrentHitPoints,
+                CurrentPoisonLevel,
+                CurrentRadiationLevel,
+            }
+
+            pub enum Perk {
+                Awareness,
+                BonusHtHAttacks,
+                BonusHtHDamage,
+                BonusMove,
+                BonusRangedDamage,
+                BonusRateOfFire,
+                EarlierSequence,
+                FasterHealing,
+                MoreCriticals,
+                NightVision,
+                Presence,
+                RadResistance,
+                Toughness,
+                StrongBack,
+                Sharpshooter,
+                SilentRunning,
+                Survivalist,
+                MasterTrader,
+                Educated,
+                Healer,
+                FortuneFinder,
+                BetterCriticals,
+                Empathy,
+                Slayer,
+                Sniper,
+                SilentDeath,
+                ActionBoy,
+                MentalBlock,
+                Lifegiver,
+                Dodger,
+                Snakeater,
+                MrFixit,
+                Medic,
+                MasterThief,
+                Speaker,
+                HeaveHo,
+                FriendlyFoe,
+                Pickpocket,
+                Ghost,
+                CultOfPersonality,
+                Scrounger,
+                Explorer,
+                FlowerChild,
+                Pathfinder,
+                AnimalFriend,
+                Scout,
+                MysteriousStranger,
+                Ranger,
+                QuickPockets,
+                SmoothTalker,
+                SwiftLearner,
+                Tag,
+                Mutate,
+                NukaColaAddiction,
+                BuffoutAddiction,
+                MentatsAddiction,
+                PsychoAddiction,
+                RadawayAddiction,
+                WeaponLongRange,
+                WeaponAccurate,
+                WeaponPenetrate,
+                WeaponKnockback,
+                PoweredArmor,
+                CombatArmor,
+            }
+
+            pub enum Gender {
+                Male,
+                Female,
+            }
+        }
+
+        pub mod combat {
+            pub mod damage {
+                pub enum Type {
+                    Default,
+                    Laser,
+                    Fire,
+                    Plasma,
+                    Electrical,
+                    Emp,
+                    Explosive,
+                }
+            }
+        }
+
+        pub mod weapons {
+            pub enum Caliber {
+                Rocket,
+                FlamethrowerFuel,
+                CEnergyCell,
+                DEnergyCell,
+                Remington223,
+                FiveMillimeter,
+                SnW40,
+                TenMillimiter,
+                Magnum44,
+                FourteenMillimeter,
+                TwelveGauge,
+                NineMillimeter,
+                Bb,
+            }
         }
 
         pub mod actions {
@@ -112,36 +263,41 @@ pub mod object {
             Key(key::Instance),
         }
 
+        pub struct Connections {
+            pub sprite_id: u32,
+            pub script_id: Option<u32>,
+
+            pub _sounds_ids: u32, // TODO: It represents multiple sounds, no info
+        }
+
         pub struct Instance {
             pub r#type: Type,
+            pub is_hidden: bool,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
-            pub material: super::common::Material,
+            pub material: super::common::world::Material,
 
             pub cost: u16,
             pub size: u16,
             pub weight: u16,
 
-            pub is_hidden: bool,
-
-            pub script_id: Option<u16>,
-            pub sprite_id: u8,
-
-            pub _sounds_ids: u16, // TODO: It represents multiple sounds, no info
+            pub connections: Connections,
         }
 
         pub mod armor {
-            pub struct Threshold {}
-            pub struct Resistance {}
+            pub struct Appearance {
+                pub gender: super::super::common::character::Gender,
+                pub sprite_id: u32,
+            }
 
             pub struct Instance {
                 pub class: u32,
-                pub threshold: Threshold,
-                pub resistance: Resistance,
 
-                pub perk_id: Option<u32>,
-                pub male_sprite_id: Option<u32>,
-                pub female_sprite_id: Option<u32>,
+                pub threshold: super::super::common::combat::damage::Type,
+                pub resistance: super::super::common::combat::damage::Type,
+
+                pub perk: Option<super::super::common::character::Perk>,
+                pub appearance: Appearance,
             }
         }
 
@@ -166,17 +322,17 @@ pub mod object {
             }
 
             pub struct Impact {
-                pub amount: Amount,
                 pub delay: Option<std::time::Duration>,
+                pub amount: Amount,
             }
 
             pub struct Effect {
-                pub stat_id: u32,
                 pub impacts: [Impact; 3],
+                pub statistic: super::super::common::character::Statistic,
             }
 
             pub struct Addiction {
-                pub perk_id: Option<u32>,
+                pub perk: Option<super::super::common::character::Perk>,
 
                 pub delay: std::time::Duration,
                 pub chance: ScaledValue<u8, u8>,
@@ -189,21 +345,9 @@ pub mod object {
         }
 
         pub mod weapon {
-            pub mod damage {
-                pub enum Type {
-                    Default,
-                    Laser,
-                    Fire,
-                    Plasma,
-                    Electrical,
-                    Emp,
-                    Explosive,
-                }
-
-                pub struct Instance {
-                    pub r#type: Type,
-                    pub value: std::ops::RangeInclusive<u32>,
-                }
+            pub struct Damage {
+                pub value: std::ops::RangeInclusive<u32>,
+                pub r#type: super::super::common::combat::damage::Type,
             }
 
             pub struct Attack {
@@ -211,23 +355,42 @@ pub mod object {
                 pub range: std::ops::RangeInclusive<u16>,
             }
 
-            pub struct Instance {
-                pub strength: u16,
-                pub failure: u16, // table?
+            pub enum Animation {
+                Knife,
+                Club,
+                Sledgehammer,
+                Spear,
+                Pistol,
+                SubmachineGun,
+                Rifle,
+                BigGun,
+                Minigun,
+                RocketLauncher,
+            }
 
-                pub damage: damage::Instance,
+            pub struct Connections {
+                pub ammo_item_idx: u32,
+                pub projectile_misc_idx: u32,
+
+                pub _sounds_ids: u16,
+            }
+
+            pub struct Instance {
+                pub animation: Option<Animation>,
+
+                pub min_strength: u16,
+                pub failure_chance: u16, // table?
+
+                pub damage: Damage,
                 pub attacks: [Attack; 2],
 
-                pub caliber_id: Option<u16>, //proto.msg - 300 + id
+                pub caliber: Option<super::super::common::weapons::Caliber>,
+
+                pub capacity: u16,
                 pub burst_count: u16,
-                pub ammo_count: u16,
 
-                pub animation_code: u8,
-                pub projectile_id: u32,
-                pub perk_id: u32,
-                pub ammo_id: u32,
-
-                pub _sounds_ids: u16, // TODO: It represents multiple sounds, no info
+                pub perk: Option<super::super::common::character::Perk>,
+                pub connections: Connections,
             }
         }
 
