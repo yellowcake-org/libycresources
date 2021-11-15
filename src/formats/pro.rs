@@ -285,6 +285,9 @@ pub mod object {
         }
 
         pub mod armor {
+            use super::super::common::combat::damage;
+            use std::collections::HashMap;
+
             pub struct Appearance {
                 pub gender: super::super::common::character::Gender,
                 pub sprite_id: u32,
@@ -293,8 +296,8 @@ pub mod object {
             pub struct Instance {
                 pub class: u32,
 
-                pub threshold: super::super::common::combat::damage::Type,
-                pub resistance: super::super::common::combat::damage::Type,
+                pub threshold: HashMap<damage::Type, u32>,
+                pub resistance: HashMap<damage::Type, u32>,
 
                 pub perk: Option<super::super::common::character::Perk>,
                 pub appearance: Appearance,
