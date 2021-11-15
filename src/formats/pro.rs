@@ -294,10 +294,10 @@ pub mod object {
             }
 
             pub struct Instance {
-                pub class: u32,
+                pub class: u8,
 
-                pub threshold: HashMap<damage::Type, u32>,
-                pub resistance: HashMap<damage::Type, u32>,
+                pub threshold: HashMap<damage::Type, u16>,
+                pub resistance: HashMap<damage::Type, u16>,
 
                 pub perk: Option<super::super::common::character::Perk>,
                 pub appearance: Appearance,
@@ -320,8 +320,8 @@ pub mod object {
             use crate::common::types::ScaledValue;
 
             pub enum Amount {
-                Fixed(u32),
-                Random(std::ops::RangeInclusive<u32>),
+                Fixed(u16),
+                Random(std::ops::RangeInclusive<u16>),
             }
 
             pub struct Impact {
@@ -420,7 +420,15 @@ pub mod object {
         }
 
         pub mod misc {
-            pub struct Instance {}
+            pub struct Connections {
+                pub power_items_idx: u32,
+            }
+
+            pub struct Instance {
+                pub count: u32,
+                pub caliber: super::super::common::weapons::Caliber,
+                pub connections: Connections,
+            }
         }
 
         pub mod key {
