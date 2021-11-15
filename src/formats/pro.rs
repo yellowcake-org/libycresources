@@ -1,3 +1,5 @@
+pub mod parse;
+
 pub struct Prototype {
     pub id: u16,
     pub meta: meta::Info,
@@ -25,8 +27,8 @@ pub mod meta {
         }
 
         pub mod flags {
-            pub enum Opacity {
-                None,
+            #[derive(PartialEq, Eq, Hash)]
+            pub enum Transparency {
                 Wall,
                 Glass,
                 Steam,
@@ -34,14 +36,15 @@ pub mod meta {
                 Red,
             }
 
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Instance {
                 Flat,
-                Blocking,
-                Bordered,
+                NotBlocking,
+                NotBordered,
                 MultiHex,
                 ShotThrough,
                 LightThrough,
-                Opaque(Opacity),
+                Transparency(Option<Transparency>),
             }
         }
     }
