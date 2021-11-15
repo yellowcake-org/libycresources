@@ -260,7 +260,7 @@ pub mod object {
             Weapon(weapon::Instance),
             Ammo(ammo::Instance),
             Misc(misc::Instance),
-            Key(key::Instance),
+            Key,
         }
 
         pub struct Connections {
@@ -429,10 +429,6 @@ pub mod object {
                 pub caliber: super::super::common::weapons::Caliber,
                 pub connections: Connections,
             }
-        }
-
-        pub mod key {
-            pub struct Instance {}
         }
     }
 
