@@ -97,48 +97,72 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     match flags.trailing_zeros() {
         0x00000008 => {
-            let _ = flagset.insert(meta::info::flags::Instance::Flat);
+            if !flagset.insert(meta::info::flags::Instance::Flat) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         0x00000010 => {
-            let _ = flagset.insert(meta::info::flags::Instance::NotBlocking);
+            if !flagset.insert(meta::info::flags::Instance::NotBlocking) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         0x00000800 => {
-            let _ = flagset.insert(meta::info::flags::Instance::MultiHex);
+            if !flagset.insert(meta::info::flags::Instance::MultiHex) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         0x00001000 => {
-            let _ = flagset.insert(meta::info::flags::Instance::NotBordered);
+            if !flagset.insert(meta::info::flags::Instance::NotBordered) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         0x20000000 => {
-            let _ = flagset.insert(meta::info::flags::Instance::LightThrough);
+            if !flagset.insert(meta::info::flags::Instance::LightThrough) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         0x80000000 => {
-            let _ = flagset.insert(meta::info::flags::Instance::ShotThrough);
+            if !flagset.insert(meta::info::flags::Instance::ShotThrough) {
+                return Err(errors::Error::Format(errors::Format::Type));
+            }
         }
         _ => {}
     }
 
     if flags.trailing_zeros() == 0x00008000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(None));
+        if !flagset.insert(meta::info::flags::Instance::Transparency(None)) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else if flags.trailing_zeros() == 0x00004000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(Some(
+        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Red,
-        )));
+        ))) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else if flags.trailing_zeros() == 0x00010000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(Some(
+        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Wall,
-        )));
+        ))) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else if flags.trailing_zeros() == 0x00020000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(Some(
+        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Glass,
-        )));
+        ))) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else if flags.trailing_zeros() == 0x00040000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(Some(
+        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Steam,
-        )));
+        ))) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else if flags.trailing_zeros() == 0x00080000 {
-        flagset.insert(meta::info::flags::Instance::Transparency(Some(
+        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Energy,
-        )));
+        ))) {
+            return Err(errors::Error::Format(errors::Format::Type));
+        }
     } else {
         return Err(errors::Error::Format(errors::Format::Type));
     }
