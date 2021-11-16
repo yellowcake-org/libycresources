@@ -397,9 +397,23 @@ pub mod object {
                 pub r#type: super::super::common::combat::damage::Type,
             }
 
-            pub struct Attack {
-                pub cost: u16,
-                pub range: std::ops::RangeInclusive<u16>,
+            pub mod attack {
+                pub enum Mode {
+                    Punch,
+                    Kick,
+                    Swing,
+                    Thrust,
+                    Throw,
+                    FireSingle,
+                    FireBurst,
+                    Flame,
+                }
+
+                pub struct Instance {
+                    pub cost: u16,
+                    pub mode: Option<Mode>,
+                    pub range: std::ops::RangeInclusive<u16>,
+                }
             }
 
             pub enum Animation {
@@ -429,7 +443,7 @@ pub mod object {
                 pub failure_chance: u16, // table?
 
                 pub damage: Damage,
-                pub attacks: [Attack; 2],
+                pub attacks: [attack::Instance; 2],
 
                 pub caliber: Option<super::super::common::weapons::Caliber>,
 

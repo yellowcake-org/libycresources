@@ -206,6 +206,122 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             if !item_actions.insert(object::common::actions::Instance::Usage(usage)) {
                 return Err(errors::Error::Format(errors::Format::Flags));
             }
+
+            let mut attack_modes_bytes = vec![0u8; size_of::<u8>()];
+            match source.read_exact(&mut attack_modes_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let attack_modes = u8::from_be_bytes(match attack_modes_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let attack_mode_primary = attack_modes & 0xf;
+            let attack_mode_secondary = (attack_modes >> 4) & 0xf;
+
+            fn attack_mode(raw: &u8) -> Option<object::item::weapon::attack::Mode> {
+                return match raw {
+                    1 => Some(object::item::weapon::attack::Mode::Punch),
+                    2 => Some(object::item::weapon::attack::Mode::Kick),
+                    3 => Some(object::item::weapon::attack::Mode::Swing),
+                    4 => Some(object::item::weapon::attack::Mode::Thrust),
+                    5 => Some(object::item::weapon::attack::Mode::Throw),
+                    6 => Some(object::item::weapon::attack::Mode::FireSingle),
+                    7 => Some(object::item::weapon::attack::Mode::FireBurst),
+                    8 => Some(object::item::weapon::attack::Mode::Flame),
+                    _ => None,
+                };
+            }
+
+            let mut script_id_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut script_id_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let script_id = u32::from_be_bytes(match script_id_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_type_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_type_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_type = u32::from_be_bytes(match item_type_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut material_id_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut material_id_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let material_id = u32::from_be_bytes(match material_id_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_size_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_size_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_size_bytes = u32::from_be_bytes(match item_size_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_weight_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_weight_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_weight = u32::from_be_bytes(match item_weight_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_cost_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_cost_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_cost = u32::from_be_bytes(match item_cost_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_sprite_id_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_sprite_id_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_sprite_id = u32::from_be_bytes(match item_sprite_id_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
+
+            let mut item_sound_ids_bytes = vec![0u8; size_of::<u32>()];
+            match source.read_exact(&mut item_sound_ids_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_sound_ids = u32::from_be_bytes(match item_sound_ids_bytes.try_into() {
+                Err(_) => return Err(errors::Error::Source),
+                Ok(value) => value,
+            });
         }
         1 => {}
         2 => {}
