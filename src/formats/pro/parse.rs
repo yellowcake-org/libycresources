@@ -88,93 +88,99 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
-    let flags = u32::from_be_bytes(match flags_bytes.try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => value,
-    });
-
     let mut flagset: HashSet<meta::info::flags::Instance> = HashSet::new();
 
-    match flags.trailing_zeros() {
-        0x00000008 => {
-            if !flagset.insert(meta::info::flags::Instance::Flat) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
+    if (flags_bytes[0] & 0x08) == 0x08 {
+        if !flagset.insert(meta::info::flags::Instance::Flat) {
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-        0x00000010 => {
-            if !flagset.insert(meta::info::flags::Instance::NotBlocking) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
-        }
-        0x00000800 => {
-            if !flagset.insert(meta::info::flags::Instance::MultiHex) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
-        }
-        0x00001000 => {
-            if !flagset.insert(meta::info::flags::Instance::NotBordered) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
-        }
-        0x20000000 => {
-            if !flagset.insert(meta::info::flags::Instance::LightThrough) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
-        }
-        0x80000000 => {
-            if !flagset.insert(meta::info::flags::Instance::ShotThrough) {
-                return Err(errors::Error::Format(errors::Format::Type));
-            }
-        }
-        _ => {}
     }
 
-    if flags.trailing_zeros() == 0x00008000 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(None)) {
-            return Err(errors::Error::Format(errors::Format::Type));
+    if (flags_bytes[0] & 0x10) == 0x10 {
+        if !flagset.insert(meta::info::flags::Instance::NotBlocking) {
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if flags.trailing_zeros() == 0x00004000 {
+    }
+
+    if (flags_bytes[1] & 0x08) == 0x08 {
+        if !flagset.insert(meta::info::flags::Instance::MultiHex) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
+    }
+
+    if (flags_bytes[1] & 0x10) == 0x10 {
+        if !flagset.insert(meta::info::flags::Instance::NotBordered) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
+    }
+
+    if (flags_bytes[3] & 0x20) == 0x20 {
+        if !flagset.insert(meta::info::flags::Instance::LightThrough) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
+    }
+
+    if (flags_bytes[3] & 0x80) == 0x80 {
+        if !flagset.insert(meta::info::flags::Instance::ShotThrough) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
+    }
+
+    if (flags_bytes[1] & 0x80) == 0x80 {
+        if !flagset.insert(meta::info::flags::Instance::Transparency(None)) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
+    } else if (flags_bytes[1] & 0x40) == 0x40 {
         if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Red,
         ))) {
-            return Err(errors::Error::Format(errors::Format::Type));
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if flags.trailing_zeros() == 0x00010000 {
+    } else if (flags_bytes[2] & 0x01) == 0x01 {
         if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Wall,
         ))) {
-            return Err(errors::Error::Format(errors::Format::Type));
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if flags.trailing_zeros() == 0x00020000 {
+    } else if (flags_bytes[2] & 0x02) == 0x02 {
         if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Glass,
         ))) {
-            return Err(errors::Error::Format(errors::Format::Type));
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if flags.trailing_zeros() == 0x00040000 {
+    } else if (flags_bytes[2] & 0x04) == 0x04 {
         if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Steam,
         ))) {
-            return Err(errors::Error::Format(errors::Format::Type));
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if flags.trailing_zeros() == 0x00080000 {
+    } else if (flags_bytes[2] & 0x08) == 0x08 {
         if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
             meta::info::flags::Transparency::Energy,
         ))) {
-            return Err(errors::Error::Format(errors::Format::Type));
+            return Err(errors::Error::Format(errors::Format::Flags));
         }
     } else {
-        return Err(errors::Error::Format(errors::Format::Type));
+        return Err(errors::Error::Format(errors::Format::Flags));
     }
 
     match r#type {
-        0 => {}
+        0 => {
+            let mut item_flags_bytes = vec![0u8; 3];
+            match source.read_exact(&mut item_flags_bytes[1..=3]) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
+            };
+
+            let item_is_hidden = (item_flags_bytes[2] & 0x08) == 0x08;
+            let mut item_flagset: HashSet<meta::info::flags::Instance> = HashSet::new();
+        }
         1 => {}
         2 => {}
         3 => {}
         4 => {}
         5 => {}
-        _ => return Err(errors::Error::Format(errors::Format::Flags)),
+        _ => return Err(errors::Error::Format(errors::Format::Type)),
     }
 
     Err(errors::Error::Source)

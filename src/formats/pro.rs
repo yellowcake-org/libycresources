@@ -245,6 +245,11 @@ pub mod object {
         }
 
         pub mod weapons {
+            pub enum Flag {
+                BigGun,
+                SecondHand,
+            }
+
             pub enum Caliber {
                 Rocket,
                 FlamethrowerFuel,
@@ -309,6 +314,7 @@ pub mod object {
             pub r#type: Type,
             pub is_hidden: bool,
 
+            pub flags: std::collections::HashSet<super::common::weapons::Flag>,
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
 
