@@ -245,6 +245,7 @@ pub mod object {
         }
 
         pub mod weapons {
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Flag {
                 BigGun,
                 SecondHand,
@@ -268,12 +269,14 @@ pub mod object {
         }
 
         pub mod actions {
+            #[derive(PartialEq, Eq, Hash)]
             pub struct Usage {
                 pub itself: bool,
                 pub something: bool,
                 pub knees_down: bool,
             }
 
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Instance {
                 Look,
                 Talk,

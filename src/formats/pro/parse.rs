@@ -173,7 +173,39 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             };
 
             let item_is_hidden = (item_flags_bytes[2] & 0x08) == 0x08;
-            let mut item_flagset: HashSet<meta::info::flags::Instance> = HashSet::new();
+            let mut item_flags: HashSet<object::common::weapons::Flag> = HashSet::new();
+            let mut item_actions: HashSet<object::common::actions::Instance> = HashSet::new();
+
+            if (item_flags_bytes[0] & 0x01) == 0x01 {
+                if !item_flags.insert(object::common::weapons::Flag::BigGun) {
+                    return Err(errors::Error::Format(errors::Format::Flags));
+                }
+            }
+
+            if (item_flags_bytes[0] & 0x02) == 0x02 {
+                if !item_flags.insert(object::common::weapons::Flag::SecondHand) {
+                    return Err(errors::Error::Format(errors::Format::Flags));
+                }
+            }
+
+            if (item_flags_bytes[0] & 0x80) == 0x80 {
+                if !item_actions.insert(object::common::actions::Instance::PickUp) {
+                    return Err(errors::Error::Format(errors::Format::Flags));
+                }
+            }
+
+            let can_use = (item_flags_bytes[0] & 0x08) == 0x08;
+            let can_use_on = (item_flags_bytes[0] & 0x10) == 0x10;
+
+            let usage = object::common::actions::Usage {
+                itself: can_use,
+                something: can_use_on,
+                knees_down: false,
+            };
+
+            if !item_actions.insert(object::common::actions::Instance::Usage(usage)) {
+                return Err(errors::Error::Format(errors::Format::Flags));
+            }
         }
         1 => {}
         2 => {}
