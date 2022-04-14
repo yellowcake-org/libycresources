@@ -8,13 +8,13 @@ pub fn image(pixels: &[Option<Pixel>], width: usize) -> bmp::Image {
         .map(|color| match color {
             None => bmp::Pixel::new(0, 0, 0),
             Some(color) => {
-                let red = ((color.red.value * (std::u8::MAX as usize + 1))
+                let red = ((color.red.value * (u8::MAX as usize + 1))
                     / ((color.red.scale.end - color.red.scale.start) as usize))
                     as u8;
-                let green = ((color.green.value * (std::u8::MAX as usize + 1))
+                let green = ((color.green.value * (u8::MAX as usize + 1))
                     / ((color.green.scale.end - color.green.scale.start) as usize))
                     as u8;
-                let blue = ((color.blue.value * (std::u8::MAX as usize + 1))
+                let blue = ((color.blue.value * (u8::MAX as usize + 1))
                     / ((color.blue.scale.end - color.blue.scale.start) as usize))
                     as u8;
 
