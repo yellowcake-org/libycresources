@@ -274,7 +274,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             };
 
-            let item_size_bytes = u32::from_be_bytes(match item_size_bytes.try_into() {
+            let item_size = u32::from_be_bytes(match item_size_bytes.try_into() {
                 Err(_) => return Err(errors::Error::Source),
                 Ok(value) => value,
             });

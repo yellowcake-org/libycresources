@@ -13,9 +13,7 @@ pub(crate) enum Error {
 }
 
 pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error>
-where
-    R: Read + Seek,
-{
+    where R: Read + Seek {
     let mut path = PathBuf::new();
 
     for (depth, _, directory) in tree.iter() {

@@ -81,7 +81,8 @@ pub mod object {
             }
 
             pub struct Destination {
-                pub tile: u16, // TODO: Coordinates!
+                // TODO: Coordinates!
+                pub tile: u16,
                 pub floor: u8,
             }
         }
