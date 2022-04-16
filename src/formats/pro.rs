@@ -18,7 +18,7 @@ pub mod meta {
 
         pub struct Light {
             pub distance: ScaledValue<u8, u8>,
-            pub intensity: ScaledValue<u8, u8>,
+            pub intensity: ScaledValue<u16, u16>,
         }
 
         pub struct Connections {
@@ -217,6 +217,7 @@ pub mod object {
                 Outdoorsman,
             }
 
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Gender {
                 Male,
                 Female,
@@ -233,6 +234,7 @@ pub mod object {
 
         pub mod combat {
             pub mod damage {
+                #[derive(PartialEq, Eq, Hash)]
                 pub enum Type {
                     Default,
                     Laser,
@@ -322,9 +324,9 @@ pub mod object {
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
 
-            pub cost: u16,
-            pub size: u16,
-            pub weight: u16,
+            pub cost: u32,
+            pub size: u32,
+            pub weight: u32,
 
             pub connections: Connections,
         }
@@ -334,15 +336,14 @@ pub mod object {
             use std::collections::HashMap;
 
             pub struct Appearance {
-                pub gender: super::super::common::critter::Gender,
-                pub sprite_id: u32,
+                pub sprite_ids: HashMap<super::super::common::critter::Gender, u32>,
             }
 
             pub struct Instance {
-                pub class: u8,
+                pub class: u32,
 
-                pub threshold: HashMap<damage::Type, u16>,
-                pub resistance: HashMap<damage::Type, u16>,
+                pub threshold: HashMap<damage::Type, u32>,
+                pub resistance: HashMap<damage::Type, u32>,
 
                 pub perk: Option<super::super::common::critter::Perk>,
                 pub appearance: Appearance,
