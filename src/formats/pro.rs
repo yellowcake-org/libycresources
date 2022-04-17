@@ -351,6 +351,7 @@ pub mod object {
         }
 
         pub mod container {
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Flag {
                 NoPickUp,
                 MagicHands,
