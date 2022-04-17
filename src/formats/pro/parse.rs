@@ -556,51 +556,87 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             Ok(value) => value,
                         });
 
-                    let threshold: HashMap<object::common::combat::damage::Type, u32> =
-                        HashMap::from([
-                            (object::common::combat::damage::Type::Default, armor_dt_normal),
-                            (object::common::combat::damage::Type::Laser, armor_dt_laser),
-                            (object::common::combat::damage::Type::Fire, armor_dt_fire),
-                            (object::common::combat::damage::Type::Plasma, armor_dt_plasma),
-                            (object::common::combat::damage::Type::Electrical, armor_dt_electrical),
-                            (object::common::combat::damage::Type::Emp, armor_dt_emp),
-                            (object::common::combat::damage::Type::Explosive, armor_dt_explosive),
-                        ]);
-
-                    let resistance: HashMap<object::common::combat::damage::Type, u32> =
-                        HashMap::from([
-                            (object::common::combat::damage::Type::Default, armor_dr_normal),
-                            (object::common::combat::damage::Type::Laser, armor_dr_laser),
-                            (object::common::combat::damage::Type::Fire, armor_dr_fire),
-                            (object::common::combat::damage::Type::Plasma, armor_dr_plasma),
-                            (object::common::combat::damage::Type::Electrical, armor_dr_electrical),
-                            (object::common::combat::damage::Type::Emp, armor_dr_emp),
-                            (object::common::combat::damage::Type::Explosive, armor_dr_explosive),
-                        ]);
-
-                    object::item::Type::Armor(object::item::armor::Instance {
-                        class: armor_ac,
-                        threshold,
-                        resistance,
-                        perk: match armor_perk {
-                            -1 => Option::None,
-                            value => Option::Some(
-                                match object::common::critter::Perk::try_from(value) {
-                                    Ok(value) => value,
-                                    Err(_) =>
-                                        return Err(errors::Error::Format(errors::Format::Data))
-                                }
-                            ),
-                        },
-                        appearance: object::item::armor::Appearance {
-                            sprite_ids: HashMap::from([
-                                (object::common::critter::Gender::Male, armor_male_fid),
-                                (object::common::critter::Gender::Female, armor_female_fid)
-                            ])
-                        },
-                    })
+                    object::item::Type::Armor(
+                        object::item::armor::Instance {
+                            class: armor_ac,
+                            threshold: HashMap::from([
+                                (object::common::combat::damage::Type::Default, armor_dt_normal),
+                                (object::common::combat::damage::Type::Laser, armor_dt_laser),
+                                (object::common::combat::damage::Type::Fire, armor_dt_fire),
+                                (object::common::combat::damage::Type::Plasma, armor_dt_plasma),
+                                (object::common::combat::damage::Type::Electrical, armor_dt_electrical),
+                                (object::common::combat::damage::Type::Emp, armor_dt_emp),
+                                (object::common::combat::damage::Type::Explosive, armor_dt_explosive),
+                            ]),
+                            resistance: HashMap::from([
+                                (object::common::combat::damage::Type::Default, armor_dr_normal),
+                                (object::common::combat::damage::Type::Laser, armor_dr_laser),
+                                (object::common::combat::damage::Type::Fire, armor_dr_fire),
+                                (object::common::combat::damage::Type::Plasma, armor_dr_plasma),
+                                (object::common::combat::damage::Type::Electrical, armor_dr_electrical),
+                                (object::common::combat::damage::Type::Emp, armor_dr_emp),
+                                (object::common::combat::damage::Type::Explosive, armor_dr_explosive),
+                            ]),
+                            perk: match armor_perk {
+                                -1 => Option::None,
+                                value => Option::Some(
+                                    match object::common::critter::Perk::try_from(value) {
+                                        Ok(value) => value,
+                                        Err(_) =>
+                                            return Err(errors::Error::Format(errors::Format::Data))
+                                    }
+                                ),
+                            },
+                            appearance: object::item::armor::Appearance {
+                                sprite_ids: HashMap::from([
+                                    (object::common::critter::Gender::Male, armor_male_fid),
+                                    (object::common::critter::Gender::Female, armor_female_fid)
+                                ])
+                            },
+                        }
+                    )
                 }
-                // 1 => {}
+                1 => {
+                    let mut container_size_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut container_size_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let container_size =
+                        u32::from_be_bytes(match container_size_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut container_flags_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut container_flags_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let mut container_flags: HashSet<object::item::container::Flag> =
+                        HashSet::new();
+
+                    if (container_flags_bytes[3] & 0x01) == 0x01 {
+                        if !container_flags.insert(object::item::container::Flag::NoPickUp) {
+                            return Err(errors::Error::Format(errors::Format::Flags));
+                        }
+                    }
+
+                    if (container_flags_bytes[3] & 0x08) == 0x08 {
+                        if !container_flags.insert(object::item::container::Flag::MagicHands) {
+                            return Err(errors::Error::Format(errors::Format::Flags));
+                        }
+                    }
+
+                    object::item::Type::Container(
+                        object::item::container::Instance {
+                            size: container_size,
+                            flags: container_flags,
+                        }
+                    )
+                }
                 // 2 => {}
                 // 3 => {}
                 // 4 => {}
