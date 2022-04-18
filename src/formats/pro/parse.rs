@@ -5,6 +5,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
 use std::ops::Range;
+use std::time::Duration;
 use std::collections::{HashMap, HashSet};
 
 use super::super::super::common::types::ScaledValue;
@@ -15,6 +16,7 @@ pub mod errors {
         Type,
         Flags,
         Data,
+        Consistency,
     }
 
     #[derive(Debug)]
@@ -637,7 +639,323 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         }
                     )
                 }
-                // 2 => {}
+                2 => {
+                    let mut drug_stat0_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_stat0_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_stat0_raw =
+                        i32::from_be_bytes(match drug_stat0_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_stat1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_stat1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_stat1_raw =
+                        i32::from_be_bytes(match drug_stat1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_stat2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_stat2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_stat2_raw =
+                        i32::from_be_bytes(match drug_stat2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect0_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect0_amount0_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect0_amount0_raw =
+                        u32::from_be_bytes(match drug_effect0_amount0_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect0_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect0_amount1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect0_amount1_raw =
+                        u32::from_be_bytes(match drug_effect0_amount1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect0_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect0_amount2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect0_amount2_raw =
+                        u32::from_be_bytes(match drug_effect0_amount2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect1_duration_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect1_duration_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect1_duration_raw =
+                        u32::from_be_bytes(match drug_effect1_duration_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect1_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect1_amount0_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect1_amount0_raw =
+                        u32::from_be_bytes(match drug_effect1_amount0_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect1_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect1_amount1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect1_amount1_raw =
+                        u32::from_be_bytes(match drug_effect1_amount1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect1_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect1_amount2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect1_amount2_raw =
+                        u32::from_be_bytes(match drug_effect1_amount2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect2_duration_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect2_duration_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect2_duration_raw =
+                        u32::from_be_bytes(match drug_effect2_duration_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect2_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect2_amount0_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect2_amount0_raw =
+                        u32::from_be_bytes(match drug_effect2_amount0_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect2_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect2_amount1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect2_amount1_raw =
+                        u32::from_be_bytes(match drug_effect2_amount1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_effect2_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_effect2_amount2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_effect2_amount2_raw =
+                        u32::from_be_bytes(match drug_effect2_amount2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_addiction_rate_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_addiction_rate_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_addiction_rate_raw =
+                        u32::from_be_bytes(match drug_addiction_rate_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_addiction_perk_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_addiction_perk_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_addiction_perk_raw =
+                        i32::from_be_bytes(match drug_addiction_perk_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut drug_addiction_delay_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut drug_addiction_delay_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let drug_addiction_delay_raw =
+                        u32::from_be_bytes(match drug_addiction_delay_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let statistic0 =
+                        match drug_stat0_raw > 0 {
+                            false => Option::None,
+                            true => Option::Some(
+                                match
+                                object::common::critter::Statistic::try_from(drug_stat0_raw) {
+                                    Ok(value) => value,
+                                    Err(_) =>
+                                        return Err(errors::Error::Format(errors::Format::Data))
+                                }
+                            )
+                        };
+
+                    let statistic1 =
+                        match object::common::critter::Statistic::try_from(drug_stat1_raw) {
+                            Ok(value) => value,
+                            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                        };
+
+                    let statistic2 =
+                        match object::common::critter::Statistic::try_from(drug_stat2_raw) {
+                            Ok(value) => value,
+                            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                        };
+
+                    let mut impact0 = HashMap::from([
+                        (statistic1.clone(), match statistic0 {
+                            Some(_) => object::item::drug::Amount::Fixed(drug_effect0_amount1_raw),
+                            None => object::item::drug::Amount::Random(
+                                drug_effect0_amount0_raw..=drug_effect0_amount1_raw
+                            ),
+                        }),
+                        (statistic2.clone(), object::item::drug::Amount::Fixed(drug_effect0_amount2_raw))
+                    ]);
+
+                    if let Some(value) = statistic0.clone() {
+                        impact0.entry(value.clone()).or_insert(
+                            object::item::drug::Amount::Fixed(
+                                drug_effect0_amount0_raw
+                            ));
+                    }
+
+                    let effect0 = object::item::drug::Effect { delay: None, impact: impact0 };
+
+                    let mut impact1 = HashMap::from([
+                        (statistic1.clone(), match statistic0 {
+                            Some(_) => object::item::drug::Amount::Fixed(drug_effect1_amount1_raw),
+                            None => object::item::drug::Amount::Random(
+                                drug_effect1_amount0_raw..=drug_effect1_amount1_raw
+                            ),
+                        }),
+                        (statistic2.clone(), object::item::drug::Amount::Fixed(drug_effect1_amount2_raw))
+                    ]);
+
+                    if let Some(value) = statistic0.clone() {
+                        impact1.entry(value.clone()).or_insert(
+                            object::item::drug::Amount::Fixed(drug_effect1_amount0_raw)
+                        );
+                    }
+
+                    let effect1 = object::item::drug::Effect {
+                        delay: Some(Duration::new(drug_effect1_duration_raw as u64 * 60, 0)),
+                        impact: impact1,
+                    };
+
+                    let mut impact2 = HashMap::from([
+                        (statistic1.clone(), match statistic0 {
+                            Some(_) => object::item::drug::Amount::Fixed(drug_effect2_amount1_raw),
+                            None => object::item::drug::Amount::Random(
+                                drug_effect2_amount0_raw..=drug_effect2_amount1_raw
+                            ),
+                        }),
+                        (statistic2.clone(), object::item::drug::Amount::Fixed(drug_effect2_amount2_raw))
+                    ]);
+
+                    if let Some(value) = statistic0.clone() {
+                        impact2.entry(value.clone()).or_insert(
+                            object::item::drug::Amount::Fixed(drug_effect2_amount0_raw)
+                        );
+                    }
+
+                    let effect2 = object::item::drug::Effect {
+                        delay: Some(Duration::new(drug_effect2_duration_raw as u64 * 60, 0)),
+                        impact: impact2,
+                    };
+
+                    if drug_effect2_duration_raw <= drug_effect1_duration_raw {
+                        return Err(errors::Error::Format(errors::Format::Consistency));
+                    }
+
+                    let addiction = object::item::drug::Addiction {
+                        perk: match drug_addiction_perk_raw {
+                            -1 => None,
+                            value => Some(
+                                match object::common::critter::Perk::
+                                try_from(value) {
+                                    Ok(value) => value,
+                                    Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                                }
+                            )
+                        },
+                        delay: Duration::new(drug_addiction_delay_raw as u64 * 60, 0),
+                        chance: ScaledValue { value: drug_addiction_rate_raw as u8, scale: 0u8..101u8 },
+                    };
+
+                    object::item::Type::Drug(
+                        object::item::drug::Instance {
+                            effects: [effect0, effect1, effect2],
+                            addiction,
+                        }
+                    )
+                }
                 // 3 => {}
                 // 4 => {}
                 // 5 => {}
@@ -789,6 +1107,54 @@ impl TryFrom<i32> for object::common::critter::Perk {
             62 => Ok(Self::WeaponKnockback),
             63 => Ok(Self::PoweredArmor),
             64 => Ok(Self::CombatArmor),
+            _ => Err(errors::Error::Format(errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<i32> for object::common::critter::Statistic {
+    type Error = errors::Error;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Self::Strength),
+            2 => Ok(Self::Perception),
+            3 => Ok(Self::Endurance),
+            4 => Ok(Self::Charisma),
+            5 => Ok(Self::Intelligence),
+            6 => Ok(Self::Agility),
+            7 => Ok(Self::Luck),
+            8 => Ok(Self::MaximumHitPoints),
+            9 => Ok(Self::MaximumActionPoints),
+            10 => Ok(Self::ArmorClass),
+            11 => Ok(Self::UnarmedDamage),
+            12 => Ok(Self::MeleeDamage),
+            13 => Ok(Self::CarryWeight),
+            14 => Ok(Self::Sequence),
+            15 => Ok(Self::HealingRate),
+            16 => Ok(Self::CriticalChance),
+            17 => Ok(Self::BetterCriticals),
+            18 => Ok(Self::DamageThreshold),
+            19 => Ok(Self::DamageThresholdLaser),
+            20 => Ok(Self::DamageThresholdFire),
+            21 => Ok(Self::DamageThresholdPlasma),
+            22 => Ok(Self::DamageThresholdElectrical),
+            23 => Ok(Self::DamageThresholdEMP),
+            24 => Ok(Self::DamageThresholdExplosion),
+            25 => Ok(Self::DamageResistance),
+            26 => Ok(Self::DamageResistanceLaser),
+            27 => Ok(Self::DamageResistanceFire),
+            28 => Ok(Self::DamageResistancePlasma),
+            29 => Ok(Self::DamageResistanceElectrical),
+            30 => Ok(Self::DamageResistanceEMP),
+            31 => Ok(Self::DamageResistanceExplosion),
+            32 => Ok(Self::RadiationResistance),
+            33 => Ok(Self::PoisonResistance),
+            34 => Ok(Self::Age),
+            35 => Ok(Self::Gender),
+            36 => Ok(Self::CurrentHitPoints),
+            37 => Ok(Self::CurrentPoisonLevel),
+            38 => Ok(Self::CurrentRadiationLevel),
             _ => Err(errors::Error::Format(errors::Format::Data))
         }
     }

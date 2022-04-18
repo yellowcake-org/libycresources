@@ -88,6 +88,7 @@ pub mod object {
         }
 
         pub mod critter {
+            #[derive(PartialEq, Eq, Hash, Copy, Clone)]
             pub enum Statistic {
                 Strength,
                 Perception,
@@ -367,18 +368,13 @@ pub mod object {
             use crate::common::types::ScaledValue;
 
             pub enum Amount {
-                Fixed(u16),
-                Random(std::ops::RangeInclusive<u16>),
-            }
-
-            pub struct Impact {
-                pub delay: Option<std::time::Duration>,
-                pub amount: Amount,
+                Fixed(u32),
+                Random(std::ops::RangeInclusive<u32>),
             }
 
             pub struct Effect {
-                pub impacts: [Impact; 3],
-                pub statistic: super::super::common::critter::Statistic,
+                pub delay: Option<std::time::Duration>,
+                pub impact: std::collections::HashMap<super::super::common::critter::Statistic, Amount>,
             }
 
             pub struct Addiction {
