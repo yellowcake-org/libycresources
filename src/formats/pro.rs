@@ -465,14 +465,17 @@ pub mod object {
             pub mod adjustments {
                 pub struct Armor {
                     pub class: u32,
-
                     pub resistance: u32,
-                    pub resistance_divider: u32,
-                    pub resistance_multiplier: u32,
+                }
+
+                pub struct Damage {
+                    pub divider: u32,
+                    pub multiplier: u32,
                 }
 
                 pub struct Instance {
                     pub armor: Armor,
+                    pub damage: Damage
                 }
             }
 

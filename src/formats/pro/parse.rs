@@ -989,14 +989,14 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         Ok(value) => value,
                     };
 
-                    let weapon_animation = u32::from_be_bytes(
+                    let weapon_animation_raw = u32::from_be_bytes(
                         match weapon_animation_bytes.try_into() {
                             Err(_) => return Err(errors::Error::Source),
                             Ok(value) => value,
                         }
                     );
 
-                    let weapon_animation_code = (weapon_animation & 0x000f) as u8;
+                    let weapon_animation_code = (weapon_animation_raw & 0x000f) as u8;
                     let weapon_animation = match weapon_animation_code {
                         0x0 => None,
                         value => Some(
@@ -1294,7 +1294,113 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         },
                     })
                 }
-                // 4 => {}
+                4 => {
+                    let mut ammo_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_caliber_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_caliber_raw = u32::from_be_bytes(
+                        match ammo_caliber_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let ammo_caliber =
+                        match ammo_caliber_raw {
+                            0 => None,
+                            value => Some(
+                                match object::common::weapons::Caliber::try_from(value) {
+                                    Ok(value) => value,
+                                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                                }
+                            )
+                        };
+
+                    let mut ammo_count_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_count_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_count = u32::from_be_bytes(
+                        match ammo_count_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut ammo_ac_modifier_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_ac_modifier_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_ac_modifier = u32::from_be_bytes(
+                        match ammo_ac_modifier_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut ammo_dr_modifier_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_dr_modifier_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_dr_modifier = u32::from_be_bytes(
+                        match ammo_dr_modifier_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut ammo_dmg_multiplier_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_dmg_multiplier_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_dmg_multiplier = u32::from_be_bytes(
+                        match ammo_dmg_multiplier_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut ammo_dmg_divider_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut ammo_dmg_divider_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let ammo_dmg_divider = u32::from_be_bytes(
+                        match ammo_dmg_divider_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    object::item::Type::Ammo(
+                        object::item::ammo::Instance {
+                            count: ammo_count,
+                            caliber: ammo_caliber,
+                            adjustments: object::item::ammo::adjustments::Instance {
+                                armor: object::item::ammo::adjustments::Armor {
+                                    class: ammo_ac_modifier,
+                                    resistance: ammo_dr_modifier,
+                                },
+                                damage: object::item::ammo::adjustments::Damage {
+                                    divider: ammo_dmg_divider,
+                                    multiplier: ammo_dmg_multiplier,
+                                },
+                            },
+                        }
+                    )
+                }
                 // 5 => {}
                 // 6 => {}
                 _ => return Err(errors::Error::Format(errors::Format::Type)),
