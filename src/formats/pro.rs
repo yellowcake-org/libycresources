@@ -488,12 +488,12 @@ pub mod object {
 
         pub mod misc {
             pub struct Connections {
-                pub power_items_idx: u32,
+                pub power_item_idx: u32,
             }
 
             pub struct Instance {
                 pub count: u32,
-                pub caliber: super::super::common::weapons::Caliber,
+                pub caliber: Option<super::super::common::weapons::Caliber>,
                 pub connections: Connections,
             }
         }

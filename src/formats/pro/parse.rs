@@ -1401,7 +1401,67 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         }
                     )
                 }
-                // 5 => {}
+                5 => {
+                    let mut misc_item_pid_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut misc_item_pid_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let misc_item_pid = u32::from_be_bytes(
+                        match misc_item_pid_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut misc_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut misc_caliber_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let misc_caliber_raw = u32::from_be_bytes(
+                        match misc_caliber_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let misc_caliber =
+                        match misc_caliber_raw {
+                            0 => None,
+                            value => Some(
+                                match object::common::weapons::Caliber::try_from(value) {
+                                    Ok(value) => value,
+                                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                                }
+                            )
+                        };
+
+                    let mut misc_count_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut misc_count_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let misc_count = u32::from_be_bytes(
+                        match misc_count_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    object::item::Type::Misc(
+                        object::item::misc::Instance {
+                            count: misc_count,
+                            caliber: misc_caliber,
+                            connections: object::item::misc::Connections {
+                                power_item_idx: misc_item_pid
+                            },
+                        }
+                    )
+                }
                 // 6 => {}
                 _ => return Err(errors::Error::Format(errors::Format::Type)),
             };
