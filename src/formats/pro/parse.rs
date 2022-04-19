@@ -1462,7 +1462,26 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         }
                     )
                 }
-                // 6 => {}
+                6 => {
+                    let mut key_code_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut key_code_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let key_code = u32::from_be_bytes(
+                        match key_code_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    object::item::Type::Key(
+                        object::item::key::Instance {
+                            code: key_code
+                        }
+                    )
+                }
                 _ => return Err(errors::Error::Format(errors::Format::Type)),
             };
 
