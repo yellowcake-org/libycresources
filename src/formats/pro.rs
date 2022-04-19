@@ -7,9 +7,12 @@ pub struct Prototype {
 }
 
 pub mod meta {
+    use std::collections::HashSet;
+
     pub struct Info {
         pub light: info::Light,
-        pub flags: std::collections::HashSet<info::flags::Instance>,
+        pub flags: HashSet<info::flags::Instance>,
+        pub sprite: super::object::common::sprite::Instance,
         pub connections: info::Connections,
     }
 
@@ -22,7 +25,6 @@ pub mod meta {
         }
 
         pub struct Connections {
-            pub sprite_id: u32,
             pub description_id: u32,
         }
 
@@ -52,6 +54,38 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
+        pub mod sprite {
+            pub enum Type {
+                Item,
+                Critter,
+                Scenery,
+                Wall,
+                Tile,
+                Background,
+                Interface,
+                Inventory,
+            }
+
+            pub struct Instance {
+                pub id: u16,
+                pub r#type: Type,
+            }
+        }
+
+        pub mod script {
+            pub enum Type {
+                Spatial,
+                Item,
+                Scenery,
+                Critter
+            }
+
+            pub struct Instance {
+                pub id: u16,
+                pub r#type: Type,
+            }
+        }
+
         pub mod world {
             pub enum Material {
                 Glass,
@@ -249,12 +283,6 @@ pub mod object {
         }
 
         pub mod weapons {
-            #[derive(PartialEq, Eq, Hash)]
-            pub enum Flag {
-                BigGun,
-                SecondHand,
-            }
-
             pub enum Caliber {
                 Rocket,
                 FlamethrowerFuel,
@@ -300,6 +328,13 @@ pub mod object {
     }
 
     pub mod item {
+        use std::collections::HashSet;
+
+        #[derive(PartialEq, Eq, Hash)]
+        pub enum Flag {
+            Hidden
+        }
+
         pub enum Type {
             Armor(armor::Instance),
             Container(container::Instance),
@@ -311,33 +346,35 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub sprite_id: u32,
-            pub script_id: Option<u32>,
-
             pub _sounds_ids: u8, // TODO: It represents multiple sounds, no info
         }
 
         pub struct Instance {
             pub r#type: Type,
-            pub is_hidden: bool,
+            pub flags: HashSet<Flag>,
 
-            pub flags: std::collections::HashSet<super::common::weapons::Flag>,
-            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub sprite: super::common::sprite::Instance,
+            pub script: Option<super::common::script::Instance>,
+
+            pub actions: HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
 
-            pub cost: u32,
             pub size: u32,
+            pub price: u32,
             pub weight: u32,
 
             pub connections: Connections,
         }
 
         pub mod armor {
+            use super::super::common::critter::Gender;
             use super::super::common::combat::damage;
+            use super::super::common::sprite;
+
             use std::collections::HashMap;
 
             pub struct Appearance {
-                pub sprite_ids: HashMap<super::super::common::critter::Gender, u32>,
+                pub sprites: HashMap<Gender, sprite::Instance>,
             }
 
             pub struct Instance {
@@ -352,6 +389,8 @@ pub mod object {
         }
 
         pub mod container {
+            use std::collections::HashSet;
+
             #[derive(PartialEq, Eq, Hash)]
             pub enum Flag {
                 NoPickUp,
@@ -360,7 +399,7 @@ pub mod object {
 
             pub struct Instance {
                 pub size: u32,
-                pub flags: std::collections::HashSet<Flag>,
+                pub flags: HashSet<Flag>,
             }
         }
 
@@ -391,6 +430,14 @@ pub mod object {
         }
 
         pub mod weapon {
+            use std::collections::HashSet;
+
+            #[derive(PartialEq, Eq, Hash)]
+            pub enum Flag {
+                BigGun,
+                SecondHand,
+            }
+
             pub struct Damage {
                 pub value: std::ops::RangeInclusive<u32>,
                 pub r#type: super::super::common::combat::damage::Type,
@@ -432,22 +479,23 @@ pub mod object {
 
             pub struct Rounds {
                 pub burst: u32,
-                pub capacity: u32,
+                pub magazine: u32,
             }
 
             pub struct Requirements {
-                pub strength: u32
+                pub strength: u32,
             }
 
             pub struct Connections {
-                pub ammo_item_idx: u32,
-                pub failure_list_idx: u32,
-                pub projectile_misc_idx: u16,
+                pub ammo_item_id: u32,
+                pub failure_list_id: u32,
+                pub projectile_misc_id: u16,
 
                 pub _sounds_ids: u8,
             }
 
             pub struct Instance {
+                pub flags: HashSet<Flag>,
                 pub damage: Damage,
                 pub attacks: [attack::Instance; 2],
                 pub animation: Option<Animation>,
@@ -475,7 +523,7 @@ pub mod object {
 
                 pub struct Instance {
                     pub armor: Armor,
-                    pub damage: Damage
+                    pub damage: Damage,
                 }
             }
 
@@ -488,7 +536,7 @@ pub mod object {
 
         pub mod misc {
             pub struct Connections {
-                pub power_item_idx: u32,
+                pub power_item_id: u32,
             }
 
             pub struct Instance {
@@ -500,7 +548,7 @@ pub mod object {
 
         pub mod key {
             pub struct Instance {
-                pub code: u32
+                pub code: u32,
             }
         }
     }
@@ -561,9 +609,7 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub sprite_id: Option<u32>,
-            pub script_id: Option<u32>,
-            pub ai_packet_idx: u32,
+            pub ai_packet_id: u32,
         }
 
         pub struct Instance {
@@ -573,6 +619,9 @@ pub mod object {
             pub damage: super::common::combat::damage::Type,
 
             pub body: super::common::critter::body::Type,
+            pub sprite: Option<super::common::sprite::Instance>,
+            pub script: Option<super::common::script::Instance>,
+
             pub flags: HashSet<Flag>,
             pub skills: HashSet<super::common::critter::Skill>,
             pub actions: HashSet<super::common::actions::Instance>,
@@ -594,7 +643,6 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub script_id: u32,
             pub _sounds_ids: u32,
         }
 
@@ -602,6 +650,7 @@ pub mod object {
             pub r#type: Type,
 
             pub light: super::common::world::Light,
+            pub script: super::common::script::Instance,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
@@ -609,8 +658,14 @@ pub mod object {
         }
 
         pub mod door {
+            use std::collections::HashSet;
+
+            pub enum Flag {
+                Passable
+            }
+
             pub struct Instance {
-                pub can_pass: bool,
+                pub flags: HashSet<Flag>
             }
         }
 
@@ -646,16 +701,12 @@ pub mod object {
     }
 
     pub mod wall {
-        pub struct Connections {
-            pub script_id: u32,
-        }
-
         pub struct Instance {
             pub light: super::common::world::Light,
+            pub script: super::common::script::Instance,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
-            pub connections: Connections,
         }
     }
 

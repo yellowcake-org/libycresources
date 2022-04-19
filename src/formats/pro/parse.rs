@@ -14,8 +14,8 @@ pub mod errors {
     #[derive(Debug)]
     pub enum Format {
         Type,
-        Flags,
         Data,
+        Flags,
         Consistency,
     }
 
@@ -55,16 +55,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     });
 
-    let mut sprite_id_bytes = vec![0u8; size_of::<u32>()];
+    let mut sprite_id_bytes = [0u8; 4];
     match source.read_exact(&mut sprite_id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
-
-    let sprite_id = u32::from_be_bytes(match sprite_id_bytes.try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => value,
-    });
 
     let mut lradius_bytes = vec![0u8; size_of::<u32>()];
     match source.read_exact(&mut lradius_bytes) {
@@ -188,8 +183,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             },
         },
         flags: flagset,
+        sprite: match object::common::sprite::Instance::try_from(sprite_id_bytes) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        },
         connections: meta::info::Connections {
-            sprite_id,
             description_id: text_id,
         },
     };
@@ -203,24 +201,30 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             };
 
-            let item_is_hidden = (item_flags_bytes[2] & 0x08) == 0x08;
-            let mut item_flags: HashSet<object::common::weapons::Flag> = HashSet::new();
+            let mut item_flags: HashSet<object::item::Flag> = HashSet::new();
+            let mut weapon_flags: HashSet<object::item::weapon::Flag> = HashSet::new();
             let mut item_actions: HashSet<object::common::actions::Instance> = HashSet::new();
 
             if (item_flags_bytes[0] & 0x01) == 0x01 {
-                if !item_flags.insert(object::common::weapons::Flag::BigGun) {
+                if !weapon_flags.insert(object::item::weapon::Flag::BigGun) {
                     return Err(errors::Error::Format(errors::Format::Flags));
                 }
             }
 
             if (item_flags_bytes[0] & 0x02) == 0x02 {
-                if !item_flags.insert(object::common::weapons::Flag::SecondHand) {
+                if !weapon_flags.insert(object::item::weapon::Flag::SecondHand) {
                     return Err(errors::Error::Format(errors::Format::Flags));
                 }
             }
 
             if (item_flags_bytes[0] & 0x80) == 0x80 {
                 if !item_actions.insert(object::common::actions::Instance::PickUp) {
+                    return Err(errors::Error::Format(errors::Format::Flags));
+                }
+            }
+
+            if (item_flags_bytes[2] & 0x08) == 0x08 {
+                if !item_flags.insert(object::item::Flag::Hidden) {
                     return Err(errors::Error::Format(errors::Format::Flags));
                 }
             }
@@ -274,16 +278,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 };
 
-            let mut script_id_bytes = vec![0u8; size_of::<u32>()];
-            match source.read_exact(&mut script_id_bytes) {
+            let mut item_script_id_bytes = [0u8; 4];
+            match source.read_exact(&mut item_script_id_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
-
-            let script_id = u32::from_be_bytes(match script_id_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
 
             let mut item_type_bytes = vec![0u8; size_of::<u32>()];
             match source.read_exact(&mut item_type_bytes) {
@@ -340,18 +339,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             });
 
-            let mut item_sprite_id_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_sprite_id_bytes = [0u8; 4];
             match source.read_exact(&mut item_sprite_id_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
-
-            let item_sprite_id = u32::from_be_bytes(
-                match item_sprite_id_bytes.try_into() {
-                    Err(_) => return Err(errors::Error::Source),
-                    Ok(value) => value,
-                }
-            );
 
             let mut item_sound_ids_bytes = vec![0u8; size_of::<u8>()];
             match source.read_exact(&mut item_sound_ids_bytes) {
@@ -560,29 +552,17 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             Ok(value) => value,
                         });
 
-                    let mut armor_male_fid_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_male_fid_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_male_fid_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_male_fid =
-                        u32::from_be_bytes(match armor_male_fid_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
-
-                    let mut armor_female_fid_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_female_fid_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_female_fid_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
-
-                    let armor_female_fid =
-                        u32::from_be_bytes(match armor_female_fid_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
 
                     object::item::Type::Armor(
                         object::item::armor::Instance {
@@ -616,9 +596,17 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                                 ),
                             },
                             appearance: object::item::armor::Appearance {
-                                sprite_ids: HashMap::from([
-                                    (object::common::critter::Gender::Male, armor_male_fid),
-                                    (object::common::critter::Gender::Female, armor_female_fid)
+                                sprites: HashMap::from([
+                                    (object::common::critter::Gender::Male,
+                                     match object::common::sprite::Instance::try_from(armor_male_fid_bytes) {
+                                         Ok(value) => value,
+                                         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                                     }),
+                                    (object::common::critter::Gender::Female,
+                                     match object::common::sprite::Instance::try_from(armor_female_fid_bytes) {
+                                         Ok(value) => value,
+                                         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                                     })
                                 ])
                             },
                         }
@@ -1274,6 +1262,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     );
 
                     object::item::Type::Weapon(object::item::weapon::Instance {
+                        flags: weapon_flags,
                         damage: weapon_damage,
                         attacks: [weapon_attack1, weapon_attack2],
                         animation: weapon_animation,
@@ -1282,14 +1271,14 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         },
                         rounds: object::item::weapon::Rounds {
                             burst: weapon_burst_count,
-                            capacity: weapon_capacity,
+                            magazine: weapon_capacity,
                         },
                         caliber: weapon_caliber,
                         perk: weapon_perk,
                         connections: object::item::weapon::Connections {
-                            ammo_item_idx: weapon_ammo_pid,
-                            failure_list_idx: weapon_crit_list_idx,
-                            projectile_misc_idx: weapon_projectile_idx,
+                            ammo_item_id: weapon_ammo_pid,
+                            failure_list_id: weapon_crit_list_idx,
+                            projectile_misc_id: weapon_projectile_idx,
                             _sounds_ids: weapon_sound_ids,
                         },
                     })
@@ -1457,7 +1446,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             count: misc_count,
                             caliber: misc_caliber,
                             connections: object::item::misc::Connections {
-                                power_item_idx: misc_item_pid
+                                power_item_id: misc_item_pid
                             },
                         }
                     )
@@ -1488,22 +1477,27 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             object::Type::Item(
                 object::item::Instance {
                     r#type: item_type,
-                    is_hidden: item_is_hidden,
                     flags: item_flags,
+                    sprite: match object::common::sprite::Instance::try_from(item_sprite_id_bytes) {
+                        Ok(value) => value,
+                        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                    },
+                    script: match item_script_id_bytes {
+                        [0xFF, 0xFF, 0xFF, 0xFF] => None,
+                        value => match object::common::script::Instance::try_from(value) {
+                            Ok(value) => Some(value),
+                            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                        }
+                    },
                     actions: item_actions,
                     material: match object::common::world::Material::try_from(material_id) {
                         Ok(value) => value,
                         Err(_) => return Err(errors::Error::Format(errors::Format::Data))
                     },
-                    cost: item_cost,
                     size: item_size,
+                    price: item_cost,
                     weight: item_weight,
                     connections: object::item::Connections {
-                        sprite_id: item_sprite_id,
-                        script_id: match script_id {
-                            0xFFFFFFFF => None,
-                            value => Some(value)
-                        },
                         _sounds_ids: item_sound_ids,
                     },
                 }
@@ -1739,5 +1733,57 @@ impl TryFrom<u32> for object::common::weapons::Caliber {
             13 => Ok(Self::Bb),
             _ => Err(errors::Error::Format(errors::Format::Data))
         }
+    }
+}
+
+impl TryFrom<[u8; 4]> for object::common::sprite::Instance {
+    type Error = errors::Error;
+
+    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
+        let r#type = match value[0] {
+            0x00 => object::common::sprite::Type::Item,
+            0x01 => object::common::sprite::Type::Critter,
+            0x02 => object::common::sprite::Type::Scenery,
+            0x03 => object::common::sprite::Type::Wall,
+            0x04 => object::common::sprite::Type::Tile,
+            0x05 => object::common::sprite::Type::Background,
+            0x06 => object::common::sprite::Type::Interface,
+            0x07 => object::common::sprite::Type::Inventory,
+            _ => return Err(errors::Error::Format(errors::Format::Data)),
+        };
+
+        let id = u16::from_be_bytes(match (&value[2..4]).try_into() {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        });
+
+        return Ok(Self {
+            id,
+            r#type,
+        });
+    }
+}
+
+impl TryFrom<[u8; 4]> for object::common::script::Instance {
+    type Error = errors::Error;
+
+    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
+        let r#type = match value[0] {
+            0x01 => object::common::script::Type::Spatial,
+            0x02 => object::common::script::Type::Item,
+            0x03 => object::common::script::Type::Scenery,
+            0x04 => object::common::script::Type::Critter,
+            _ => return Err(errors::Error::Format(errors::Format::Data)),
+        };
+
+        let id = u16::from_be_bytes(match (&value[2..4]).try_into() {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        });
+
+        return Ok(Self {
+            id,
+            r#type,
+        });
     }
 }
