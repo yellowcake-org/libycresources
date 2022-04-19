@@ -249,8 +249,30 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             });
 
-            let attack_mode_primary = attack_modes & 0xf;
-            let attack_mode_secondary = (attack_modes >> 4) & 0xf;
+            let attack_mode_primary_raw = attack_modes & 0xf;
+            let attack_mode_secondary_raw = (attack_modes >> 4) & 0xf;
+
+            let attack_mode_primary =
+                match attack_mode_primary_raw {
+                    0 => None,
+                    value => Some(
+                        match object::item::weapon::attack::Mode::try_from(value) {
+                            Ok(value) => value,
+                            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                        }
+                    )
+                };
+
+            let attack_mode_secondary =
+                match attack_mode_secondary_raw {
+                    0 => None,
+                    value => Some(
+                        match object::item::weapon::attack::Mode::try_from(value) {
+                            Ok(value) => value,
+                            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                        }
+                    )
+                };
 
             let mut script_id_bytes = vec![0u8; size_of::<u32>()];
             match source.read_exact(&mut script_id_bytes) {
@@ -324,21 +346,25 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             };
 
-            let item_sprite_id = u32::from_be_bytes(match item_sprite_id_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_sprite_id = u32::from_be_bytes(
+                match item_sprite_id_bytes.try_into() {
+                    Err(_) => return Err(errors::Error::Source),
+                    Ok(value) => value,
+                }
+            );
 
-            let mut item_sound_ids_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_sound_ids_bytes = vec![0u8; size_of::<u8>()];
             match source.read_exact(&mut item_sound_ids_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_sound_ids = u32::from_be_bytes(match item_sound_ids_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_sound_ids = u8::from_be_bytes(
+                match item_sound_ids_bytes.try_into() {
+                    Err(_) => return Err(errors::Error::Source),
+                    Ok(value) => value,
+                }
+            );
 
             let item_type = match item_type {
                 0 => {
@@ -956,7 +982,318 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         }
                     )
                 }
-                // 3 => {}
+                3 => {
+                    let mut weapon_animation_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_animation_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_animation = u32::from_be_bytes(
+                        match weapon_animation_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let weapon_animation_code = (weapon_animation & 0x000f) as u8;
+                    let weapon_animation = match weapon_animation_code {
+                        0x0 => None,
+                        value => Some(
+                            match object::item::weapon::Animation::try_from(value) {
+                                Err(_) => return Err(errors::Error::Source),
+                                Ok(value) => value,
+                            }
+                        )
+                    };
+
+                    let mut weapon_min_dmg_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_min_dmg_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_min_dmg = u32::from_be_bytes(
+                        match weapon_min_dmg_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_max_dmg_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_max_dmg_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_max_dmg = u32::from_be_bytes(
+                        match weapon_max_dmg_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_dmg_type_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_dmg_type_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_dmg_type_raw = u32::from_be_bytes(
+                        match weapon_dmg_type_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let weapon_dmg_type = match object::common::combat::damage::Type::try_from(
+                        weapon_dmg_type_raw as u8
+                    ) {
+                        Ok(value) => value,
+                        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                    };
+
+                    let weapon_damage = object::item::weapon::Damage {
+                        value: weapon_min_dmg..=weapon_max_dmg,
+                        r#type: weapon_dmg_type,
+                    };
+
+                    let mut weapon_dmg_range_max1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_dmg_range_max1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_dmg_range_max1 = u32::from_be_bytes(
+                        match weapon_dmg_range_max1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_dmg_range_max2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_dmg_range_max2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_dmg_range_max2 = u32::from_be_bytes(
+                        match weapon_dmg_range_max2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_projectile_header_bytes = vec![0u8; size_of::<u16>()];
+                    match source.read_exact(&mut weapon_projectile_header_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_projectile_header = u16::from_be_bytes(
+                        match weapon_projectile_header_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    if 0x0500 != weapon_projectile_header {
+                        return Err(errors::Error::Format(errors::Format::Consistency));
+                    }
+
+                    let mut weapon_projectile_idx_bytes = vec![0u8; size_of::<u16>()];
+                    match source.read_exact(&mut weapon_projectile_idx_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_projectile_idx = u16::from_be_bytes(
+                        match weapon_projectile_idx_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_min_strength_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_min_strength_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_min_strength = u32::from_be_bytes(
+                        match weapon_min_strength_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_cost1_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_cost1_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_cost1 = u32::from_be_bytes(
+                        match weapon_cost1_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_cost2_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_cost2_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_cost2 = u32::from_be_bytes(
+                        match weapon_cost2_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let weapon_attack1 = object::item::weapon::attack::Instance {
+                        cost: weapon_cost1,
+                        mode: attack_mode_primary,
+                        range: 0..=weapon_dmg_range_max1,
+                    };
+
+                    let weapon_attack2 = object::item::weapon::attack::Instance {
+                        cost: weapon_cost2,
+                        mode: attack_mode_secondary,
+                        range: 0..=weapon_dmg_range_max2,
+                    };
+
+                    let mut weapon_crit_list_idx_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_crit_list_idx_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_crit_list_idx = u32::from_be_bytes(
+                        match weapon_crit_list_idx_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    let mut weapon_perk_bytes = vec![0u8; size_of::<i32>()];
+                    match source.read_exact(&mut weapon_perk_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_perk_raw =
+                        i32::from_be_bytes(match weapon_perk_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let weapon_perk = match weapon_perk_raw {
+                        -1 => Option::None,
+                        value => Option::Some(
+                            match object::common::critter::Perk::try_from(value) {
+                                Ok(value) => value,
+                                Err(_) =>
+                                    return Err(errors::Error::Format(errors::Format::Data))
+                            }
+                        ),
+                    };
+
+                    let mut weapon_burst_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_burst_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_burst_count =
+                        u32::from_be_bytes(match weapon_burst_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut weapon_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_caliber_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_caliber_raw =
+                        u32::from_be_bytes(match weapon_caliber_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let weapon_caliber =
+                        match weapon_caliber_raw {
+                            0 => None,
+                            value => Some(
+                                match object::common::weapons::Caliber::try_from(value) {
+                                    Ok(value) => value,
+                                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                                }
+                            )
+                        };
+
+                    let mut weapon_ammo_pid_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_ammo_pid_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_ammo_pid =
+                        u32::from_be_bytes(match weapon_ammo_pid_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut weapon_capacity_bytes = vec![0u8; size_of::<u32>()];
+                    match source.read_exact(&mut weapon_capacity_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_capacity =
+                        u32::from_be_bytes(match weapon_capacity_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        });
+
+                    let mut weapon_sound_ids_bytes = vec![0u8; size_of::<u8>()];
+                    match source.read_exact(&mut weapon_sound_ids_bytes) {
+                        Err(error) => return Err(errors::Error::Read(error)),
+                        Ok(value) => value,
+                    };
+
+                    let weapon_sound_ids = u8::from_be_bytes(
+                        match weapon_sound_ids_bytes.try_into() {
+                            Err(_) => return Err(errors::Error::Source),
+                            Ok(value) => value,
+                        }
+                    );
+
+                    object::item::Type::Weapon(object::item::weapon::Instance {
+                        damage: weapon_damage,
+                        attacks: [weapon_attack1, weapon_attack2],
+                        animation: weapon_animation,
+                        requirements: object::item::weapon::Requirements {
+                            strength: weapon_min_strength
+                        },
+                        rounds: object::item::weapon::Rounds {
+                            burst: weapon_burst_count,
+                            capacity: weapon_capacity,
+                        },
+                        caliber: weapon_caliber,
+                        perk: weapon_perk,
+                        connections: object::item::weapon::Connections {
+                            ammo_item_idx: weapon_ammo_pid,
+                            failure_list_idx: weapon_crit_list_idx,
+                            projectile_misc_idx: weapon_projectile_idx,
+                            _sounds_ids: weapon_sound_ids,
+                        },
+                    })
+                }
                 // 4 => {}
                 // 5 => {}
                 // 6 => {}
@@ -1155,6 +1492,66 @@ impl TryFrom<i32> for object::common::critter::Statistic {
             36 => Ok(Self::CurrentHitPoints),
             37 => Ok(Self::CurrentPoisonLevel),
             38 => Ok(Self::CurrentRadiationLevel),
+            _ => Err(errors::Error::Format(errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<u8> for object::item::weapon::Animation {
+    type Error = errors::Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0x1 => Ok(Self::Knife),
+            0x2 => Ok(Self::Club),
+            0x3 => Ok(Self::Sledgehammer),
+            0x4 => Ok(Self::Spear),
+            0x5 => Ok(Self::Pistol),
+            0x6 => Ok(Self::SubmachineGun),
+            0x7 => Ok(Self::Rifle),
+            0x8 => Ok(Self::BigGun),
+            0x9 => Ok(Self::Minigun),
+            0xA => Ok(Self::RocketLauncher),
+            _ => Err(errors::Error::Format(errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<u8> for object::common::combat::damage::Type {
+    type Error = errors::Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Default),
+            1 => Ok(Self::Laser),
+            2 => Ok(Self::Fire),
+            3 => Ok(Self::Plasma),
+            4 => Ok(Self::Electrical),
+            5 => Ok(Self::Emp),
+            6 => Ok(Self::Explosive),
+            _ => Err(errors::Error::Format(errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<u32> for object::common::weapons::Caliber {
+    type Error = errors::Error;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Self::Rocket),
+            2 => Ok(Self::FlamethrowerFuel),
+            3 => Ok(Self::CEnergyCell),
+            4 => Ok(Self::DEnergyCell),
+            5 => Ok(Self::Remington223),
+            6 => Ok(Self::FiveMillimeter),
+            7 => Ok(Self::SnW40),
+            8 => Ok(Self::TenMillimiter),
+            9 => Ok(Self::Magnum44),
+            10 => Ok(Self::FourteenMillimeter),
+            11 => Ok(Self::TwelveGauge),
+            12 => Ok(Self::NineMillimeter),
+            13 => Ok(Self::Bb),
             _ => Err(errors::Error::Format(errors::Format::Data))
         }
     }

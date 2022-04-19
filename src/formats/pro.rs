@@ -314,7 +314,7 @@ pub mod object {
             pub sprite_id: u32,
             pub script_id: Option<u32>,
 
-            pub _sounds_ids: u32, // TODO: It represents multiple sounds, no info
+            pub _sounds_ids: u8, // TODO: It represents multiple sounds, no info
         }
 
         pub struct Instance {
@@ -397,6 +397,7 @@ pub mod object {
             }
 
             pub mod attack {
+                #[derive(PartialEq, Eq, Hash)]
                 pub enum Mode {
                     Punch,
                     Kick,
@@ -408,10 +409,11 @@ pub mod object {
                     Flame,
                 }
 
+                #[derive(PartialEq, Eq, Hash)]
                 pub struct Instance {
-                    pub cost: u16,
+                    pub cost: u32,
                     pub mode: Option<Mode>,
-                    pub range: std::ops::RangeInclusive<u16>,
+                    pub range: std::ops::RangeInclusive<u32>,
                 }
             }
 
@@ -428,26 +430,31 @@ pub mod object {
                 RocketLauncher,
             }
 
+            pub struct Rounds {
+                pub burst: u32,
+                pub capacity: u32,
+            }
+
+            pub struct Requirements {
+                pub strength: u32
+            }
+
             pub struct Connections {
                 pub ammo_item_idx: u32,
-                pub projectile_misc_idx: u32,
+                pub failure_list_idx: u32,
+                pub projectile_misc_idx: u16,
 
-                pub _sounds_ids: u16,
+                pub _sounds_ids: u8,
             }
 
             pub struct Instance {
-                pub animation: Option<Animation>,
-
-                pub min_strength: u16,
-                pub failure_chance: u16, // table?
-
                 pub damage: Damage,
                 pub attacks: [attack::Instance; 2],
+                pub animation: Option<Animation>,
+                pub requirements: Requirements,
 
+                pub rounds: Rounds,
                 pub caliber: Option<super::super::common::weapons::Caliber>,
-
-                pub capacity: u16,
-                pub burst_count: u16,
 
                 pub perk: Option<super::super::common::critter::Perk>,
                 pub connections: Connections,
