@@ -183,7 +183,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             },
         },
         flags: flagset,
-        sprite: match object::common::sprite::Instance::try_from(sprite_id_bytes) {
+        sprite: match object::common::sprite::Reference::try_from(sprite_id_bytes) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data))
         },
@@ -598,12 +598,12 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             appearance: object::item::armor::Appearance {
                                 sprites: HashMap::from([
                                     (object::common::critter::Gender::Male,
-                                     match object::common::sprite::Instance::try_from(armor_male_fid_bytes) {
+                                     match object::common::sprite::Reference::try_from(armor_male_fid_bytes) {
                                          Ok(value) => value,
                                          Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                                      }),
                                     (object::common::critter::Gender::Female,
-                                     match object::common::sprite::Instance::try_from(armor_female_fid_bytes) {
+                                     match object::common::sprite::Reference::try_from(armor_female_fid_bytes) {
                                          Ok(value) => value,
                                          Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                                      })
@@ -948,19 +948,24 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         return Err(errors::Error::Format(errors::Format::Consistency));
                     }
 
-                    let addiction = object::item::drug::Addiction {
-                        perk: match drug_addiction_perk_raw {
-                            -1 => None,
-                            value => Some(
-                                match object::common::critter::Perk::
-                                try_from(value) {
-                                    Ok(value) => value,
-                                    Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-                                }
-                            )
-                        },
-                        delay: Duration::new(drug_addiction_delay_raw as u64 * 60, 0),
-                        chance: ScaledValue { value: drug_addiction_rate_raw as u8, scale: 0u8..101u8 },
+                    let addiction_perk = match drug_addiction_perk_raw {
+                        -1 => None,
+                        value => Some(
+                            match object::common::critter::Perk::
+                            try_from(value) {
+                                Ok(value) => value,
+                                Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                            }
+                        )
+                    };
+
+                    let addiction = match addiction_perk {
+                        None => None,
+                        Some(perk) => Some(object::item::drug::Addiction {
+                            perk,
+                            delay: Duration::new(drug_addiction_delay_raw as u64 * 60, 0),
+                            chance: ScaledValue { value: drug_addiction_rate_raw as u8, scale: 0u8..101u8 },
+                        })
                     };
 
                     object::item::Type::Drug(
@@ -1478,13 +1483,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 object::item::Instance {
                     r#type: item_type,
                     flags: item_flags,
-                    sprite: match object::common::sprite::Instance::try_from(item_sprite_id_bytes) {
+                    sprite: match object::common::sprite::Reference::try_from(item_sprite_id_bytes) {
                         Ok(value) => value,
                         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                     },
                     script: match item_script_id_bytes {
                         [0xFF, 0xFF, 0xFF, 0xFF] => None,
-                        value => match object::common::script::Instance::try_from(value) {
+                        value => match object::common::script::Reference::try_from(value) {
                             Ok(value) => Some(value),
                             Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                         }
@@ -1736,7 +1741,7 @@ impl TryFrom<u32> for object::common::weapons::Caliber {
     }
 }
 
-impl TryFrom<[u8; 4]> for object::common::sprite::Instance {
+impl TryFrom<[u8; 4]> for object::common::sprite::Reference {
     type Error = errors::Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
@@ -1764,7 +1769,7 @@ impl TryFrom<[u8; 4]> for object::common::sprite::Instance {
     }
 }
 
-impl TryFrom<[u8; 4]> for object::common::script::Instance {
+impl TryFrom<[u8; 4]> for object::common::script::Reference {
     type Error = errors::Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {

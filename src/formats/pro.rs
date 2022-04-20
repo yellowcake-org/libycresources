@@ -12,7 +12,7 @@ pub mod meta {
     pub struct Info {
         pub light: info::Light,
         pub flags: HashSet<info::flags::Instance>,
-        pub sprite: super::object::common::sprite::Instance,
+        pub sprite: super::object::common::sprite::Reference,
         pub connections: info::Connections,
     }
 
@@ -66,7 +66,7 @@ pub mod object {
                 Inventory,
             }
 
-            pub struct Instance {
+            pub struct Reference {
                 pub id: u16,
                 pub r#type: Type,
             }
@@ -80,7 +80,7 @@ pub mod object {
                 Critter
             }
 
-            pub struct Instance {
+            pub struct Reference {
                 pub id: u16,
                 pub r#type: Type,
             }
@@ -353,8 +353,8 @@ pub mod object {
             pub r#type: Type,
             pub flags: HashSet<Flag>,
 
-            pub sprite: super::common::sprite::Instance,
-            pub script: Option<super::common::script::Instance>,
+            pub sprite: super::common::sprite::Reference,
+            pub script: Option<super::common::script::Reference>,
 
             pub actions: HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
@@ -367,14 +367,11 @@ pub mod object {
         }
 
         pub mod armor {
-            use super::super::common::critter::Gender;
-            use super::super::common::combat::damage;
-            use super::super::common::sprite;
-
+            use super::super::common::{critter, sprite, combat::damage};
             use std::collections::HashMap;
 
             pub struct Appearance {
-                pub sprites: HashMap<Gender, sprite::Instance>,
+                pub sprites: HashMap<critter::Gender, sprite::Reference>,
             }
 
             pub struct Instance {
@@ -417,15 +414,14 @@ pub mod object {
             }
 
             pub struct Addiction {
-                pub perk: Option<super::super::common::critter::Perk>,
-
+                pub perk: super::super::common::critter::Perk,
                 pub delay: std::time::Duration,
                 pub chance: ScaledValue<u8, u8>,
             }
 
             pub struct Instance {
                 pub effects: [Effect; 3],
-                pub addiction: Addiction,
+                pub addiction: Option<Addiction>,
             }
         }
 
@@ -619,8 +615,8 @@ pub mod object {
             pub damage: super::common::combat::damage::Type,
 
             pub body: super::common::critter::body::Type,
-            pub sprite: Option<super::common::sprite::Instance>,
-            pub script: Option<super::common::script::Instance>,
+            pub sprite: Option<super::common::sprite::Reference>,
+            pub script: Option<super::common::script::Reference>,
 
             pub flags: HashSet<Flag>,
             pub skills: HashSet<super::common::critter::Skill>,
@@ -650,7 +646,7 @@ pub mod object {
             pub r#type: Type,
 
             pub light: super::common::world::Light,
-            pub script: super::common::script::Instance,
+            pub script: super::common::script::Reference,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
@@ -703,7 +699,7 @@ pub mod object {
     pub mod wall {
         pub struct Instance {
             pub light: super::common::world::Light,
-            pub script: super::common::script::Instance,
+            pub script: super::common::script::Reference,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
