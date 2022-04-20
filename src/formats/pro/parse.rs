@@ -992,9 +992,8 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         }
                     );
 
-                    let weapon_animation_code = (weapon_animation_raw & 0x000f) as u8;
-                    let weapon_animation = match weapon_animation_code {
-                        0x0 => None,
+                    let weapon_animation = match weapon_animation_raw {
+                        0x00 => None,
                         value => Some(
                             match object::item::weapon::Animation::try_from(value) {
                                 Err(_) => return Err(errors::Error::Source),
@@ -1684,21 +1683,21 @@ impl TryFrom<i32> for object::common::critter::Statistic {
     }
 }
 
-impl TryFrom<u8> for object::item::weapon::Animation {
+impl TryFrom<u32> for object::item::weapon::Animation {
     type Error = errors::Error;
 
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            0x1 => Ok(Self::Knife),
-            0x2 => Ok(Self::Club),
-            0x3 => Ok(Self::Sledgehammer),
-            0x4 => Ok(Self::Spear),
-            0x5 => Ok(Self::Pistol),
-            0x6 => Ok(Self::SubmachineGun),
-            0x7 => Ok(Self::Rifle),
-            0x8 => Ok(Self::BigGun),
-            0x9 => Ok(Self::Minigun),
-            0xA => Ok(Self::RocketLauncher),
+            0x01 => Ok(Self::Knife),
+            0x02 => Ok(Self::Club),
+            0x03 => Ok(Self::Sledgehammer),
+            0x04 => Ok(Self::Spear),
+            0x05 => Ok(Self::Pistol),
+            0x06 => Ok(Self::SubmachineGun),
+            0x07 => Ok(Self::Rifle),
+            0x08 => Ok(Self::BigGun),
+            0x09 => Ok(Self::Minigun),
+            0x0A => Ok(Self::RocketLauncher),
             _ => Err(errors::Error::Format(errors::Format::Data))
         }
     }
