@@ -2,7 +2,6 @@ use super::*;
 
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
-use std::mem::size_of;
 
 use std::ops::Range;
 use std::time::Duration;
@@ -32,28 +31,27 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         return Err(errors::Error::Read(error));
     }
 
-    let mut id_bytes = vec![0u8; size_of::<u32>()];
+    let mut id_bytes = [0u8; 4];
     match source.read_exact(&mut id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let object_id_bytes = &id_bytes[(size_of::<u32>() - size_of::<u16>())..size_of::<u32>()];
+    let r#type = id_bytes[0];
+
+    let object_id_bytes = &id_bytes[2..4];
     let object_id = u16::from_be_bytes(match object_id_bytes.try_into() {
         Err(_) => return Err(errors::Error::Source),
         Ok(value) => value,
     });
 
-    let mut text_id_bytes = vec![0u8; size_of::<u32>()];
+    let mut text_id_bytes = [0u8; 4];
     match source.read_exact(&mut text_id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let text_id = u32::from_be_bytes(match text_id_bytes.try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => value,
-    });
+    let text_id = u32::from_be_bytes(text_id_bytes);
 
     let mut sprite_id_bytes = [0u8; 4];
     match source.read_exact(&mut sprite_id_bytes) {
@@ -61,29 +59,23 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
-    let mut lradius_bytes = vec![0u8; size_of::<u32>()];
+    let mut lradius_bytes = [0u8; 4];
     match source.read_exact(&mut lradius_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let lradius = u32::from_be_bytes(match lradius_bytes.try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => value,
-    });
+    let lradius = u32::from_be_bytes(lradius_bytes);
 
-    let mut lintensity_bytes = vec![0u8; size_of::<u32>()];
+    let mut lintensity_bytes = [0u8; 4];
     match source.read_exact(&mut lintensity_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let lintensity = u32::from_be_bytes(match lintensity_bytes.try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => value,
-    });
+    let lintensity = u32::from_be_bytes(lintensity_bytes);
 
-    let mut flags_bytes = vec![0u8; size_of::<u32>()];
+    let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
@@ -192,10 +184,9 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         },
     };
 
-    let r#type = id_bytes[0];
     let object_type = match r#type {
         0 => {
-            let mut item_flags_bytes = vec![0u8; 3];
+            let mut item_flags_bytes = [0u8; 3];
             match source.read_exact(&mut item_flags_bytes[1..=3]) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
@@ -242,16 +233,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 return Err(errors::Error::Format(errors::Format::Flags));
             }
 
-            let mut attack_modes_bytes = vec![0u8; size_of::<u8>()];
+            let mut attack_modes_bytes = [0u8; 1];
             match source.read_exact(&mut attack_modes_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let attack_modes = u8::from_be_bytes(match attack_modes_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let attack_modes = u8::from_be_bytes(attack_modes_bytes);
 
             let attack_mode_primary_raw = attack_modes & 0xf;
             let attack_mode_secondary_raw = (attack_modes >> 4) & 0xf;
@@ -284,60 +272,45 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             };
 
-            let mut item_type_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_type_bytes = [0u8; 4];
             match source.read_exact(&mut item_type_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_type = u32::from_be_bytes(match item_type_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_type = u32::from_be_bytes(item_type_bytes);
 
-            let mut material_id_bytes = vec![0u8; size_of::<u32>()];
+            let mut material_id_bytes = [0u8; 4];
             match source.read_exact(&mut material_id_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let material_id = u32::from_be_bytes(match material_id_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let material_id = u32::from_be_bytes(material_id_bytes);
 
-            let mut item_size_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_size_bytes = [0u8; 4];
             match source.read_exact(&mut item_size_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_size = u32::from_be_bytes(match item_size_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_size = u32::from_be_bytes(item_size_bytes);
 
-            let mut item_weight_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_weight_bytes = [0u8; 4];
             match source.read_exact(&mut item_weight_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_weight = u32::from_be_bytes(match item_weight_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_weight = u32::from_be_bytes(item_weight_bytes);
 
-            let mut item_cost_bytes = vec![0u8; size_of::<u32>()];
+            let mut item_cost_bytes = [0u8; 4];
             match source.read_exact(&mut item_cost_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_cost = u32::from_be_bytes(match item_cost_bytes.try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            });
+            let item_cost = u32::from_be_bytes(item_cost_bytes);
 
             let mut item_sprite_id_bytes = [0u8; 4];
             match source.read_exact(&mut item_sprite_id_bytes) {
@@ -345,212 +318,143 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 Ok(value) => value,
             };
 
-            let mut item_sound_ids_bytes = vec![0u8; size_of::<u8>()];
+            let mut item_sound_ids_bytes = [0u8; 1];
             match source.read_exact(&mut item_sound_ids_bytes) {
                 Err(error) => return Err(errors::Error::Read(error)),
                 Ok(value) => value,
             };
 
-            let item_sound_ids = u8::from_be_bytes(
-                match item_sound_ids_bytes.try_into() {
-                    Err(_) => return Err(errors::Error::Source),
-                    Ok(value) => value,
-                }
-            );
+            let item_sound_ids = u8::from_be_bytes(item_sound_ids_bytes);
 
             let item_type = match item_type {
                 0 => {
-                    let mut armor_ac_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_ac_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_ac_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_ac =
-                        u32::from_be_bytes(match armor_ac_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_ac = u32::from_be_bytes(armor_ac_bytes);
 
-                    let mut armor_dr_normal_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_normal_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_normal_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_normal =
-                        u32::from_be_bytes(match armor_dr_normal_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_normal = u32::from_be_bytes(armor_dr_normal_bytes);
 
-                    let mut armor_dr_laser_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_laser_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_laser_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_laser =
-                        u32::from_be_bytes(match armor_dr_laser_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_laser = u32::from_be_bytes(armor_dr_laser_bytes);
 
-                    let mut armor_dr_fire_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_fire_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_fire_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_fire =
-                        u32::from_be_bytes(match armor_dr_fire_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_fire = u32::from_be_bytes(armor_dr_fire_bytes);
 
-                    let mut armor_dr_plasma_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_plasma_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_plasma_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_plasma =
-                        u32::from_be_bytes(match armor_dr_plasma_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_plasma = u32::from_be_bytes(armor_dr_plasma_bytes);
 
-                    let mut armor_dr_electrical_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_electrical_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_electrical_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_electrical =
-                        u32::from_be_bytes(match armor_dr_electrical_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_electrical = u32::from_be_bytes(armor_dr_electrical_bytes);
 
-                    let mut armor_dr_emp_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_emp_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_emp_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_emp =
-                        u32::from_be_bytes(match armor_dr_emp_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_emp = u32::from_be_bytes(armor_dr_emp_bytes);
 
-                    let mut armor_dr_explosive_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dr_explosive_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dr_explosive_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dr_explosive =
-                        u32::from_be_bytes(match armor_dr_explosive_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dr_explosive = u32::from_be_bytes(armor_dr_explosive_bytes);
 
-                    let mut armor_dt_normal_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_normal_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_normal_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_normal =
-                        u32::from_be_bytes(match armor_dt_normal_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_normal = u32::from_be_bytes(armor_dt_normal_bytes);
 
-                    let mut armor_dt_laser_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_laser_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_laser_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_laser =
-                        u32::from_be_bytes(match armor_dt_laser_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_laser = u32::from_be_bytes(armor_dt_laser_bytes);
 
-                    let mut armor_dt_fire_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_fire_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_fire_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_fire =
-                        u32::from_be_bytes(match armor_dt_fire_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_fire = u32::from_be_bytes(armor_dt_fire_bytes);
 
-                    let mut armor_dt_plasma_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_plasma_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_plasma_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_plasma =
-                        u32::from_be_bytes(match armor_dt_plasma_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_plasma = u32::from_be_bytes(armor_dt_plasma_bytes);
 
-                    let mut armor_dt_electrical_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_electrical_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_electrical_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_electrical =
-                        u32::from_be_bytes(match armor_dt_electrical_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_electrical = u32::from_be_bytes(armor_dt_electrical_bytes);
 
-                    let mut armor_dt_emp_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_emp_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_emp_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_emp =
-                        u32::from_be_bytes(match armor_dt_emp_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_emp = u32::from_be_bytes(armor_dt_emp_bytes);
 
-                    let mut armor_dt_explosive_bytes = vec![0u8; size_of::<u32>()];
+                    let mut armor_dt_explosive_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_dt_explosive_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_dt_explosive =
-                        u32::from_be_bytes(match armor_dt_explosive_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_dt_explosive = u32::from_be_bytes(armor_dt_explosive_bytes);
 
-                    let mut armor_perk_bytes = vec![0u8; size_of::<i32>()];
+                    let mut armor_perk_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_perk_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let armor_perk =
-                        i32::from_be_bytes(match armor_perk_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let armor_perk = i32::from_be_bytes(armor_perk_bytes);
 
                     let mut armor_male_fid_bytes = [0u8; 4];
                     match source.read_exact(&mut armor_male_fid_bytes) {
@@ -613,19 +517,15 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 }
                 1 => {
-                    let mut container_size_bytes = vec![0u8; size_of::<u32>()];
+                    let mut container_size_bytes = [0u8; 4];
                     match source.read_exact(&mut container_size_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let container_size =
-                        u32::from_be_bytes(match container_size_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let container_size = u32::from_be_bytes(container_size_bytes);
 
-                    let mut container_flags_bytes = vec![0u8; size_of::<u32>()];
+                    let mut container_flags_bytes = [0u8; 4];
                     match source.read_exact(&mut container_flags_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
@@ -654,209 +554,141 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 }
                 2 => {
-                    let mut drug_stat0_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_stat0_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_stat0_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_stat0_raw =
-                        i32::from_be_bytes(match drug_stat0_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_stat0_raw = i32::from_be_bytes(drug_stat0_bytes);
 
-                    let mut drug_stat1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_stat1_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_stat1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_stat1_raw =
-                        i32::from_be_bytes(match drug_stat1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_stat1_raw = i32::from_be_bytes(drug_stat1_bytes);
 
-                    let mut drug_stat2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_stat2_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_stat2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_stat2_raw =
-                        i32::from_be_bytes(match drug_stat2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_stat2_raw = i32::from_be_bytes(drug_stat2_bytes);
 
-                    let mut drug_effect0_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect0_amount0_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect0_amount0_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect0_amount0_raw =
-                        u32::from_be_bytes(match drug_effect0_amount0_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect0_amount0_raw = u32::from_be_bytes(drug_effect0_amount0_bytes);
 
-                    let mut drug_effect0_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect0_amount1_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect0_amount1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect0_amount1_raw =
-                        u32::from_be_bytes(match drug_effect0_amount1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect0_amount1_raw = u32::from_be_bytes(drug_effect0_amount1_bytes);
 
-                    let mut drug_effect0_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect0_amount2_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect0_amount2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect0_amount2_raw =
-                        u32::from_be_bytes(match drug_effect0_amount2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect0_amount2_raw = u32::from_be_bytes(drug_effect0_amount2_bytes);
 
-                    let mut drug_effect1_duration_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect1_duration_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect1_duration_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect1_duration_raw =
-                        u32::from_be_bytes(match drug_effect1_duration_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect1_duration_raw = u32::from_be_bytes(drug_effect1_duration_bytes);
 
-                    let mut drug_effect1_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect1_amount0_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect1_amount0_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect1_amount0_raw =
-                        u32::from_be_bytes(match drug_effect1_amount0_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect1_amount0_raw = u32::from_be_bytes(drug_effect1_amount0_bytes);
 
-                    let mut drug_effect1_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect1_amount1_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect1_amount1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect1_amount1_raw =
-                        u32::from_be_bytes(match drug_effect1_amount1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect1_amount1_raw = u32::from_be_bytes(drug_effect1_amount1_bytes);
 
-                    let mut drug_effect1_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect1_amount2_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect1_amount2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect1_amount2_raw =
-                        u32::from_be_bytes(match drug_effect1_amount2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect1_amount2_raw = u32::from_be_bytes(drug_effect1_amount2_bytes);
 
-                    let mut drug_effect2_duration_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect2_duration_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect2_duration_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect2_duration_raw =
-                        u32::from_be_bytes(match drug_effect2_duration_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect2_duration_raw = u32::from_be_bytes(drug_effect2_duration_bytes);
 
-                    let mut drug_effect2_amount0_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect2_amount0_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect2_amount0_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect2_amount0_raw =
-                        u32::from_be_bytes(match drug_effect2_amount0_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect2_amount0_raw = u32::from_be_bytes(drug_effect2_amount0_bytes);
 
-                    let mut drug_effect2_amount1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect2_amount1_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect2_amount1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect2_amount1_raw =
-                        u32::from_be_bytes(match drug_effect2_amount1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect2_amount1_raw = u32::from_be_bytes(drug_effect2_amount1_bytes);
 
-                    let mut drug_effect2_amount2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_effect2_amount2_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_effect2_amount2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_effect2_amount2_raw =
-                        u32::from_be_bytes(match drug_effect2_amount2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_effect2_amount2_raw = u32::from_be_bytes(drug_effect2_amount2_bytes);
 
-                    let mut drug_addiction_rate_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_addiction_rate_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_addiction_rate_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_addiction_rate_raw =
-                        u32::from_be_bytes(match drug_addiction_rate_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_addiction_rate_raw = u32::from_be_bytes(drug_addiction_rate_bytes);
 
-                    let mut drug_addiction_perk_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_addiction_perk_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_addiction_perk_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_addiction_perk_raw =
-                        i32::from_be_bytes(match drug_addiction_perk_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_addiction_perk_raw = i32::from_be_bytes(drug_addiction_perk_bytes);
 
-                    let mut drug_addiction_delay_bytes = vec![0u8; size_of::<u32>()];
+                    let mut drug_addiction_delay_bytes = [0u8; 4];
                     match source.read_exact(&mut drug_addiction_delay_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let drug_addiction_delay_raw =
-                        u32::from_be_bytes(match drug_addiction_delay_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let drug_addiction_delay_raw = u32::from_be_bytes(drug_addiction_delay_bytes);
 
                     let statistic0 =
                         match drug_stat0_raw > 0 {
@@ -979,18 +811,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 }
                 3 => {
-                    let mut weapon_animation_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_animation_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_animation_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_animation_raw = u32::from_be_bytes(
-                        match weapon_animation_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_animation_raw = u32::from_be_bytes(weapon_animation_bytes);
 
                     let weapon_animation = match weapon_animation_raw {
                         0x00 => None,
@@ -1002,44 +829,29 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         )
                     };
 
-                    let mut weapon_min_dmg_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_min_dmg_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_min_dmg_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_min_dmg = u32::from_be_bytes(
-                        match weapon_min_dmg_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_min_dmg = u32::from_be_bytes(weapon_min_dmg_bytes);
 
-                    let mut weapon_max_dmg_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_max_dmg_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_max_dmg_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_max_dmg = u32::from_be_bytes(
-                        match weapon_max_dmg_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_max_dmg = u32::from_be_bytes(weapon_max_dmg_bytes);
 
-                    let mut weapon_dmg_type_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_dmg_type_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_dmg_type_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_dmg_type_raw = u32::from_be_bytes(
-                        match weapon_dmg_type_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_dmg_type_raw = u32::from_be_bytes(weapon_dmg_type_bytes);
 
                     let weapon_dmg_type = match object::common::combat::damage::Type::try_from(
                         weapon_dmg_type_raw as u8
@@ -1053,100 +865,65 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         r#type: weapon_dmg_type,
                     };
 
-                    let mut weapon_dmg_range_max1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_dmg_range_max1_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_dmg_range_max1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_dmg_range_max1 = u32::from_be_bytes(
-                        match weapon_dmg_range_max1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_dmg_range_max1 = u32::from_be_bytes(weapon_dmg_range_max1_bytes);
 
-                    let mut weapon_dmg_range_max2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_dmg_range_max2_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_dmg_range_max2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_dmg_range_max2 = u32::from_be_bytes(
-                        match weapon_dmg_range_max2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_dmg_range_max2 = u32::from_be_bytes(weapon_dmg_range_max2_bytes);
 
-                    let mut weapon_projectile_header_bytes = vec![0u8; size_of::<u16>()];
+                    let mut weapon_projectile_header_bytes = [0u8; 2];
                     match source.read_exact(&mut weapon_projectile_header_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_projectile_header = u16::from_be_bytes(
-                        match weapon_projectile_header_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_projectile_header = u16::from_be_bytes(weapon_projectile_header_bytes);
 
                     if 0x0500 != weapon_projectile_header {
                         return Err(errors::Error::Format(errors::Format::Consistency));
                     }
 
-                    let mut weapon_projectile_idx_bytes = vec![0u8; size_of::<u16>()];
+                    let mut weapon_projectile_idx_bytes = [0u8; 2];
                     match source.read_exact(&mut weapon_projectile_idx_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_projectile_idx = u16::from_be_bytes(
-                        match weapon_projectile_idx_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_projectile_idx = u16::from_be_bytes(weapon_projectile_idx_bytes);
 
-                    let mut weapon_min_strength_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_min_strength_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_min_strength_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_min_strength = u32::from_be_bytes(
-                        match weapon_min_strength_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_min_strength = u32::from_be_bytes(weapon_min_strength_bytes);
 
-                    let mut weapon_cost1_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_cost1_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_cost1_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_cost1 = u32::from_be_bytes(
-                        match weapon_cost1_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_cost1 = u32::from_be_bytes(weapon_cost1_bytes);
 
-                    let mut weapon_cost2_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_cost2_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_cost2_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_cost2 = u32::from_be_bytes(
-                        match weapon_cost2_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_cost2 = u32::from_be_bytes(weapon_cost2_bytes);
 
                     let weapon_attack1 = object::item::weapon::attack::Instance {
                         cost: weapon_cost1,
@@ -1160,30 +937,21 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         range: 0..=weapon_dmg_range_max2,
                     };
 
-                    let mut weapon_crit_list_idx_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_crit_list_idx_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_crit_list_idx_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_crit_list_idx = u32::from_be_bytes(
-                        match weapon_crit_list_idx_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_crit_list_idx = u32::from_be_bytes(weapon_crit_list_idx_bytes);
 
-                    let mut weapon_perk_bytes = vec![0u8; size_of::<i32>()];
+                    let mut weapon_perk_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_perk_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_perk_raw =
-                        i32::from_be_bytes(match weapon_perk_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let weapon_perk_raw = i32::from_be_bytes(weapon_perk_bytes);
 
                     let weapon_perk = match weapon_perk_raw {
                         -1 => Option::None,
@@ -1196,29 +964,21 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         ),
                     };
 
-                    let mut weapon_burst_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_burst_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_burst_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_burst_count =
-                        u32::from_be_bytes(match weapon_burst_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let weapon_burst_count = u32::from_be_bytes(weapon_burst_bytes);
 
-                    let mut weapon_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_caliber_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_caliber_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_caliber_raw =
-                        u32::from_be_bytes(match weapon_caliber_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let weapon_caliber_raw = u32::from_be_bytes(weapon_caliber_bytes);
 
                     let weapon_caliber =
                         match weapon_caliber_raw {
@@ -1231,42 +991,29 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             )
                         };
 
-                    let mut weapon_ammo_pid_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_ammo_pid_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_ammo_pid_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_ammo_pid =
-                        u32::from_be_bytes(match weapon_ammo_pid_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let weapon_ammo_pid = u32::from_be_bytes(weapon_ammo_pid_bytes);
 
-                    let mut weapon_capacity_bytes = vec![0u8; size_of::<u32>()];
+                    let mut weapon_capacity_bytes = [0u8; 4];
                     match source.read_exact(&mut weapon_capacity_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_capacity =
-                        u32::from_be_bytes(match weapon_capacity_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        });
+                    let weapon_capacity = u32::from_be_bytes(weapon_capacity_bytes);
 
-                    let mut weapon_sound_ids_bytes = vec![0u8; size_of::<u8>()];
+                    let mut weapon_sound_ids_bytes = [0u8; 1];
                     match source.read_exact(&mut weapon_sound_ids_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let weapon_sound_ids = u8::from_be_bytes(
-                        match weapon_sound_ids_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let weapon_sound_ids = u8::from_be_bytes(weapon_sound_ids_bytes);
 
                     object::item::Type::Weapon(object::item::weapon::Instance {
                         flags: weapon_flags,
@@ -1291,18 +1038,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     })
                 }
                 4 => {
-                    let mut ammo_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_caliber_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_caliber_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_caliber_raw = u32::from_be_bytes(
-                        match ammo_caliber_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_caliber_raw = u32::from_be_bytes(ammo_caliber_bytes);
 
                     let ammo_caliber =
                         match ammo_caliber_raw {
@@ -1315,70 +1057,45 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             )
                         };
 
-                    let mut ammo_count_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_count_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_count_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_count = u32::from_be_bytes(
-                        match ammo_count_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_count = u32::from_be_bytes(ammo_count_bytes);
 
-                    let mut ammo_ac_modifier_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_ac_modifier_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_ac_modifier_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_ac_modifier = u32::from_be_bytes(
-                        match ammo_ac_modifier_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_ac_modifier = u32::from_be_bytes(ammo_ac_modifier_bytes);
 
-                    let mut ammo_dr_modifier_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_dr_modifier_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_dr_modifier_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_dr_modifier = u32::from_be_bytes(
-                        match ammo_dr_modifier_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_dr_modifier = u32::from_be_bytes(ammo_dr_modifier_bytes);
 
-                    let mut ammo_dmg_multiplier_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_dmg_multiplier_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_dmg_multiplier_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_dmg_multiplier = u32::from_be_bytes(
-                        match ammo_dmg_multiplier_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_dmg_multiplier = u32::from_be_bytes(ammo_dmg_multiplier_bytes);
 
-                    let mut ammo_dmg_divider_bytes = vec![0u8; size_of::<u32>()];
+                    let mut ammo_dmg_divider_bytes = [0u8; 4];
                     match source.read_exact(&mut ammo_dmg_divider_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let ammo_dmg_divider = u32::from_be_bytes(
-                        match ammo_dmg_divider_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let ammo_dmg_divider = u32::from_be_bytes(ammo_dmg_divider_bytes);
 
                     object::item::Type::Ammo(
                         object::item::ammo::Instance {
@@ -1398,31 +1115,21 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 }
                 5 => {
-                    let mut misc_item_pid_bytes = vec![0u8; size_of::<u32>()];
+                    let mut misc_item_pid_bytes = [0u8; 4];
                     match source.read_exact(&mut misc_item_pid_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let misc_item_pid = u32::from_be_bytes(
-                        match misc_item_pid_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let misc_item_pid = u32::from_be_bytes(misc_item_pid_bytes);
 
-                    let mut misc_caliber_bytes = vec![0u8; size_of::<u32>()];
+                    let mut misc_caliber_bytes = [0u8; 4];
                     match source.read_exact(&mut misc_caliber_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let misc_caliber_raw = u32::from_be_bytes(
-                        match misc_caliber_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let misc_caliber_raw = u32::from_be_bytes(misc_caliber_bytes);
 
                     let misc_caliber =
                         match misc_caliber_raw {
@@ -1435,18 +1142,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                             )
                         };
 
-                    let mut misc_count_bytes = vec![0u8; size_of::<u32>()];
+                    let mut misc_count_bytes = [0u8; 4];
                     match source.read_exact(&mut misc_count_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let misc_count = u32::from_be_bytes(
-                        match misc_count_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let misc_count = u32::from_be_bytes(misc_count_bytes);
 
                     object::item::Type::Misc(
                         object::item::misc::Instance {
@@ -1459,18 +1161,13 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                     )
                 }
                 6 => {
-                    let mut key_code_bytes = vec![0u8; size_of::<u32>()];
+                    let mut key_code_bytes = [0u8; 4];
                     match source.read_exact(&mut key_code_bytes) {
                         Err(error) => return Err(errors::Error::Read(error)),
                         Ok(value) => value,
                     };
 
-                    let key_code = u32::from_be_bytes(
-                        match key_code_bytes.try_into() {
-                            Err(_) => return Err(errors::Error::Source),
-                            Ok(value) => value,
-                        }
-                    );
+                    let key_code = u32::from_be_bytes(key_code_bytes);
 
                     object::item::Type::Key(
                         object::item::key::Instance {
