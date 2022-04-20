@@ -959,19 +959,22 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                         )
                     };
 
-                    let addiction = match addiction_perk {
-                        None => None,
-                        Some(perk) => Some(object::item::drug::Addiction {
-                            perk,
-                            delay: Duration::new(drug_addiction_delay_raw as u64 * 60, 0),
-                            chance: ScaledValue { value: drug_addiction_rate_raw as u8, scale: 0u8..101u8 },
-                        })
-                    };
-
                     object::item::Type::Drug(
                         object::item::drug::Instance {
                             effects: [effect0, effect1, effect2],
-                            addiction,
+                            addiction: match addiction_perk {
+                                None => None,
+                                Some(perk) => Some(object::item::drug::Addiction {
+                                    perk,
+                                    delay: Duration::new(
+                                        drug_addiction_delay_raw as u64 * 60, 0,
+                                    ),
+                                    chance: ScaledValue {
+                                        value: drug_addiction_rate_raw as u8,
+                                        scale: 0u8..101u8,
+                                    },
+                                })
+                            },
                         }
                     )
                 }
