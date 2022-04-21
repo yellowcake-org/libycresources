@@ -10,23 +10,7 @@ use super::super::super::common::types::ScaledValue;
 mod r#type;
 mod flags;
 pub(crate) mod id;
-
-pub mod errors {
-    #[derive(Debug)]
-    pub enum Format {
-        Type,
-        Data,
-        Flags,
-        Consistency,
-    }
-
-    #[derive(Debug)]
-    pub enum Error {
-        Read(std::io::Error),
-        Format(Format),
-        Source,
-    }
-}
+pub mod errors;
 
 pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
@@ -72,11 +56,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
-    let light_intensity =
-        u16::from_be_bytes(match &light_intensity_bytes[2..4].try_into() {
-            Ok(value) => *value,
-            Err(_) => return Err(errors::Error::Source),
-        });
+    let light_intensity = u32::from_be_bytes(light_intensity_bytes) as u16;
 
     let flags = match flags::instance(source) {
         Ok(value) => value,

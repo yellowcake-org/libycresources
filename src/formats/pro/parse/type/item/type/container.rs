@@ -15,8 +15,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::containe
         Ok(value) => value,
     };
 
-    let mut flags: HashSet<object::item::container::Flag> =
-        HashSet::new();
+    let mut flags: HashSet<object::item::container::Flag> = HashSet::new();
 
     if (flags_bytes[3] & 0x01) == 0x01 {
         if !flags.insert(object::item::container::Flag::NoPickUp) {

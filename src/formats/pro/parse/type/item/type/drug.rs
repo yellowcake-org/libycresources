@@ -137,30 +137,27 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let addiction_delay_raw = u32::from_be_bytes(addiction_delay_bytes);
 
-    let statistic0 =
-        match stat0_raw > 0 {
-            false => Option::None,
-            true => Option::Some(
-                match
-                object::common::critter::Statistic::try_from(stat0_raw) {
-                    Ok(value) => value,
-                    Err(_) =>
-                        return Err(errors::Error::Format(errors::Format::Data))
-                }
-            )
-        };
+    let statistic0 = match stat0_raw > 0 {
+        false => Option::None,
+        true => Option::Some(
+            match
+            object::common::critter::Statistic::try_from(stat0_raw) {
+                Ok(value) => value,
+                Err(_) =>
+                    return Err(errors::Error::Format(errors::Format::Data))
+            }
+        )
+    };
 
-    let statistic1 =
-        match object::common::critter::Statistic::try_from(stat1_raw) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-        };
+    let statistic1 = match object::common::critter::Statistic::try_from(stat1_raw) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+    };
 
-    let statistic2 =
-        match object::common::critter::Statistic::try_from(stat2_raw) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-        };
+    let statistic2 = match object::common::critter::Statistic::try_from(stat2_raw) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+    };
 
     let mut impact0 = HashMap::from([
         (statistic1.clone(), match statistic0 {
@@ -173,10 +170,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     ]);
 
     if let Some(value) = statistic0.clone() {
-        impact0.entry(value.clone()).or_insert(
-            object::item::drug::Amount::Fixed(
-                effect0_amount0_raw
-            ));
+        impact0.entry(value.clone())
+            .or_insert(object::item::drug::Amount::Fixed(effect0_amount0_raw));
     }
 
     let effect0 = object::item::drug::Effect { delay: None, impact: impact0 };
@@ -192,9 +187,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     ]);
 
     if let Some(value) = statistic0.clone() {
-        impact1.entry(value.clone()).or_insert(
-            object::item::drug::Amount::Fixed(effect1_amount0_raw)
-        );
+        impact1.entry(value.clone())
+            .or_insert(object::item::drug::Amount::Fixed(effect1_amount0_raw));
     }
 
     let effect1 = object::item::drug::Effect {
@@ -213,9 +207,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     ]);
 
     if let Some(value) = statistic0.clone() {
-        impact2.entry(value.clone()).or_insert(
-            object::item::drug::Amount::Fixed(effect2_amount0_raw)
-        );
+        impact2.entry(value.clone())
+            .or_insert(object::item::drug::Amount::Fixed(effect2_amount0_raw));
     }
 
     let effect2 = object::item::drug::Effect {

@@ -17,12 +17,10 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let animation = match animation_raw {
         0x00 => None,
-        value => Some(
-            match object::item::weapon::Animation::try_from(value) {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => value,
-            }
-        )
+        value => Some(match object::item::weapon::Animation::try_from(value) {
+            Err(_) => return Err(errors::Error::Source),
+            Ok(value) => value,
+        })
     };
 
     let mut min_dmg_bytes = [0u8; 4];
@@ -49,12 +47,11 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let dmg_type_raw = u32::from_be_bytes(dmg_type_bytes);
 
-    let dmg_type = match object::common::combat::damage::Type::try_from(
-        dmg_type_raw as u8
-    ) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-    };
+    let dmg_type =
+        match object::common::combat::damage::Type::try_from(dmg_type_raw as u8) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        };
 
     let damage = object::item::weapon::Damage {
         value: min_dmg..=max_dmg,
