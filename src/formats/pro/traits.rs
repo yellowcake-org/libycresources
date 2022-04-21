@@ -1,3 +1,5 @@
+mod impls;
+
 pub(crate) trait TryFromOptional<T>: TryFrom<T> {
     fn try_from_optional(value: T, none: T) -> Result<Option<Self>, Self::Error>;
 }
