@@ -383,3 +383,17 @@ impl TryFrom<[u8; 4]> for object::common::script::Reference {
         });
     }
 }
+
+impl object::common::weapons::Caliber {
+    fn optional(raw: u32) -> Result<Option<Self>, errors::Error> {
+        Ok(match raw {
+            0 => None,
+            value => Some(
+                match object::common::weapons::Caliber::try_from(value) {
+                    Ok(value) => value,
+                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                }
+            )
+        })
+    }
+}

@@ -197,17 +197,6 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let caliber_raw = u32::from_be_bytes(caliber_bytes);
 
-    let caliber =
-        match caliber_raw {
-            0 => None,
-            value => Some(
-                match object::common::weapons::Caliber::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-                }
-            )
-        };
-
     let mut ammo_pid_bytes = [0u8; 4];
     match source.read_exact(&mut ammo_pid_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -244,7 +233,10 @@ pub(crate) fn instance<S: Read>(source: &mut S,
             burst: burst_count,
             magazine: capacity,
         },
-        caliber,
+        caliber: match object::common::weapons::Caliber::optional(caliber_raw) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        },
         perk,
         connections: object::item::weapon::Connections {
             ammo_item_id: ammo_pid,
