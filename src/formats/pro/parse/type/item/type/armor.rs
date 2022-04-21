@@ -161,7 +161,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
             (object::common::combat::damage::Type::Emp, dr_emp),
             (object::common::combat::damage::Type::Explosive, dr_explosive),
         ]),
-        perk: match object::common::critter::Perk::optional(perk_raw) {
+        perk: match object::common::critter::Perk::try_from_optional(perk_raw, -1) {
             Ok(value) => value,
             Err(_) =>
                 return Err(errors::Error::Format(errors::Format::Data))

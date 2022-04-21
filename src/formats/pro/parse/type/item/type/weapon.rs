@@ -122,7 +122,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let attack1 = object::item::weapon::attack::Instance {
         cost: cost1,
-        mode: match object::item::weapon::attack::Mode::optional(attack1_mode_raw) {
+        mode: match object::item::weapon::attack::Mode::try_from_optional(attack1_mode_raw, 0) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data))
         },
@@ -131,7 +131,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let attack2 = object::item::weapon::attack::Instance {
         cost: cost2,
-        mode: match object::item::weapon::attack::Mode::optional(attack2_mode_raw) {
+        mode: match object::item::weapon::attack::Mode::try_from_optional(attack2_mode_raw, 0) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data))
         },
@@ -154,7 +154,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let perk_raw = i32::from_be_bytes(perk_bytes);
 
-    let perk = match object::common::critter::Perk::optional(perk_raw) {
+    let perk = match object::common::critter::Perk::try_from_optional(perk_raw, -1) {
         Ok(value) => value,
         Err(_) => return Err(errors::Error::Format(errors::Format::Data))
     };
@@ -211,7 +211,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
             burst: burst_count,
             magazine: capacity,
         },
-        caliber: match object::common::weapons::Caliber::optional(caliber_raw) {
+        caliber: match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data))
         },

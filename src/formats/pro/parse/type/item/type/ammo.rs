@@ -51,7 +51,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     Ok(object::item::ammo::Instance {
         count,
-        caliber: match object::common::weapons::Caliber::optional(caliber_raw) {
+        caliber: match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data))
         },
