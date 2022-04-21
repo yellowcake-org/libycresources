@@ -1,4 +1,5 @@
 mod r#type;
+mod flags;
 
 use super::*;
 
@@ -59,131 +60,55 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
-    let mut lradius_bytes = [0u8; 4];
-    match source.read_exact(&mut lradius_bytes) {
+    let mut light_radius_bytes = [0u8; 4];
+    match source.read_exact(&mut light_radius_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let lradius = lradius_bytes[3];
+    let light_radius = light_radius_bytes[3];
 
-    let mut lintensity_bytes = [0u8; 4];
-    match source.read_exact(&mut lintensity_bytes) {
+    let mut light_intensity_bytes = [0u8; 4];
+    match source.read_exact(&mut light_intensity_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let lintensity = u16::from_be_bytes(match &lintensity_bytes[2..4].try_into() {
-        Ok(value) => *value,
-        Err(_) => return Err(errors::Error::Source),
-    });
+    let light_intensity =
+        u16::from_be_bytes(match &light_intensity_bytes[2..4].try_into() {
+            Ok(value) => *value,
+            Err(_) => return Err(errors::Error::Source),
+        });
 
-    let mut flags_bytes = [0u8; 4];
-    match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+    let flags = match flags::instance(source) {
         Ok(value) => value,
+        Err(error) => return Err(error)
     };
-
-    let mut flagset: HashSet<meta::info::flags::Instance> = HashSet::new();
-
-    if (flags_bytes[0] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::Flat) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[0] & 0x10) == 0x10 {
-        if !flagset.insert(meta::info::flags::Instance::NotBlocking) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[1] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::MultiHex) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[1] & 0x10) == 0x10 {
-        if !flagset.insert(meta::info::flags::Instance::NotBordered) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[3] & 0x20) == 0x20 {
-        if !flagset.insert(meta::info::flags::Instance::LightThrough) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[3] & 0x80) == 0x80 {
-        if !flagset.insert(meta::info::flags::Instance::ShotThrough) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    }
-
-    if (flags_bytes[1] & 0x80) == 0x80 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(None)) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[1] & 0x40) == 0x40 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Red,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x01) == 0x01 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Wall,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x02) == 0x02 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Glass,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x04) == 0x04 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Steam,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Energy,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else {
-        return Err(errors::Error::Format(errors::Format::Flags));
-    }
 
     Ok(Prototype {
         id: object_id,
         meta: meta::Info {
             light: meta::info::Light {
                 distance: ScaledValue {
-                    value: lradius,
+                    value: light_radius,
                     scale: Range { start: 0, end: 8 },
                 },
                 intensity: ScaledValue {
-                    value: lintensity,
+                    value: light_intensity,
                     scale: Range { start: 0, end: u16::MAX },
                 },
             },
-            flags: flagset,
+            flags,
             sprite: match object::common::sprite::Reference::try_from(sprite_id_bytes) {
                 Ok(value) => value,
-                Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                Err(error) => return Err(error)
             },
-            connections: meta::info::Connections { description_id: text_id, },
+            connections: meta::info::Connections { description_id: text_id },
         },
         r#type: match r#type::instance(source, type_id) {
             Ok(value) => value,
             Err(error) => return Err(error)
-        }
+        },
     })
 }
 
