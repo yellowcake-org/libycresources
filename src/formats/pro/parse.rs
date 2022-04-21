@@ -382,7 +382,11 @@ impl TryFrom<[u8; 4]> for object::common::script::Reference {
     }
 }
 
-trait TryFromOptional<T>: TryFrom<T> where T: Eq {
+trait TryFromOptional<T>: TryFrom<T> {
+    fn try_from_optional(value: T, none: T) -> Result<Option<Self>, Self::Error>;
+}
+
+impl<V, T> TryFromOptional<T> for V where V: TryFrom<T>, T: Eq {
     fn try_from_optional(value: T, none: T) -> Result<Option<Self>, Self::Error> {
         Ok(if value == none { None } else {
             Some(match Self::try_from(value) {
@@ -392,5 +396,3 @@ trait TryFromOptional<T>: TryFrom<T> where T: Eq {
         })
     }
 }
-
-impl<V, T> TryFromOptional<T> for V where V: TryFrom<T>, T: Eq {}
