@@ -77,7 +77,7 @@ pub mod object {
                 Spatial,
                 Item,
                 Scenery,
-                Critter
+                Critter,
             }
 
             pub struct Reference {
@@ -662,7 +662,7 @@ pub mod object {
             }
 
             pub struct Instance {
-                pub flags: HashSet<Flag>
+                pub flags: HashSet<Flag>,
             }
         }
 

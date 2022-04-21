@@ -1,7 +1,7 @@
-use libycresources::formats::dat;
-
 use std::io::{Read, Seek};
 use std::path::PathBuf;
+
+use libycresources::formats::dat;
 
 #[derive(Debug)]
 pub(crate) enum Error {

@@ -1,9 +1,10 @@
-pub mod render;
+use std::fs::File;
+
+use clap::Parser;
 
 use libycresources::formats::{frm, pal};
 
-use clap::Parser;
-use std::fs::File;
+pub mod render;
 
 #[derive(Parser)]
 #[clap(name = "frameview", version)]

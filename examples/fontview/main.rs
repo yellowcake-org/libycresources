@@ -1,9 +1,10 @@
-pub(crate) mod print;
+use std::fs::File;
+
+use clap::Parser;
 
 use libycresources::formats::aaf;
 
-use clap::Parser;
-use std::fs::File;
+pub(crate) mod print;
 
 #[derive(Parser)]
 #[clap(name = "fontview", version)]
