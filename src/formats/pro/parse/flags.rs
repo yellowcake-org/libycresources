@@ -8,81 +8,63 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::fl
         Ok(value) => value,
     };
 
-    let mut flagset: HashSet<meta::info::flags::Instance> = HashSet::new();
+    let mut flags: HashSet<meta::info::flags::Instance> = HashSet::new();
 
     if (flags_bytes[0] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::Flat) {
+        if !flags.insert(meta::info::flags::Instance::Flat) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
     if (flags_bytes[0] & 0x10) == 0x10 {
-        if !flagset.insert(meta::info::flags::Instance::NotBlocking) {
+        if !flags.insert(meta::info::flags::Instance::NotBlocking) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
     if (flags_bytes[1] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::MultiHex) {
+        if !flags.insert(meta::info::flags::Instance::MultiHex) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
     if (flags_bytes[1] & 0x10) == 0x10 {
-        if !flagset.insert(meta::info::flags::Instance::NotBordered) {
+        if !flags.insert(meta::info::flags::Instance::NotBordered) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
     if (flags_bytes[3] & 0x20) == 0x20 {
-        if !flagset.insert(meta::info::flags::Instance::LightThrough) {
+        if !flags.insert(meta::info::flags::Instance::LightThrough) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
     if (flags_bytes[3] & 0x80) == 0x80 {
-        if !flagset.insert(meta::info::flags::Instance::ShotThrough) {
+        if !flags.insert(meta::info::flags::Instance::ShotThrough) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
     }
 
-    if (flags_bytes[1] & 0x80) == 0x80 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(None)) {
+    if !flags.insert(meta::info::flags::Instance::Transparency(
+        if (flags_bytes[1] & 0x80) == 0x80 {
+            None
+        } else if (flags_bytes[1] & 0x40) == 0x40 {
+            Some(meta::info::flags::Transparency::Red)
+        } else if (flags_bytes[2] & 0x01) == 0x01 {
+            Some(meta::info::flags::Transparency::Wall)
+        } else if (flags_bytes[2] & 0x02) == 0x02 {
+            Some(meta::info::flags::Transparency::Glass)
+        } else if (flags_bytes[2] & 0x04) == 0x04 {
+            Some(meta::info::flags::Transparency::Steam)
+        } else if (flags_bytes[2] & 0x08) == 0x08 {
+            Some(meta::info::flags::Transparency::Energy)
+        } else {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
-    } else if (flags_bytes[1] & 0x40) == 0x40 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Red,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x01) == 0x01 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Wall,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x02) == 0x02 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Glass,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x04) == 0x04 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Steam,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else if (flags_bytes[2] & 0x08) == 0x08 {
-        if !flagset.insert(meta::info::flags::Instance::Transparency(Some(
-            meta::info::flags::Transparency::Energy,
-        ))) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
-    } else {
+    )) {
         return Err(errors::Error::Format(errors::Format::Flags));
     }
 
-    Ok(flagset)
+    Ok(flags)
 }
