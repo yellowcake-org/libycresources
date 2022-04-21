@@ -1,7 +1,7 @@
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S,
-                                weapon_flags: HashSet<object::item::weapon::Flag>,
+                                flags: HashSet<object::item::weapon::Flag>,
                                 attack_modes: u8) -> Result<object::item::weapon::Instance, errors::Error> {
     let attack_mode_primary_raw = attack_modes & 0xf;
     let attack_mode_secondary_raw = (attack_modes >> 4) & 0xf;
@@ -28,15 +28,15 @@ pub(crate) fn instance<S: Read>(source: &mut S,
             )
         };
 
-    let mut weapon_animation_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_animation_bytes) {
+    let mut animation_bytes = [0u8; 4];
+    match source.read_exact(&mut animation_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_animation_raw = u32::from_be_bytes(weapon_animation_bytes);
+    let animation_raw = u32::from_be_bytes(animation_bytes);
 
-    let weapon_animation = match weapon_animation_raw {
+    let animation = match animation_raw {
         0x00 => None,
         value => Some(
             match object::item::weapon::Animation::try_from(value) {
@@ -46,131 +46,131 @@ pub(crate) fn instance<S: Read>(source: &mut S,
         )
     };
 
-    let mut weapon_min_dmg_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_min_dmg_bytes) {
+    let mut min_dmg_bytes = [0u8; 4];
+    match source.read_exact(&mut min_dmg_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_min_dmg = u32::from_be_bytes(weapon_min_dmg_bytes);
+    let min_dmg = u32::from_be_bytes(min_dmg_bytes);
 
-    let mut weapon_max_dmg_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_max_dmg_bytes) {
+    let mut max_dmg_bytes = [0u8; 4];
+    match source.read_exact(&mut max_dmg_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_max_dmg = u32::from_be_bytes(weapon_max_dmg_bytes);
+    let max_dmg = u32::from_be_bytes(max_dmg_bytes);
 
-    let mut weapon_dmg_type_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_dmg_type_bytes) {
+    let mut dmg_type_bytes = [0u8; 4];
+    match source.read_exact(&mut dmg_type_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_dmg_type_raw = u32::from_be_bytes(weapon_dmg_type_bytes);
+    let dmg_type_raw = u32::from_be_bytes(dmg_type_bytes);
 
-    let weapon_dmg_type = match object::common::combat::damage::Type::try_from(
-        weapon_dmg_type_raw as u8
+    let dmg_type = match object::common::combat::damage::Type::try_from(
+        dmg_type_raw as u8
     ) {
         Ok(value) => value,
         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
     };
 
-    let weapon_damage = object::item::weapon::Damage {
-        value: weapon_min_dmg..=weapon_max_dmg,
-        r#type: weapon_dmg_type,
+    let damage = object::item::weapon::Damage {
+        value: min_dmg..=max_dmg,
+        r#type: dmg_type,
     };
 
-    let mut weapon_dmg_range_max1_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_dmg_range_max1_bytes) {
+    let mut dmg_range_max1_bytes = [0u8; 4];
+    match source.read_exact(&mut dmg_range_max1_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_dmg_range_max1 = u32::from_be_bytes(weapon_dmg_range_max1_bytes);
+    let dmg_range_max1 = u32::from_be_bytes(dmg_range_max1_bytes);
 
-    let mut weapon_dmg_range_max2_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_dmg_range_max2_bytes) {
+    let mut dmg_range_max2_bytes = [0u8; 4];
+    match source.read_exact(&mut dmg_range_max2_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_dmg_range_max2 = u32::from_be_bytes(weapon_dmg_range_max2_bytes);
+    let dmg_range_max2 = u32::from_be_bytes(dmg_range_max2_bytes);
 
-    let mut weapon_projectile_header_bytes = [0u8; 2];
-    match source.read_exact(&mut weapon_projectile_header_bytes) {
+    let mut projectile_header_bytes = [0u8; 2];
+    match source.read_exact(&mut projectile_header_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_projectile_header = u16::from_be_bytes(weapon_projectile_header_bytes);
+    let projectile_header = u16::from_be_bytes(projectile_header_bytes);
 
-    if 0x0500 != weapon_projectile_header {
+    if 0x0500 != projectile_header {
         return Err(errors::Error::Format(errors::Format::Consistency));
     }
 
-    let mut weapon_projectile_idx_bytes = [0u8; 2];
-    match source.read_exact(&mut weapon_projectile_idx_bytes) {
+    let mut projectile_idx_bytes = [0u8; 2];
+    match source.read_exact(&mut projectile_idx_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_projectile_idx = u16::from_be_bytes(weapon_projectile_idx_bytes);
+    let projectile_idx = u16::from_be_bytes(projectile_idx_bytes);
 
-    let mut weapon_min_strength_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_min_strength_bytes) {
+    let mut min_strength_bytes = [0u8; 4];
+    match source.read_exact(&mut min_strength_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_min_strength = u32::from_be_bytes(weapon_min_strength_bytes);
+    let min_strength = u32::from_be_bytes(min_strength_bytes);
 
-    let mut weapon_cost1_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_cost1_bytes) {
+    let mut cost1_bytes = [0u8; 4];
+    match source.read_exact(&mut cost1_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_cost1 = u32::from_be_bytes(weapon_cost1_bytes);
+    let cost1 = u32::from_be_bytes(cost1_bytes);
 
-    let mut weapon_cost2_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_cost2_bytes) {
+    let mut cost2_bytes = [0u8; 4];
+    match source.read_exact(&mut cost2_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_cost2 = u32::from_be_bytes(weapon_cost2_bytes);
+    let cost2 = u32::from_be_bytes(cost2_bytes);
 
-    let weapon_attack1 = object::item::weapon::attack::Instance {
-        cost: weapon_cost1,
+    let attack1 = object::item::weapon::attack::Instance {
+        cost: cost1,
         mode: attack_mode_primary,
-        range: 0..=weapon_dmg_range_max1,
+        range: 0..=dmg_range_max1,
     };
 
-    let weapon_attack2 = object::item::weapon::attack::Instance {
-        cost: weapon_cost2,
+    let attack2 = object::item::weapon::attack::Instance {
+        cost: cost2,
         mode: attack_mode_secondary,
-        range: 0..=weapon_dmg_range_max2,
+        range: 0..=dmg_range_max2,
     };
 
-    let mut weapon_crit_list_idx_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_crit_list_idx_bytes) {
+    let mut crit_list_idx_bytes = [0u8; 4];
+    match source.read_exact(&mut crit_list_idx_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_crit_list_idx = u32::from_be_bytes(weapon_crit_list_idx_bytes);
+    let crit_list_idx = u32::from_be_bytes(crit_list_idx_bytes);
 
-    let mut weapon_perk_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_perk_bytes) {
+    let mut perk_bytes = [0u8; 4];
+    match source.read_exact(&mut perk_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_perk_raw = i32::from_be_bytes(weapon_perk_bytes);
+    let perk_raw = i32::from_be_bytes(perk_bytes);
 
-    let weapon_perk = match weapon_perk_raw {
+    let perk = match perk_raw {
         -1 => Option::None,
         value => Option::Some(
             match object::common::critter::Perk::try_from(value) {
@@ -181,24 +181,24 @@ pub(crate) fn instance<S: Read>(source: &mut S,
         ),
     };
 
-    let mut weapon_burst_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_burst_bytes) {
+    let mut burst_bytes = [0u8; 4];
+    match source.read_exact(&mut burst_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_burst_count = u32::from_be_bytes(weapon_burst_bytes);
+    let burst_count = u32::from_be_bytes(burst_bytes);
 
-    let mut weapon_caliber_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_caliber_bytes) {
+    let mut caliber_bytes = [0u8; 4];
+    match source.read_exact(&mut caliber_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_caliber_raw = u32::from_be_bytes(weapon_caliber_bytes);
+    let caliber_raw = u32::from_be_bytes(caliber_bytes);
 
-    let weapon_caliber =
-        match weapon_caliber_raw {
+    let caliber =
+        match caliber_raw {
             0 => None,
             value => Some(
                 match object::common::weapons::Caliber::try_from(value) {
@@ -208,49 +208,49 @@ pub(crate) fn instance<S: Read>(source: &mut S,
             )
         };
 
-    let mut weapon_ammo_pid_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_ammo_pid_bytes) {
+    let mut ammo_pid_bytes = [0u8; 4];
+    match source.read_exact(&mut ammo_pid_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_ammo_pid = u32::from_be_bytes(weapon_ammo_pid_bytes);
+    let ammo_pid = u32::from_be_bytes(ammo_pid_bytes);
 
-    let mut weapon_capacity_bytes = [0u8; 4];
-    match source.read_exact(&mut weapon_capacity_bytes) {
+    let mut capacity_bytes = [0u8; 4];
+    match source.read_exact(&mut capacity_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_capacity = u32::from_be_bytes(weapon_capacity_bytes);
+    let capacity = u32::from_be_bytes(capacity_bytes);
 
-    let mut weapon_sound_ids_bytes = [0u8; 1];
-    match source.read_exact(&mut weapon_sound_ids_bytes) {
+    let mut sound_ids_bytes = [0u8; 1];
+    match source.read_exact(&mut sound_ids_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let weapon_sound_ids = u8::from_be_bytes(weapon_sound_ids_bytes);
+    let sound_ids = u8::from_be_bytes(sound_ids_bytes);
 
     Ok(object::item::weapon::Instance {
-        flags: weapon_flags,
-        damage: weapon_damage,
-        attacks: [weapon_attack1, weapon_attack2],
-        animation: weapon_animation,
+        flags,
+        damage,
+        attacks: [attack1, attack2],
+        animation,
         requirements: object::item::weapon::Requirements {
-            strength: weapon_min_strength
+            strength: min_strength
         },
         rounds: object::item::weapon::Rounds {
-            burst: weapon_burst_count,
-            magazine: weapon_capacity,
+            burst: burst_count,
+            magazine: capacity,
         },
-        caliber: weapon_caliber,
-        perk: weapon_perk,
+        caliber,
+        perk,
         connections: object::item::weapon::Connections {
-            ammo_item_id: weapon_ammo_pid,
-            failure_list_id: weapon_crit_list_idx,
-            projectile_misc_id: weapon_projectile_idx,
-            _sounds_ids: weapon_sound_ids,
+            ammo_item_id: ammo_pid,
+            failure_list_id: crit_list_idx,
+            projectile_misc_id: projectile_idx,
+            _sounds_ids: sound_ids,
         },
     })
 }

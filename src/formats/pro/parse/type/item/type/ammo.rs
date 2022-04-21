@@ -1,16 +1,16 @@
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::Instance, errors::Error> {
-    let mut ammo_caliber_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_caliber_bytes) {
+    let mut caliber_bytes = [0u8; 4];
+    match source.read_exact(&mut caliber_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_caliber_raw = u32::from_be_bytes(ammo_caliber_bytes);
+    let caliber_raw = u32::from_be_bytes(caliber_bytes);
 
-    let ammo_caliber =
-        match ammo_caliber_raw {
+    let caliber =
+        match caliber_raw {
             0 => None,
             value => Some(
                 match object::common::weapons::Caliber::try_from(value) {
@@ -20,57 +20,57 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
             )
         };
 
-    let mut ammo_count_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_count_bytes) {
+    let mut count_bytes = [0u8; 4];
+    match source.read_exact(&mut count_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_count = u32::from_be_bytes(ammo_count_bytes);
+    let count = u32::from_be_bytes(count_bytes);
 
-    let mut ammo_ac_modifier_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_ac_modifier_bytes) {
+    let mut ac_modifier_bytes = [0u8; 4];
+    match source.read_exact(&mut ac_modifier_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_ac_modifier = u32::from_be_bytes(ammo_ac_modifier_bytes);
+    let ac_modifier = u32::from_be_bytes(ac_modifier_bytes);
 
-    let mut ammo_dr_modifier_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_dr_modifier_bytes) {
+    let mut dr_modifier_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_modifier_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_dr_modifier = u32::from_be_bytes(ammo_dr_modifier_bytes);
+    let dr_modifier = u32::from_be_bytes(dr_modifier_bytes);
 
-    let mut ammo_dmg_multiplier_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_dmg_multiplier_bytes) {
+    let mut dmg_multiplier_bytes = [0u8; 4];
+    match source.read_exact(&mut dmg_multiplier_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_dmg_multiplier = u32::from_be_bytes(ammo_dmg_multiplier_bytes);
+    let dmg_multiplier = u32::from_be_bytes(dmg_multiplier_bytes);
 
-    let mut ammo_dmg_divider_bytes = [0u8; 4];
-    match source.read_exact(&mut ammo_dmg_divider_bytes) {
+    let mut dmg_divider_bytes = [0u8; 4];
+    match source.read_exact(&mut dmg_divider_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let ammo_dmg_divider = u32::from_be_bytes(ammo_dmg_divider_bytes);
+    let dmg_divider = u32::from_be_bytes(dmg_divider_bytes);
 
     Ok(object::item::ammo::Instance {
-        count: ammo_count,
-        caliber: ammo_caliber,
+        count,
+        caliber,
         adjustments: object::item::ammo::adjustments::Instance {
             armor: object::item::ammo::adjustments::Armor {
-                class: ammo_ac_modifier,
-                resistance: ammo_dr_modifier,
+                class: ac_modifier,
+                resistance: dr_modifier,
             },
             damage: object::item::ammo::adjustments::Damage {
-                divider: ammo_dmg_divider,
-                multiplier: ammo_dmg_multiplier,
+                divider: dmg_divider,
+                multiplier: dmg_multiplier,
             },
         },
     })

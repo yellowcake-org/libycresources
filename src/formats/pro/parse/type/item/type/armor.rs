@@ -1,167 +1,167 @@
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::Instance, errors::Error> {
-    let mut armor_ac_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_ac_bytes) {
+    let mut ac_bytes = [0u8; 4];
+    match source.read_exact(&mut ac_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_ac = u32::from_be_bytes(armor_ac_bytes);
+    let ac = u32::from_be_bytes(ac_bytes);
 
-    let mut armor_dr_normal_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_normal_bytes) {
+    let mut dr_normal_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_normal_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_normal = u32::from_be_bytes(armor_dr_normal_bytes);
+    let dr_normal = u32::from_be_bytes(dr_normal_bytes);
 
-    let mut armor_dr_laser_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_laser_bytes) {
+    let mut dr_laser_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_laser_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_laser = u32::from_be_bytes(armor_dr_laser_bytes);
+    let dr_laser = u32::from_be_bytes(dr_laser_bytes);
 
-    let mut armor_dr_fire_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_fire_bytes) {
+    let mut dr_fire_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_fire_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_fire = u32::from_be_bytes(armor_dr_fire_bytes);
+    let dr_fire = u32::from_be_bytes(dr_fire_bytes);
 
-    let mut armor_dr_plasma_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_plasma_bytes) {
+    let mut dr_plasma_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_plasma_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_plasma = u32::from_be_bytes(armor_dr_plasma_bytes);
+    let dr_plasma = u32::from_be_bytes(dr_plasma_bytes);
 
-    let mut armor_dr_electrical_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_electrical_bytes) {
+    let mut dr_electrical_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_electrical_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_electrical = u32::from_be_bytes(armor_dr_electrical_bytes);
+    let dr_electrical = u32::from_be_bytes(dr_electrical_bytes);
 
-    let mut armor_dr_emp_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_emp_bytes) {
+    let mut dr_emp_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_emp_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_emp = u32::from_be_bytes(armor_dr_emp_bytes);
+    let dr_emp = u32::from_be_bytes(dr_emp_bytes);
 
-    let mut armor_dr_explosive_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dr_explosive_bytes) {
+    let mut dr_explosive_bytes = [0u8; 4];
+    match source.read_exact(&mut dr_explosive_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dr_explosive = u32::from_be_bytes(armor_dr_explosive_bytes);
+    let dr_explosive = u32::from_be_bytes(dr_explosive_bytes);
 
-    let mut armor_dt_normal_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_normal_bytes) {
+    let mut dt_normal_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_normal_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_normal = u32::from_be_bytes(armor_dt_normal_bytes);
+    let dt_normal = u32::from_be_bytes(dt_normal_bytes);
 
-    let mut armor_dt_laser_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_laser_bytes) {
+    let mut dt_laser_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_laser_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_laser = u32::from_be_bytes(armor_dt_laser_bytes);
+    let dt_laser = u32::from_be_bytes(dt_laser_bytes);
 
-    let mut armor_dt_fire_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_fire_bytes) {
+    let mut dt_fire_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_fire_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_fire = u32::from_be_bytes(armor_dt_fire_bytes);
+    let dt_fire = u32::from_be_bytes(dt_fire_bytes);
 
-    let mut armor_dt_plasma_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_plasma_bytes) {
+    let mut dt_plasma_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_plasma_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_plasma = u32::from_be_bytes(armor_dt_plasma_bytes);
+    let dt_plasma = u32::from_be_bytes(dt_plasma_bytes);
 
-    let mut armor_dt_electrical_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_electrical_bytes) {
+    let mut dt_electrical_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_electrical_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_electrical = u32::from_be_bytes(armor_dt_electrical_bytes);
+    let dt_electrical = u32::from_be_bytes(dt_electrical_bytes);
 
-    let mut armor_dt_emp_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_emp_bytes) {
+    let mut dt_emp_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_emp_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_emp = u32::from_be_bytes(armor_dt_emp_bytes);
+    let dt_emp = u32::from_be_bytes(dt_emp_bytes);
 
-    let mut armor_dt_explosive_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_dt_explosive_bytes) {
+    let mut dt_explosive_bytes = [0u8; 4];
+    match source.read_exact(&mut dt_explosive_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_dt_explosive = u32::from_be_bytes(armor_dt_explosive_bytes);
+    let dt_explosive = u32::from_be_bytes(dt_explosive_bytes);
 
-    let mut armor_perk_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_perk_bytes) {
+    let mut perk_bytes = [0u8; 4];
+    match source.read_exact(&mut perk_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let armor_perk = i32::from_be_bytes(armor_perk_bytes);
+    let perk = i32::from_be_bytes(perk_bytes);
 
-    let mut armor_male_fid_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_male_fid_bytes) {
+    let mut male_fid_bytes = [0u8; 4];
+    match source.read_exact(&mut male_fid_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let mut armor_female_fid_bytes = [0u8; 4];
-    match source.read_exact(&mut armor_female_fid_bytes) {
+    let mut female_fid_bytes = [0u8; 4];
+    match source.read_exact(&mut female_fid_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
     Ok(object::item::armor::Instance {
-        class: armor_ac,
+        class: ac,
         threshold: HashMap::from([
-            (object::common::combat::damage::Type::Default, armor_dt_normal),
-            (object::common::combat::damage::Type::Laser, armor_dt_laser),
-            (object::common::combat::damage::Type::Fire, armor_dt_fire),
-            (object::common::combat::damage::Type::Plasma, armor_dt_plasma),
-            (object::common::combat::damage::Type::Electrical, armor_dt_electrical),
-            (object::common::combat::damage::Type::Emp, armor_dt_emp),
-            (object::common::combat::damage::Type::Explosive, armor_dt_explosive),
+            (object::common::combat::damage::Type::Default, dt_normal),
+            (object::common::combat::damage::Type::Laser, dt_laser),
+            (object::common::combat::damage::Type::Fire, dt_fire),
+            (object::common::combat::damage::Type::Plasma, dt_plasma),
+            (object::common::combat::damage::Type::Electrical, dt_electrical),
+            (object::common::combat::damage::Type::Emp, dt_emp),
+            (object::common::combat::damage::Type::Explosive, dt_explosive),
         ]),
         resistance: HashMap::from([
-            (object::common::combat::damage::Type::Default, armor_dr_normal),
-            (object::common::combat::damage::Type::Laser, armor_dr_laser),
-            (object::common::combat::damage::Type::Fire, armor_dr_fire),
-            (object::common::combat::damage::Type::Plasma, armor_dr_plasma),
-            (object::common::combat::damage::Type::Electrical, armor_dr_electrical),
-            (object::common::combat::damage::Type::Emp, armor_dr_emp),
-            (object::common::combat::damage::Type::Explosive, armor_dr_explosive),
+            (object::common::combat::damage::Type::Default, dr_normal),
+            (object::common::combat::damage::Type::Laser, dr_laser),
+            (object::common::combat::damage::Type::Fire, dr_fire),
+            (object::common::combat::damage::Type::Plasma, dr_plasma),
+            (object::common::combat::damage::Type::Electrical, dr_electrical),
+            (object::common::combat::damage::Type::Emp, dr_emp),
+            (object::common::combat::damage::Type::Explosive, dr_explosive),
         ]),
-        perk: match armor_perk {
+        perk: match perk {
             -1 => Option::None,
             value => Option::Some(
                 match object::common::critter::Perk::try_from(value) {
@@ -174,12 +174,12 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
         appearance: object::item::armor::Appearance {
             sprites: HashMap::from([
                 (object::common::critter::Gender::Male,
-                 match object::common::sprite::Reference::try_from(armor_male_fid_bytes) {
+                 match object::common::sprite::Reference::try_from(male_fid_bytes) {
                      Ok(value) => value,
                      Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                  }),
                 (object::common::critter::Gender::Female,
-                 match object::common::sprite::Reference::try_from(armor_female_fid_bytes) {
+                 match object::common::sprite::Reference::try_from(female_fid_bytes) {
                      Ok(value) => value,
                      Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
                  })
