@@ -1,5 +1,6 @@
 mod r#type;
 mod flags;
+mod id;
 
 use super::*;
 
@@ -40,11 +41,10 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
-    let type_id = id_bytes[0];
-    let object_id = u16::from_be_bytes(match &id_bytes[2..4].try_into() {
-        Err(_) => return Err(errors::Error::Source),
-        Ok(value) => *value,
-    });
+    let (type_id, object_id) = match id::instance(id_bytes) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
 
     let mut text_id_bytes = [0u8; 4];
     match source.read_exact(&mut text_id_bytes) {
@@ -84,6 +84,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
         Err(error) => return Err(error)
     };
+
     let r#type = match r#type::instance(source, type_id) {
         Ok(value) => value,
         Err(error) => return Err(error)
@@ -335,7 +336,12 @@ impl TryFrom<[u8; 4]> for object::common::sprite::Reference {
     type Error = errors::Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        let r#type = match value[0] {
+        let (type_id, id) = match id::instance(value) {
+            Ok(value) => value,
+            Err(error) => return Err(error)
+        };
+
+        let r#type = match type_id {
             0x00 => object::common::sprite::Type::Item,
             0x01 => object::common::sprite::Type::Critter,
             0x02 => object::common::sprite::Type::Scenery,
@@ -346,11 +352,6 @@ impl TryFrom<[u8; 4]> for object::common::sprite::Reference {
             0x07 => object::common::sprite::Type::Inventory,
             _ => return Err(errors::Error::Format(errors::Format::Data)),
         };
-
-        let id = u16::from_be_bytes(match (&value[2..4]).try_into() {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-        });
 
         return Ok(Self {
             id,
@@ -363,18 +364,18 @@ impl TryFrom<[u8; 4]> for object::common::script::Reference {
     type Error = errors::Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        let r#type = match value[0] {
+        let (type_id, id) = match id::instance(value) {
+            Ok(value) => value,
+            Err(error) => return Err(error)
+        };
+
+        let r#type = match type_id {
             0x01 => object::common::script::Type::Spatial,
             0x02 => object::common::script::Type::Item,
             0x03 => object::common::script::Type::Scenery,
             0x04 => object::common::script::Type::Critter,
             _ => return Err(errors::Error::Format(errors::Format::Data)),
         };
-
-        let id = u16::from_be_bytes(match (&value[2..4]).try_into() {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-        });
 
         return Ok(Self {
             id,
