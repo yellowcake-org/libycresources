@@ -1,4 +1,5 @@
 use super::super::super::*;
+use super::super::super::traits::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S,
                                 flags: HashSet<object::item::weapon::Flag>,

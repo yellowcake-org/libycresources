@@ -1,4 +1,5 @@
 pub mod parse;
+mod traits;
 
 pub struct Prototype {
     pub id: u16,
