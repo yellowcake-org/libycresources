@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::super::super::*;
 use super::super::super::traits::*;
 

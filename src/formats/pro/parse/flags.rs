@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::flags::Instance>, errors::Error> {

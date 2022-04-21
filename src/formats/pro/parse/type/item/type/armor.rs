@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::super::super::*;
 use super::super::super::traits::*;
 

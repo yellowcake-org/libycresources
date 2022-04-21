@@ -1,8 +1,5 @@
-use std::collections::{HashMap, HashSet};
-use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
-use std::time::Duration;
 
 use super::*;
 use super::super::super::common::types::ScaledValue;
