@@ -1,6 +1,6 @@
-pub mod builtin;
-
 use crate::common::types::ScaledValue;
+
+pub mod builtin;
 
 pub struct Pixel {
     pub red: ScaledValue<usize, usize>,

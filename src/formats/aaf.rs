@@ -1,6 +1,6 @@
-pub mod parse;
-
 use crate::common::types::ScaledValue;
+
+pub mod parse;
 
 pub struct Glyph {
     pub width: u16,

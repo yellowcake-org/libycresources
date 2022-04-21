@@ -1,9 +1,10 @@
-use super::{Font, Glyph, Spacing};
-use crate::common::types::ScaledValue;
-
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
+
+use crate::common::types::ScaledValue;
+
+use super::{Font, Glyph, Spacing};
 
 #[derive(Debug)]
 pub enum Error {

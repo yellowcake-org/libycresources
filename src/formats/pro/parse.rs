@@ -1,17 +1,15 @@
+use std::collections::{HashMap, HashSet};
+use std::convert::TryInto;
+use std::io::{Read, Seek, SeekFrom};
+use std::ops::Range;
+use std::time::Duration;
+
+use super::*;
+use super::super::super::common::types::ScaledValue;
+
 mod r#type;
 mod flags;
 mod id;
-
-use super::*;
-
-use std::convert::TryInto;
-use std::io::{Read, Seek, SeekFrom};
-
-use std::ops::Range;
-use std::time::Duration;
-use std::collections::{HashMap, HashSet};
-
-use super::super::super::common::types::ScaledValue;
 
 pub mod errors {
     #[derive(Debug)]

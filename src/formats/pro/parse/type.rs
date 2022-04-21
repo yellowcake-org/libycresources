@@ -1,5 +1,6 @@
-mod item;
 use super::*;
+
+mod item;
 
 pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::Type, errors::Error> {
     Ok(match type_id {

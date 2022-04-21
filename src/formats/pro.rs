@@ -367,8 +367,9 @@ pub mod object {
         }
 
         pub mod armor {
-            use super::super::common::{critter, sprite, combat::damage};
             use std::collections::HashMap;
+
+            use super::super::common::{combat::damage, critter, sprite};
 
             pub struct Appearance {
                 pub sprites: HashMap<critter::Gender, sprite::Reference>,

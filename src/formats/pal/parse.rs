@@ -1,11 +1,11 @@
-use super::Palette;
+use std::convert::TryInto;
+use std::io::{Read, Seek, SeekFrom};
+use std::mem::size_of;
 
 use crate::common::graphics::Pixel;
 use crate::common::types::ScaledValue;
 
-use std::convert::TryInto;
-use std::io::{Read, Seek, SeekFrom};
-use std::mem::size_of;
+use super::Palette;
 
 #[derive(Debug)]
 pub enum Error {
