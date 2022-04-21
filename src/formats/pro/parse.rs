@@ -148,6 +148,20 @@ impl TryFrom<u8> for object::item::weapon::attack::Mode {
     }
 }
 
+impl object::item::weapon::attack::Mode {
+    fn optional(raw: u8) -> Result<Option<Self>, errors::Error> {
+        Ok(match raw {
+            0 => None,
+            value => Some(
+                match Self::try_from(value) {
+                    Ok(value) => value,
+                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                }
+            )
+        })
+    }
+}
+
 impl TryFrom<i32> for object::common::critter::Perk {
     type Error = errors::Error;
 
@@ -219,6 +233,20 @@ impl TryFrom<i32> for object::common::critter::Perk {
             64 => Ok(Self::CombatArmor),
             _ => Err(errors::Error::Format(errors::Format::Data))
         }
+    }
+}
+
+impl object::common::critter::Perk {
+    fn optional(raw: i32) -> Result<Option<Self>, errors::Error> {
+        Ok(match raw {
+            0 => None,
+            value => Some(
+                match Self::try_from(value) {
+                    Ok(value) => value,
+                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                }
+            )
+        })
     }
 }
 
@@ -387,7 +415,7 @@ impl object::common::weapons::Caliber {
         Ok(match raw {
             0 => None,
             value => Some(
-                match object::common::weapons::Caliber::try_from(value) {
+                match Self::try_from(value) {
                     Ok(value) => value,
                     Err(_) => return Err(errors::Error::Format(errors::Format::Data))
                 }

@@ -3,30 +3,8 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S,
                                 flags: HashSet<object::item::weapon::Flag>,
                                 attack_modes: u8) -> Result<object::item::weapon::Instance, errors::Error> {
-    let attack_mode_primary_raw = attack_modes & 0xf;
-    let attack_mode_secondary_raw = (attack_modes >> 4) & 0xf;
-
-    let attack_mode_primary =
-        match attack_mode_primary_raw {
-            0 => None,
-            value => Some(
-                match object::item::weapon::attack::Mode::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-                }
-            )
-        };
-
-    let attack_mode_secondary =
-        match attack_mode_secondary_raw {
-            0 => None,
-            value => Some(
-                match object::item::weapon::attack::Mode::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-                }
-            )
-        };
+    let attack1_mode_raw = attack_modes & 0xf;
+    let attack2_mode_raw = (attack_modes >> 4) & 0xf;
 
     let mut animation_bytes = [0u8; 4];
     match source.read_exact(&mut animation_bytes) {
@@ -144,13 +122,19 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let attack1 = object::item::weapon::attack::Instance {
         cost: cost1,
-        mode: attack_mode_primary,
+        mode: match object::item::weapon::attack::Mode::optional(attack1_mode_raw) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        },
         range: 0..=dmg_range_max1,
     };
 
     let attack2 = object::item::weapon::attack::Instance {
         cost: cost2,
-        mode: attack_mode_secondary,
+        mode: match object::item::weapon::attack::Mode::optional(attack2_mode_raw) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        },
         range: 0..=dmg_range_max2,
     };
 
@@ -170,15 +154,9 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let perk_raw = i32::from_be_bytes(perk_bytes);
 
-    let perk = match perk_raw {
-        -1 => Option::None,
-        value => Option::Some(
-            match object::common::critter::Perk::try_from(value) {
-                Ok(value) => value,
-                Err(_) =>
-                    return Err(errors::Error::Format(errors::Format::Data))
-            }
-        ),
+    let perk = match object::common::critter::Perk::optional(perk_raw) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
     };
 
     let mut burst_bytes = [0u8; 4];

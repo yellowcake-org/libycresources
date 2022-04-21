@@ -127,7 +127,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
         Ok(value) => value,
     };
 
-    let perk = i32::from_be_bytes(perk_bytes);
+    let perk_raw = i32::from_be_bytes(perk_bytes);
 
     let mut male_fid_bytes = [0u8; 4];
     match source.read_exact(&mut male_fid_bytes) {
@@ -161,15 +161,10 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
             (object::common::combat::damage::Type::Emp, dr_emp),
             (object::common::combat::damage::Type::Explosive, dr_explosive),
         ]),
-        perk: match perk {
-            -1 => Option::None,
-            value => Option::Some(
-                match object::common::critter::Perk::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) =>
-                        return Err(errors::Error::Format(errors::Format::Data))
-                }
-            ),
+        perk: match object::common::critter::Perk::optional(perk_raw) {
+            Ok(value) => value,
+            Err(_) =>
+                return Err(errors::Error::Format(errors::Format::Data))
         },
         appearance: object::item::armor::Appearance {
             sprites: HashMap::from([

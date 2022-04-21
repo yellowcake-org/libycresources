@@ -1,5 +1,4 @@
 use super::*;
-use super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::flags::Instance>, errors::Error> {
     let mut flags_bytes = [0u8; 4];
