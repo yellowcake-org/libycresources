@@ -84,6 +84,10 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
         Err(error) => return Err(error)
     };
+    let r#type = match r#type::instance(source, type_id) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
 
     Ok(Prototype {
         id: object_id,
@@ -105,10 +109,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             },
             connections: meta::info::Connections { description_id: text_id },
         },
-        r#type: match r#type::instance(source, type_id) {
-            Ok(value) => value,
-            Err(error) => return Err(error)
-        },
+        r#type,
     })
 }
 

@@ -117,12 +117,13 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
     };
 
     let item_sound_ids = u8::from_be_bytes(item_sound_ids_bytes);
+    let r#type = match r#type::instance(source, item_type_id, weapon_flags, attack_modes) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
 
     Ok(object::item::Instance {
-        r#type: match r#type::instance(source, item_type_id, weapon_flags, attack_modes) {
-            Ok(value) => value,
-            Err(error) => return Err(error)
-        },
+        r#type,
         flags: item_flags,
         sprite: match object::common::sprite::Reference::try_from(item_sprite_id_bytes) {
             Ok(value) => value,
