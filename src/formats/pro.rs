@@ -234,6 +234,7 @@ pub mod object {
                 CombatArmor,
             }
 
+            #[derive(PartialEq, Eq, Hash, Copy, Clone)]
             pub enum Skill {
                 SmallGuns,
                 BigGuns,
