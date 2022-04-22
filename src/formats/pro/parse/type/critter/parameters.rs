@@ -1,23 +1,21 @@
-use crate::formats::pro::object::critter::Parameters;
-use crate::formats::pro::parse::errors::Error;
-
 use super::super::super::*;
 
 mod damage;
 mod statistic;
 
-pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Parameters, errors::Error> {
+pub(crate) fn instance<S: Read>(source: &mut S) ->
+Result<object::critter::Parameters, errors::Error> {
     let statistics = match statistic::map(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
-    let dts = match damage::threshold(source) {
+    let threshold = match damage::threshold(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
-    let drs = match damage::resistance(source) {
+    let resistance = match damage::resistance(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
@@ -36,17 +34,17 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Param
         Ok(value) => value,
     };
 
-    let gender = match u32::from_be_bytes(gender_bytes) as u8 {
-        0 => object::common::critter::Gender::Male,
-        1 => object::common::critter::Gender::Female,
-        _ => return Err(Error::Format(errors::Format::Data))
+    let gender = match object::common::critter::Gender::
+    try_from(u32::from_be_bytes(gender_bytes) as u8) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
     };
 
-    Ok(Parameters {
+    Ok(object::critter::Parameters {
         age,
         gender,
-        threshold: dts,
-        resistance: drs,
-        statistics
+        threshold,
+        resistance,
+        statistics,
     })
 }

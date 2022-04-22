@@ -1,6 +1,60 @@
 use super::super::object;
 use super::super::parse;
 
+impl TryFrom<u32> for object::common::critter::body::Type {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Biped),
+            1 => Ok(Self::Quadruped),
+            2 => Ok(Self::Robotic),
+            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<u8> for object::common::critter::Gender {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Male),
+            1 => Ok(Self::Female),
+            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+        }
+    }
+}
+
+impl TryFrom<u32> for object::critter::murder::Type {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Men),
+            1 => Ok(Self::Women),
+            2 => Ok(Self::Children),
+            3 => Ok(Self::SuperMutants),
+            4 => Ok(Self::Ghouls),
+            5 => Ok(Self::Brahmin),
+            6 => Ok(Self::Radscorpions),
+            7 => Ok(Self::Rats),
+            8 => Ok(Self::Floaters),
+            9 => Ok(Self::Centaurs),
+            10 => Ok(Self::Robots),
+            11 => Ok(Self::Dogs),
+            12 => Ok(Self::Manti),
+            13 => Ok(Self::DeathClaws),
+            14 => Ok(Self::Plants),
+            15 => Ok(Self::Geckos),
+            16 => Ok(Self::Aliens),
+            17 => Ok(Self::GiantAnts),
+            18 => Ok(Self::GiantAnts),
+            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+        }
+    }
+}
+
 impl TryFrom<u32> for object::item::weapon::Animation {
     type Error = parse::errors::Error;
 
@@ -69,7 +123,7 @@ impl TryFrom<u32> for object::common::weapons::Caliber {
             5 => Ok(Self::Remington223),
             6 => Ok(Self::FiveMillimeter),
             7 => Ok(Self::SnW40),
-            8 => Ok(Self::TenMillimiter),
+            8 => Ok(Self::TenMillimeter),
             9 => Ok(Self::Magnum44),
             10 => Ok(Self::FourteenMillimeter),
             11 => Ok(Self::TwelveGauge),

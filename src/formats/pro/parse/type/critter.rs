@@ -2,6 +2,7 @@ use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
 mod flags;
+mod skills;
 mod parameters;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Instance, errors::Error> {
@@ -44,17 +45,92 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let ai_packet_id = u32::from_be_bytes(ai_packet_id_bytes);
 
-    let mut team_num_bytes = [0u8; 4];
-    match source.read_exact(&mut team_num_bytes) {
+    let mut team_bytes = [0u8; 4];
+    match source.read_exact(&mut team_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let team_num = u32::from_be_bytes(team_num_bytes);
+    let team = u32::from_be_bytes(team_bytes);
 
-    let flags = flags::instance(source);
-    let basic = parameters::instance(source);
-    let bonuses = parameters::instance(source);
+    let flags = match flags::instance(source) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
 
-    Err(errors::Error::Source)
+    let basic = match parameters::instance(source) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
+
+    let bonuses = match parameters::instance(source) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
+
+    let skills = match skills::map(source) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
+
+    let mut body_bytes = [0u8; 4];
+    match source.read_exact(&mut body_bytes) {
+        Err(error) => return Err(errors::Error::Read(error)),
+        Ok(value) => value,
+    };
+
+    let body_raw = u32::from_be_bytes(body_bytes);
+    let body = match object::common::critter::body::Type::try_from(body_raw) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
+
+    let mut kill_reward_bytes = [0u8; 4];
+    match source.read_exact(&mut kill_reward_bytes) {
+        Err(error) => return Err(errors::Error::Read(error)),
+        Ok(value) => value,
+    };
+
+    let kill_reward = u32::from_be_bytes(kill_reward_bytes);
+
+    let mut kill_type_bytes = [0u8; 4];
+    match source.read_exact(&mut kill_type_bytes) {
+        Err(error) => return Err(errors::Error::Read(error)),
+        Ok(value) => value,
+    };
+
+    let kill_type_raw = u32::from_be_bytes(kill_type_bytes);
+    let kill_type = match object::critter::murder::Type::try_from(kill_type_raw) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+    };
+
+    let mut damage_type_bytes = [0u8; 4];
+    match source.read_exact(&mut damage_type_bytes) {
+        Err(error) => return Err(errors::Error::Read(error)),
+        Ok(value) => value,
+    };
+
+    let damage_type_raw = u32::from_be_bytes(damage_type_bytes);
+    let damage_type = match object::common::combat::damage::Type::try_from(damage_type_raw as u8) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+    };
+
+    Ok(object::critter::Instance {
+        team,
+        murder: object::critter::murder::Result {
+            r#type: kill_type,
+            experience: kill_reward,
+        },
+        damage: damage_type,
+        body,
+        sprite,
+        script,
+        flags,
+        skills,
+        basic,
+        bonuses,
+        connections: object::critter::Connections { ai_packet_id },
+    })
 }

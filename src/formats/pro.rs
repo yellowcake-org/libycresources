@@ -296,7 +296,7 @@ pub mod object {
                 Remington223,
                 FiveMillimeter,
                 SnW40,
-                TenMillimiter,
+                TenMillimeter,
                 Magnum44,
                 FourteenMillimeter,
                 TwelveGauge,
@@ -603,7 +603,7 @@ pub mod object {
 
             pub struct Result {
                 pub r#type: Type,
-                pub experience: u16,
+                pub experience: u32,
             }
         }
 
@@ -632,8 +632,7 @@ pub mod object {
             pub script: Option<super::common::script::Reference>,
 
             pub flags: HashSet<Flag>,
-            pub skills: HashSet<super::common::critter::Skill>,
-            pub actions: HashSet<super::common::actions::Instance>,
+            pub skills: HashMap<super::common::critter::Skill, u32>,
 
             pub basic: Parameters,
             pub bonuses: Parameters,
