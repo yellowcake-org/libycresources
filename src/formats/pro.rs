@@ -19,6 +19,7 @@ pub mod meta {
 
     pub mod info {
         use std::ops::RangeInclusive;
+
         use crate::common::types::ScaledValue;
 
         pub struct Light {
@@ -280,6 +281,8 @@ pub mod object {
                     Electrical,
                     Emp,
                     Explosive,
+                    Radiation,
+                    Poison,
                 }
             }
         }
@@ -404,7 +407,8 @@ pub mod object {
         }
 
         pub mod drug {
-            use std::ops::{RangeInclusive};
+            use std::ops::RangeInclusive;
+
             use crate::common::types::ScaledValue;
 
             pub enum Amount {
@@ -555,6 +559,9 @@ pub mod object {
 
     pub mod critter {
         use std::collections::{HashMap, HashSet};
+        use std::ops::Range;
+
+        use crate::common::types::ScaledValue;
 
         #[derive(PartialEq, Eq, Hash)]
         pub enum Flag {
@@ -601,7 +608,7 @@ pub mod object {
         }
 
         pub struct Parameters {
-            pub age: u8,
+            pub age: ScaledValue<u8, Range<u8>>,
             pub gender: super::common::critter::Gender,
 
             pub threshold: HashMap<super::common::combat::damage::Type, u32>,

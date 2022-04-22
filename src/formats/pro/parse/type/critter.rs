@@ -53,7 +53,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
     let team_num = u32::from_be_bytes(team_num_bytes);
 
     let flags = flags::instance(source);
-
     let basic = parameters::instance(source);
     let bonuses = parameters::instance(source);
 
