@@ -1,11 +1,9 @@
 use std::collections::HashMap;
 
-use crate::formats::pro::object::common::critter::Skill;
-
 use super::super::super::*;
+use object::common::critter::Skill;
 
-pub(crate) fn map<S: Read>(source: &mut S) ->
-Result<HashMap<object::common::critter::Skill, u32>, errors::Error> {
+pub(crate) fn map<S: Read>(source: &mut S) -> Result<HashMap<Skill, u32>, errors::Error> {
     let mut skills = HashMap::new();
 
     fn consume<S: Read>(skill: object::common::critter::Skill,
