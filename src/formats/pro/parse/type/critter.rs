@@ -2,6 +2,7 @@ use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
 mod flags;
+mod parameters;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Instance, errors::Error> {
     let mut flags_bytes = [0u8; 4];
@@ -52,6 +53,9 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
     let team_num = u32::from_be_bytes(team_num_bytes);
 
     let flags = flags::instance(source);
+
+    let basic = parameters::instance(source);
+    let bonuses = parameters::instance(source);
 
     Err(errors::Error::Source)
 }

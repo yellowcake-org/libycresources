@@ -604,10 +604,10 @@ pub mod object {
             pub age: u8,
             pub gender: super::common::critter::Gender,
 
-            pub threshold: HashMap<super::common::combat::damage::Type, u16>,
-            pub resistance: HashMap<super::common::combat::damage::Type, u16>,
+            pub threshold: HashMap<super::common::combat::damage::Type, u32>,
+            pub resistance: HashMap<super::common::combat::damage::Type, u32>,
 
-            pub statistics: HashMap<super::common::critter::Statistic, u16>,
+            pub statistics: HashMap<super::common::critter::Statistic, u32>,
         }
 
         pub struct Connections {
