@@ -18,11 +18,12 @@ pub mod meta {
     }
 
     pub mod info {
+        use std::ops::RangeInclusive;
         use crate::common::types::ScaledValue;
 
         pub struct Light {
-            pub distance: ScaledValue<u8, u8>,
-            pub intensity: ScaledValue<u16, u16>,
+            pub distance: ScaledValue<u8, RangeInclusive<u8>>,
+            pub intensity: ScaledValue<u16, RangeInclusive<u16>>,
         }
 
         pub struct Connections {
@@ -403,6 +404,7 @@ pub mod object {
         }
 
         pub mod drug {
+            use std::ops::{RangeInclusive};
             use crate::common::types::ScaledValue;
 
             pub enum Amount {
@@ -418,7 +420,7 @@ pub mod object {
             pub struct Addiction {
                 pub perk: super::super::common::critter::Perk,
                 pub delay: std::time::Duration,
-                pub chance: ScaledValue<u8, u8>,
+                pub chance: ScaledValue<u8, RangeInclusive<u8>>,
             }
 
             pub struct Instance {
@@ -554,18 +556,19 @@ pub mod object {
     pub mod critter {
         use std::collections::{HashMap, HashSet};
 
+        #[derive(PartialEq, Eq, Hash)]
         pub enum Flag {
-            Barter,
-            Steal,
-            Drop,
-            Limbs,
-            Ages,
-            Heal,
+            BarterAvailable,
+            NoSteal,
+            NoDrop,
+            NoLimbsLoose,
+            NoCorpseDisappear,
+            NoAutoHeal,
             Invulnerable,
-            Flatten,
-            Special,
-            Range,
-            Knock,
+            NoCorpse,
+            SpecialDeath,
+            RangedMelee,
+            NoKnockDown,
         }
 
         pub mod murder {
@@ -601,9 +604,10 @@ pub mod object {
             pub age: u8,
             pub gender: super::common::critter::Gender,
 
-            pub statistics: HashMap<super::common::critter::Statistic, u16>,
             pub threshold: HashMap<super::common::combat::damage::Type, u16>,
             pub resistance: HashMap<super::common::combat::damage::Type, u16>,
+
+            pub statistics: HashMap<super::common::critter::Statistic, u16>,
         }
 
         pub struct Connections {

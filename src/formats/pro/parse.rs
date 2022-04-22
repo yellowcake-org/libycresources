@@ -1,5 +1,4 @@
 use std::io::{Read, Seek, SeekFrom};
-use std::ops::Range;
 
 use super::*;
 use super::super::super::common::types::ScaledValue;
@@ -71,11 +70,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             light: meta::info::Light {
                 distance: ScaledValue {
                     value: light_radius,
-                    scale: Range { start: 0, end: 8 },
+                    scale: 0..=8,
                 },
                 intensity: ScaledValue {
                     value: light_intensity,
-                    scale: Range { start: 0, end: u16::MAX },
+                    scale: 0..=u16::MAX,
                 },
             },
             flags,

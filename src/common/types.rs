@@ -1,4 +1,4 @@
-pub struct ScaledValue<V, R> {
+pub struct ScaledValue<V, S> {
     pub value: V,
-    pub scale: std::ops::Range<R>,
+    pub scale: S,
 }

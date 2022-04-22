@@ -245,7 +245,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 ),
                 chance: ScaledValue {
                     value: addiction_rate_raw as u8,
-                    scale: 0u8..101u8,
+                    scale: 0u8..=100u8,
                 },
             })
         },
