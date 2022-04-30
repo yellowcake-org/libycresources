@@ -35,26 +35,24 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::fl
         }
     }
 
-    if !flags.insert(meta::info::flags::Instance::Transparency(
-        if (flags_bytes[2] & 0x80) == 0x80 {
-            None
-        } else if (flags_bytes[2] & 0x40) == 0x40 {
-            Some(meta::info::flags::Transparency::Red)
-        } else if (flags_bytes[1] & 0x01) == 0x01 {
-            Some(meta::info::flags::Transparency::Wall)
-        } else if (flags_bytes[1] & 0x02) == 0x02 {
-            Some(meta::info::flags::Transparency::Glass)
-        } else if (flags_bytes[1] & 0x04) == 0x04 {
-            Some(meta::info::flags::Transparency::Steam)
-        } else if (flags_bytes[1] & 0x08) == 0x08 {
-            Some(meta::info::flags::Transparency::Energy)
-        } else if (flags_bytes[0] & 0x10) == 0x10 {
-            Some(meta::info::flags::Transparency::End)
-        } else {
+    if let Some(transparency) = if (flags_bytes[2] & 0x80) == 0x80 {
+        Some(None)
+    } else if (flags_bytes[2] & 0x40) == 0x40 {
+        Some(Some(meta::info::flags::Transparency::Red))
+    } else if (flags_bytes[1] & 0x01) == 0x01 {
+        Some(Some(meta::info::flags::Transparency::Wall))
+    } else if (flags_bytes[1] & 0x02) == 0x02 {
+        Some(Some(meta::info::flags::Transparency::Glass))
+    } else if (flags_bytes[1] & 0x04) == 0x04 {
+        Some(Some(meta::info::flags::Transparency::Steam))
+    } else if (flags_bytes[1] & 0x08) == 0x08 {
+        Some(Some(meta::info::flags::Transparency::Energy))
+    } else if (flags_bytes[0] & 0x10) == 0x10 {
+        Some(Some(meta::info::flags::Transparency::End))
+    } else { None } {
+        if !flags.insert(meta::info::flags::Instance::Transparency(transparency)) {
             return Err(errors::Error::Format(errors::Format::Flags));
         }
-    )) {
-        return Err(errors::Error::Format(errors::Format::Flags));
     }
 
     if (flags_bytes[0] & 0x20) == 0x20 {

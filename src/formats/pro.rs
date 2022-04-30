@@ -32,7 +32,7 @@ pub mod meta {
         }
 
         pub mod flags {
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Transparency {
                 Wall,
                 Glass,
@@ -42,7 +42,7 @@ pub mod meta {
                 End,
             }
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Instance {
                 Flat,
                 NotBlocking,
@@ -59,6 +59,7 @@ pub mod meta {
 pub mod object {
     pub mod common {
         pub mod sprite {
+            #[derive(Debug)]
             pub enum Type {
                 Item,
                 Critter,
@@ -367,7 +368,7 @@ pub mod object {
             pub r#type: Type,
             pub flags: HashSet<Flag>,
 
-            pub sprite: super::common::sprite::Reference,
+            pub sprite: Option<super::common::sprite::Reference>,
             pub script: Option<super::common::script::Reference>,
 
             pub actions: HashSet<super::common::actions::Instance>,

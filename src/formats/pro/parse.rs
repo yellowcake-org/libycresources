@@ -38,6 +38,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         Ok(value) => value,
     };
 
+    let sprite = match object::common::sprite::Reference::try_from(sprite_id_bytes) {
+        Ok(value) => value,
+        Err(error) => return Err(error)
+    };
+
     let mut light_radius_bytes = [0u8; 4];
     match source.read_exact(&mut light_radius_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -70,7 +75,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
             light: meta::info::Light {
                 distance: ScaledValue {
                     value: light_radius,
-                    scale: 0..=8,
+                    scale: 0..=7,
                 },
                 intensity: ScaledValue {
                     value: light_intensity,
@@ -78,10 +83,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
                 },
             },
             flags,
-            sprite: match object::common::sprite::Reference::try_from(sprite_id_bytes) {
-                Ok(value) => value,
-                Err(error) => return Err(error)
-            },
+            sprite,
             connections: meta::info::Connections { description_id: text_id },
         },
         r#type,

@@ -106,6 +106,12 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
         Ok(value) => value,
     };
 
+    let sprite = match object::common::sprite::Reference::
+    try_from_optional(sprite_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+    };
+
     let mut sound_ids_bytes = [0u8; 1];
     match source.read_exact(&mut sound_ids_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -121,10 +127,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
     Ok(object::item::Instance {
         r#type,
         flags,
-        sprite: match object::common::sprite::Reference::try_from(sprite_id_bytes) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-        },
+        sprite,
         script,
         actions,
         material: match object::common::world::Material::try_from(material_id) {

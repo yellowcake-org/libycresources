@@ -19,8 +19,10 @@ pub(crate) fn extract(from: u8) -> Result<HashSet<object::common::actions::Insta
         knees_down: false,
     };
 
-    if !actions.insert(object::common::actions::Instance::Usage(usage)) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+    if can_use || can_use_on {
+        if !actions.insert(object::common::actions::Instance::Usage(usage)) {
+            return Err(errors::Error::Format(errors::Format::Flags));
+        }
     }
 
     Ok(actions)
