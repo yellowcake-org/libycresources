@@ -77,14 +77,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
         Err(error) => return Err(error)
     };
 
-    // let mut unknown_bytes = [0u8; 4];
-    // match source.read_exact(&mut unknown_bytes) {
-    //     Err(error) => return Err(errors::Error::Read(error)),
-    //     Ok(value) => value,
-    // };
-    //
-    // let unknown = u32::from_be_bytes(unknown_bytes);
-
     Ok(object::scenery::Instance {
         r#type,
         light,
