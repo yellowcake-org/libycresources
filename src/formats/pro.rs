@@ -121,7 +121,7 @@ pub mod object {
             pub enum Floor {
                 Zero,
                 First,
-                Second
+                Second,
             }
 
             pub struct Destination {
@@ -337,7 +337,7 @@ pub mod object {
         Scenery(scenery::Instance),
         Wall(wall::Instance),
         Tile(tile::Instance),
-        Misc,
+        Misc(misc::Instance),
     }
 
     pub mod item {

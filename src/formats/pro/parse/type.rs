@@ -7,6 +7,7 @@ mod critter;
 mod scenery;
 mod wall;
 mod tile;
+mod misc;
 
 pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::Type, errors::Error> {
     Ok(match type_id {
@@ -30,7 +31,10 @@ pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::T
             Ok(value) => value,
             Err(error) => return Err(error),
         }),
-        // 5 => {}
+        5 => object::Type::Misc(match misc::instance(source) {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        }),
         _ => return Err(errors::Error::Format(errors::Format::Type)),
     })
 }
