@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::formats::pro::object::common::critter::Statistic;
-
 use crate::formats::pro::parse::*;
 
 pub(crate) fn map<S: Read>(source: &mut S) ->

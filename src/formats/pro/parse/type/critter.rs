@@ -1,4 +1,5 @@
 use crate::formats::pro::object::critter::Statistics;
+
 use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
