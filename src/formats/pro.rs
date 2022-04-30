@@ -717,9 +717,11 @@ pub mod object {
     }
 
     pub mod wall {
+        use std::collections::HashSet;
+
         pub struct Instance {
-            pub light: super::common::world::Light,
-            pub script: super::common::script::Reference,
+            pub light: HashSet<super::common::world::Light>,
+            pub script: Option<super::common::script::Reference>,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
