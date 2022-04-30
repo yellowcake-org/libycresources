@@ -15,7 +15,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
     let mut flags: HashSet<object::item::Flag> = HashSet::new();
     let mut weapon_flags: HashSet<object::item::weapon::Flag> = HashSet::new();
     let actions: HashSet<object::common::actions::Instance> =
-        match super::common::actions::set(source, flags_bytes[2]) {
+        match super::common::actions::extract(flags_bytes[2]) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
         };

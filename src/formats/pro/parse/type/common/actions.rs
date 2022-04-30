@@ -2,8 +2,7 @@ use std::collections::HashSet;
 
 use super::super::super::*;
 
-pub(crate) fn set<S: Read>(source: &mut S, from: u8)
-                           -> Result<HashSet<object::common::actions::Instance>, errors::Error> {
+pub(crate) fn extract(from: u8) -> Result<HashSet<object::common::actions::Instance>, errors::Error> {
     let mut actions: HashSet<object::common::actions::Instance> = HashSet::new();
 
     if (from & 0x80) == 0x80 &&

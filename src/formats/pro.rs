@@ -634,11 +634,11 @@ pub mod object {
 
     pub mod scenery {
         pub enum Type {
-            Generic,
             Door(door::Instance),
             Stairs(stairs::Instance),
             Elevator(elevator::Instance),
             Ladder(ladder::Instance),
+            Generic(generic::Instance),
         }
 
         pub struct Connections {
@@ -654,8 +654,6 @@ pub mod object {
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
             pub connections: Connections,
-
-            pub _unknown: u32,
         }
 
         pub mod door {
@@ -697,6 +695,12 @@ pub mod object {
             pub struct Instance {
                 pub direction: Direction,
                 pub destination: super::super::common::map::Destination,
+            }
+        }
+
+        pub mod generic {
+            pub struct Instance {
+                pub _unknown: u32,
             }
         }
     }

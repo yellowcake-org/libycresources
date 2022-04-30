@@ -26,7 +26,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
     };
 
     let actions: HashSet<object::common::actions::Instance> =
-        match super::common::actions::set(source, actions_bytes[1]) {
+        match super::common::actions::extract(actions_bytes[1]) {
             Ok(value) => value,
             Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
         };
@@ -77,13 +77,13 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
         Err(error) => return Err(error)
     };
 
-    let mut unknown_bytes = [0u8; 4];
-    match source.read_exact(&mut unknown_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let unknown = u32::from_be_bytes(unknown_bytes);
+    // let mut unknown_bytes = [0u8; 4];
+    // match source.read_exact(&mut unknown_bytes) {
+    //     Err(error) => return Err(errors::Error::Read(error)),
+    //     Ok(value) => value,
+    // };
+    //
+    // let unknown = u32::from_be_bytes(unknown_bytes);
 
     Ok(object::scenery::Instance {
         r#type,
@@ -93,7 +93,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
         actions,
         connections: object::scenery::Connections {
             _sounds_ids: sound_ids
-        },
-        _unknown: unknown,
+        }
     })
 }
