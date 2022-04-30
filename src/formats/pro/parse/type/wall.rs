@@ -57,6 +57,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::wall::Instance
         light,
         script,
         material,
-        actions
+        actions,
     })
 }

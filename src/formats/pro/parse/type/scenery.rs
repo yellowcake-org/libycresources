@@ -84,6 +84,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
         actions,
         connections: object::scenery::Connections {
             _sounds_ids: sound_ids
-        }
+        },
     })
 }

@@ -16,6 +16,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::eleva
     };
 
     let floor = u32::from_be_bytes(floor_bytes);
-    
+
     Ok(object::scenery::elevator::Instance { floor, r#type })
 }
