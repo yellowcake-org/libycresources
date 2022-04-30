@@ -101,6 +101,7 @@ pub mod object {
                 Leather,
             }
 
+            #[derive(PartialEq, Eq, Hash)]
             pub enum Light {
                 Vertical,
                 Horizontal,
@@ -639,6 +640,8 @@ pub mod object {
     }
 
     pub mod scenery {
+        use std::collections::HashSet;
+
         pub enum Type {
             Door(door::Instance),
             Stairs(stairs::Instance),
@@ -654,7 +657,7 @@ pub mod object {
         pub struct Instance {
             pub r#type: Type,
 
-            pub light: super::common::world::Light,
+            pub light: HashSet<super::common::world::Light>,
             pub script: Option<super::common::script::Reference>,
             pub material: super::common::world::Material,
 

@@ -13,8 +13,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
         Ok(value) => value,
     };
 
-    let light_raw = u16::from_be_bytes(light_bytes);
-    let light = match object::common::world::Light::try_from(light_raw) {
+    let light = match super::common::light::extract(light_bytes[0]) {
         Ok(value) => value,
         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
     };
