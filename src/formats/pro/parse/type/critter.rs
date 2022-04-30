@@ -25,14 +25,14 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
             Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
         };
 
-    let mut sprite_id_bytes = [0u8; 4];
-    match source.read_exact(&mut sprite_id_bytes) {
+    let mut head_id_bytes = [0u8; 4];
+    match source.read_exact(&mut head_id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let sprite = match object::common::sprite::Reference::
-    try_from_optional(sprite_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
+    let head = match object::common::sprite::Reference::
+    try_from_optional(head_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
         Ok(value) => value,
         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
     };
@@ -125,7 +125,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         },
         damage: damage_type,
         body,
-        sprite,
+        head,
         script,
         flags,
         skills,
