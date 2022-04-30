@@ -1,5 +1,3 @@
-use crate::formats::pro::object::critter::Statistics;
-
 use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
@@ -131,7 +129,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         script,
         flags,
         skills,
-        statistics: Statistics { basic, bonuses },
+        statistics: object::critter::Statistics { basic, bonuses },
         connections: object::critter::Connections { ai_packet_id },
     })
 }
