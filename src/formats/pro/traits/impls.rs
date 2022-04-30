@@ -340,3 +340,39 @@ impl TryFrom<u16> for object::common::world::Light {
         }
     }
 }
+
+impl TryFrom<[u8; 4]> for object::common::map::Destination {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
+        let tile = u32::from_be_bytes(match &value[1..4].try_into() {
+            Err(_) => return Err(parse::errors::Error::Source),
+            Ok(value) => *value,
+        });
+
+        let floor: object::common::map::Floor = match value[0] & 0xFF {
+            0xF0 => object::common::map::Floor::Zero,
+            0xF2 => object::common::map::Floor::First,
+            0xF4 => object::common::map::Floor::Second,
+            _ => return Err(parse::errors::Error::Format(parse::errors::Format::Data)),
+        };
+
+        Ok(Self { tile, floor })
+    }
+}
+
+impl TryFrom<i32> for object::common::map::Map {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        match value {
+            -1 => Ok(Self::World),
+            value => Ok(
+                Self::Local(match u32::try_from(value) {
+                    Ok(value) => value,
+                    Err(_) => return Err(parse::errors::Error::Format(parse::errors::Format::Data))
+                })
+            )
+        }
+    }
+}

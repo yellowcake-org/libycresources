@@ -117,10 +117,16 @@ pub mod object {
                 World,
             }
 
+            pub enum Floor {
+                Zero,
+                First,
+                Second
+            }
+
             pub struct Destination {
                 // TODO: Coordinates!
-                pub tile: u16,
-                pub floor: u8,
+                pub tile: u32,
+                pub floor: Floor,
             }
         }
 
