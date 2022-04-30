@@ -689,8 +689,8 @@ pub mod object {
 
         pub mod elevator {
             pub struct Instance {
-                pub floor: u8,
-                pub r#type: u8, // 0...23, hardcoded, do something?
+                pub floor: u32,
+                pub r#type: u32, // 0...23, hardcoded, do something?
             }
         }
 
