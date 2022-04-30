@@ -2,6 +2,7 @@ use super::*;
 
 mod item;
 mod critter;
+mod scenery;
 
 pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::Type, errors::Error> {
     Ok(match type_id {
@@ -13,7 +14,10 @@ pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::T
             Ok(value) => value,
             Err(error) => return Err(error),
         }),
-        // 2 => {}
+        2 => object::Type::Scenery(match scenery::instance(source) {
+            Ok(value) => value,
+            Err(error) => return Err(error),
+        }),
         // 3 => {}
         // 4 => {}
         // 5 => {}
