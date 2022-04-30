@@ -1,9 +1,10 @@
+use crate::formats::pro::object::critter::Statistics;
 use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
 mod flags;
 mod skills;
-mod parameters;
+mod statistics;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Instance, errors::Error> {
     let mut flags_bytes = [0u8; 4];
@@ -58,12 +59,12 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         Err(error) => return Err(error)
     };
 
-    let basic = match parameters::instance(source) {
+    let basic = match statistics::map(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
-    let bonuses = match parameters::instance(source) {
+    let bonuses = match statistics::map(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
@@ -129,8 +130,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         script,
         flags,
         skills,
-        basic,
-        bonuses,
+        statistics: Statistics { basic, bonuses },
         connections: object::critter::Connections { ai_packet_id },
     })
 }

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::formats::pro::object::common::critter::Statistic;
 
-use super::super::super::super::*;
+use crate::formats::pro::parse::*;
 
 pub(crate) fn map<S: Read>(source: &mut S) ->
 Result<HashMap<object::common::critter::Statistic, u32>, errors::Error> {
@@ -56,11 +56,11 @@ Result<HashMap<object::common::critter::Statistic, u32>, errors::Error> {
 
     // Other
 
-    if let Err(error) = consume(Statistic::HitPoints, source, &mut statistics) {
+    if let Err(error) = consume(Statistic::MaximumHitPoints, source, &mut statistics) {
         return Err(error);
     }
 
-    if let Err(error) = consume(Statistic::ActionPoints, source, &mut statistics) {
+    if let Err(error) = consume(Statistic::MaximumActionPoints, source, &mut statistics) {
         return Err(error);
     }
 
@@ -93,6 +93,84 @@ Result<HashMap<object::common::critter::Statistic, u32>, errors::Error> {
     }
 
     if let Err(error) = consume(Statistic::BetterCriticals, source, &mut statistics) {
+        return Err(error);
+    }
+
+    // Damage Threshold
+
+    if let Err(error) = consume(Statistic::DamageThreshold, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdLaser, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdFire, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdPlasma, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdElectrical, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdEMP, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageThresholdExplosive, source, &mut statistics) {
+        return Err(error);
+    }
+
+    // Damage Resistance
+
+    if let Err(error) = consume(Statistic::DamageResistance, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistanceLaser, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistanceFire, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistancePlasma, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistanceElectrical, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistanceEMP, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::DamageResistanceExplosive, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::RadiationResistance, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::PoisonResistance, source, &mut statistics) {
+        return Err(error);
+    }
+
+    // Age & Gender
+
+    if let Err(error) = consume(Statistic::Age, source, &mut statistics) {
+        return Err(error);
+    }
+
+    if let Err(error) = consume(Statistic::Gender, source, &mut statistics) {
         return Err(error);
     }
 

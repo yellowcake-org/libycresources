@@ -134,8 +134,8 @@ pub mod object {
                 Intelligence,
                 Agility,
                 Luck,
-                HitPoints,
-                ActionPoints,
+                MaximumHitPoints,
+                MaximumActionPoints,
                 ArmorClass,
                 UnarmedDamage,
                 MeleeDamage,
@@ -143,7 +143,28 @@ pub mod object {
                 Sequence,
                 HealingRate,
                 CriticalChance,
-                BetterCriticals
+                BetterCriticals,
+                DamageThreshold,
+                DamageThresholdLaser,
+                DamageThresholdFire,
+                DamageThresholdPlasma,
+                DamageThresholdElectrical,
+                DamageThresholdEMP,
+                DamageThresholdExplosive,
+                DamageResistance,
+                DamageResistanceLaser,
+                DamageResistanceFire,
+                DamageResistancePlasma,
+                DamageResistanceElectrical,
+                DamageResistanceEMP,
+                DamageResistanceExplosive,
+                RadiationResistance,
+                PoisonResistance,
+                Age,
+                Gender,
+                CurrentHitPoints,
+                CurrentPoisonLevel,
+                CurrentRadiationLevel,
             }
 
             pub enum Perk {
@@ -539,9 +560,6 @@ pub mod object {
 
     pub mod critter {
         use std::collections::{HashMap, HashSet};
-        use std::ops::Range;
-
-        use crate::common::types::ScaledValue;
 
         #[derive(PartialEq, Eq, Hash)]
         pub enum Flag {
@@ -587,14 +605,9 @@ pub mod object {
             }
         }
 
-        pub struct Parameters {
-            pub age: ScaledValue<u8, Range<u8>>,
-            pub gender: super::common::critter::Gender,
-
-            pub threshold: HashMap<super::common::combat::damage::Type, u32>,
-            pub resistance: HashMap<super::common::combat::damage::Type, u32>,
-
-            pub statistics: HashMap<super::common::critter::Statistic, u32>,
+        pub struct Statistics {
+            pub basic: HashMap<super::common::critter::Statistic, u32>,
+            pub bonuses: HashMap<super::common::critter::Statistic, u32>,
         }
 
         pub struct Connections {
@@ -614,9 +627,7 @@ pub mod object {
             pub flags: HashSet<Flag>,
             pub skills: HashMap<super::common::critter::Skill, u32>,
 
-            pub basic: Parameters,
-            pub bonuses: Parameters,
-
+            pub statistics: Statistics,
             pub connections: Connections,
         }
     }
