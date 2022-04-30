@@ -659,12 +659,14 @@ pub mod object {
         pub mod door {
             use std::collections::HashSet;
 
-            pub enum Flag {
+            #[derive(PartialEq, Eq, Hash)]
+            pub enum Flags {
                 Passable
             }
 
             pub struct Instance {
-                pub flags: HashSet<Flag>,
+                pub flags: HashSet<Flags>,
+                pub _unknown: u32,
             }
         }
 
