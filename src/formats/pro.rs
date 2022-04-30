@@ -654,6 +654,8 @@ pub mod object {
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,
             pub connections: Connections,
+
+            pub _unknown: u32,
         }
 
         pub mod door {
@@ -712,6 +714,12 @@ pub mod object {
     pub mod tile {
         pub struct Instance {
             pub material: super::common::world::Material,
+        }
+    }
+
+    pub mod misc {
+        pub struct Instance {
+            pub _unknown: u32,
         }
     }
 }
