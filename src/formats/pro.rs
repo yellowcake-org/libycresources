@@ -39,6 +39,7 @@ pub mod meta {
                 Steam,
                 Energy,
                 Red,
+                End,
             }
 
             #[derive(PartialEq, Eq, Hash)]
