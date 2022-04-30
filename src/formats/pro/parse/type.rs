@@ -1,5 +1,7 @@
 use super::*;
 
+mod common;
+
 mod item;
 mod critter;
 mod scenery;

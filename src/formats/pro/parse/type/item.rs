@@ -14,38 +14,28 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut flags: HashSet<object::item::Flag> = HashSet::new();
     let mut weapon_flags: HashSet<object::item::weapon::Flag> = HashSet::new();
-    let mut actions: HashSet<object::common::actions::Instance> = HashSet::new();
+    let actions: HashSet<object::common::actions::Instance> =
+        match super::common::actions::set(source, flags_bytes[2]) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        };
 
-    if (flags_bytes[0] & 0x01) == 0x01 &&
-        !weapon_flags.insert(object::item::weapon::Flag::BigGun) {
-        return Err(errors::Error::Format(errors::Format::Flags));
-    }
+    // Flags
 
-    if (flags_bytes[0] & 0x02) == 0x02 &&
-        !weapon_flags.insert(object::item::weapon::Flag::SecondHand) {
-        return Err(errors::Error::Format(errors::Format::Flags));
-    }
-
-    if (flags_bytes[0] & 0x80) == 0x80 &&
-        !actions.insert(object::common::actions::Instance::PickUp) {
-        return Err(errors::Error::Format(errors::Format::Flags));
-    }
-
-    if (flags_bytes[2] & 0x08) == 0x08 &&
+    if (flags_bytes[0] & 0x08) == 0x08 &&
         !flags.insert(object::item::Flag::Hidden) {
         return Err(errors::Error::Format(errors::Format::Flags));
     }
 
-    let can_use = (flags_bytes[0] & 0x08) == 0x08;
-    let can_use_on = (flags_bytes[0] & 0x10) == 0x10;
+    // Weapon Flags
 
-    let usage = object::common::actions::Usage {
-        itself: can_use,
-        something: can_use_on,
-        knees_down: false,
-    };
+    if (flags_bytes[2] & 0x01) == 0x01 &&
+        !weapon_flags.insert(object::item::weapon::Flag::BigGun) {
+        return Err(errors::Error::Format(errors::Format::Flags));
+    }
 
-    if !actions.insert(object::common::actions::Instance::Usage(usage)) {
+    if (flags_bytes[2] & 0x02) == 0x02 &&
+        !weapon_flags.insert(object::item::weapon::Flag::SecondHand) {
         return Err(errors::Error::Format(errors::Format::Flags));
     }
 

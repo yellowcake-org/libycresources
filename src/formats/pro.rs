@@ -642,14 +642,14 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub _sounds_ids: u32,
+            pub _sounds_ids: u8,
         }
 
         pub struct Instance {
             pub r#type: Type,
 
             pub light: super::common::world::Light,
-            pub script: super::common::script::Reference,
+            pub script: Option<super::common::script::Reference>,
             pub material: super::common::world::Material,
 
             pub actions: std::collections::HashSet<super::common::actions::Instance>,

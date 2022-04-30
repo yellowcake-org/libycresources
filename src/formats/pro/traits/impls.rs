@@ -324,3 +324,19 @@ impl TryFrom<[u8; 4]> for object::common::script::Reference {
         });
     }
 }
+
+impl TryFrom<u16> for object::common::world::Light {
+    type Error = parse::errors::Error;
+
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        match value {
+            0x0001 => Ok(Self::Vertical),
+            0x0800 => Ok(Self::Horizontal),
+            0x1000 => Ok(Self::NorthCorner),
+            0x2000 => Ok(Self::SouthCorner),
+            0x4000 => Ok(Self::EastCorner),
+            0x8000 => Ok(Self::WestCorner),
+            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data)),
+        }
+    }
+}
