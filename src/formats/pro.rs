@@ -71,6 +71,7 @@ pub mod object {
                 Inventory,
             }
 
+            #[derive(Debug)]
             pub struct Reference {
                 pub id: u16,
                 pub r#type: Type,
@@ -78,6 +79,7 @@ pub mod object {
         }
 
         pub mod script {
+            #[derive(Debug)]
             pub enum Type {
                 Spatial,
                 Item,
@@ -85,6 +87,7 @@ pub mod object {
                 Critter,
             }
 
+            #[derive(Debug)]
             pub struct Reference {
                 pub id: u16,
                 pub r#type: Type,
@@ -92,6 +95,7 @@ pub mod object {
         }
 
         pub mod world {
+            #[derive(Debug)]
             pub enum Material {
                 Glass,
                 Metal,
@@ -176,6 +180,7 @@ pub mod object {
                 CurrentRadiationLevel,
             }
 
+            #[derive(Debug)]
             pub enum Perk {
                 Awareness,
                 BonusHtHAttacks,
@@ -265,7 +270,7 @@ pub mod object {
                 Outdoorsman,
             }
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Gender {
                 Male,
                 Female,
@@ -282,7 +287,7 @@ pub mod object {
 
         pub mod combat {
             pub mod damage {
-                #[derive(PartialEq, Eq, Hash)]
+                #[derive(Debug, PartialEq, Eq, Hash)]
                 pub enum Type {
                     Default,
                     Laser,
@@ -298,6 +303,7 @@ pub mod object {
         }
 
         pub mod weapons {
+            #[derive(Debug)]
             pub enum Caliber {
                 Rocket,
                 FlamethrowerFuel,
@@ -316,14 +322,14 @@ pub mod object {
         }
 
         pub mod actions {
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub struct Usage {
                 pub itself: bool,
                 pub something: bool,
                 pub knees_down: bool,
             }
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Instance {
                 Look,
                 Talk,
@@ -345,7 +351,7 @@ pub mod object {
     pub mod item {
         use std::collections::HashSet;
 
-        #[derive(PartialEq, Eq, Hash)]
+        #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
             Hidden
         }
@@ -386,6 +392,7 @@ pub mod object {
 
             use super::super::common::{combat::damage, critter, sprite};
 
+            #[derive(Debug)]
             pub struct Appearance {
                 pub sprites: HashMap<critter::Gender, sprite::Reference>,
             }
@@ -526,8 +533,8 @@ pub mod object {
         pub mod ammo {
             pub mod adjustments {
                 pub struct Armor {
-                    pub class: u32,
-                    pub resistance: u32,
+                    pub class: i32,
+                    pub resistance: i32,
                 }
 
                 pub struct Damage {

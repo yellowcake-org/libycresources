@@ -84,10 +84,6 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let projectile_header = u16::from_be_bytes(projectile_header_bytes);
 
-    if 0x0500 != projectile_header {
-        return Err(errors::Error::Format(errors::Format::Consistency));
-    }
-
     let mut projectile_idx_bytes = [0u8; 2];
     match source.read_exact(&mut projectile_idx_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -95,6 +91,10 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     };
 
     let projectile_idx = u16::from_be_bytes(projectile_idx_bytes);
+
+    if 0xFFFF != projectile_idx && 0x0500 != projectile_header  {
+        return Err(errors::Error::Format(errors::Format::Consistency));
+    }
 
     let mut min_strength_bytes = [0u8; 4];
     match source.read_exact(&mut min_strength_bytes) {

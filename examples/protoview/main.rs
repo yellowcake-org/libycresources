@@ -7,7 +7,7 @@ use libycresources::formats::pro;
 pub(crate) mod print;
 
 #[derive(Parser)]
-#[clap(name = "fontview", version)]
+#[clap(name = "protoview", version)]
 struct Options {
     /// Path to the input proto file (.pro)
     #[clap(short, long)]
