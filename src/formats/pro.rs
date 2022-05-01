@@ -411,7 +411,7 @@ pub mod object {
         pub mod container {
             use std::collections::HashSet;
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Flag {
                 NoPickUp,
                 MagicHands,
@@ -557,7 +557,7 @@ pub mod object {
 
         pub mod misc {
             pub struct Connections {
-                pub power_item_id: u32,
+                pub power_item_id: Option<u32>,
             }
 
             pub struct Instance {

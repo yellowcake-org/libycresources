@@ -1,6 +1,7 @@
 use libycresources::formats::pro::object::item::Type;
 
 mod armor;
+mod container;
 mod ammo;
 mod misc;
 
@@ -27,7 +28,7 @@ pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) 
 
     match &item.r#type {
         Type::Armor(armor) => { armor::armor(armor) }
-        Type::Container(_) => {}
+        Type::Container(container) => { container::container(container) }
         Type::Drug(_) => {}
         Type::Weapon(_) => {}
         Type::Ammo(ammo) => { ammo::ammo(ammo) }

@@ -8,7 +8,14 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::misc::In
         Ok(value) => value,
     };
 
-    let item_pid = u32::from_be_bytes(item_pid_bytes);
+    let item_pid_raw = i32::from_be_bytes(item_pid_bytes);
+    let item_pid = match item_pid_raw {
+        -1 => None,
+        value => Some(match u32::try_from(value) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        })
+    };
 
     let mut caliber_bytes = [0u8; 4];
     match source.read_exact(&mut caliber_bytes) {
