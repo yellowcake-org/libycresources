@@ -1,3 +1,4 @@
+use std::io::ErrorKind;
 use super::super::*;
 use super::super::super::traits::TryFromOptional;
 
@@ -105,16 +106,23 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
     };
 
+    let mut damage_type = None;
+
     let mut damage_type_bytes = [0u8; 4];
     match source.read_exact(&mut damage_type_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let damage_type_raw = u32::from_be_bytes(damage_type_bytes);
-    let damage_type = match object::common::combat::damage::Type::try_from(damage_type_raw as u8) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(error) => {
+            match error.kind() {
+                ErrorKind::UnexpectedEof => {}
+                _ => return Err(errors::Error::Source)
+            }
+        }
+        Ok(_) => {
+            let damage_type_raw = u32::from_be_bytes(damage_type_bytes);
+            damage_type = Some(match object::common::combat::damage::Type::try_from(damage_type_raw as u8) {
+                Ok(value) => value,
+                Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+            });
+        }
     };
 
     Ok(object::critter::Instance {

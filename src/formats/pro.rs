@@ -248,7 +248,7 @@ pub mod object {
                 CombatArmor,
             }
 
-            #[derive(PartialEq, Eq, Hash, Copy, Clone)]
+            #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
             pub enum Skill {
                 SmallGuns,
                 BigGuns,
@@ -277,6 +277,7 @@ pub mod object {
             }
 
             pub mod body {
+                #[derive(Debug)]
                 pub enum Type {
                     Biped,
                     Quadruped,
@@ -593,7 +594,7 @@ pub mod object {
     pub mod critter {
         use std::collections::{HashMap, HashSet};
 
-        #[derive(PartialEq, Eq, Hash)]
+        #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
             BarterAvailable,
             NoSteal,
@@ -609,6 +610,7 @@ pub mod object {
         }
 
         pub mod murder {
+            #[derive(Debug)]
             pub enum Type {
                 Men,
                 Women,
@@ -631,6 +633,7 @@ pub mod object {
                 BigBadBoss,
             }
 
+            #[derive(Debug)]
             pub struct Result {
                 pub r#type: Type,
                 pub experience: u32,
@@ -650,7 +653,7 @@ pub mod object {
             pub team: u32,
 
             pub murder: murder::Result,
-            pub damage: super::common::combat::damage::Type,
+            pub damage: Option<super::common::combat::damage::Type>, // Fallout 2 only
 
             pub body: super::common::critter::body::Type,
             pub head: Option<super::common::sprite::Reference>,
