@@ -8,6 +8,7 @@ mod misc;
 
 pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) {
     println!("Prototype is Item");
+    println!();
     println!("Flags: {:?}", item.flags);
     println!("Actions: {:?}", item.actions);
     println!("Script: {:?}", item.script);
