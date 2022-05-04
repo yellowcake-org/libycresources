@@ -326,14 +326,11 @@ impl TryFrom<[u8; 4]> for object::common::script::Reference {
     }
 }
 
-impl TryFrom<[u8; 4]> for object::common::map::Destination {
+impl TryFrom<&[u8; 4]> for object::common::map::Destination {
     type Error = parse::errors::Error;
 
-    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        let tile = u32::from_be_bytes(match &value[1..4].try_into() {
-            Err(_) => return Err(parse::errors::Error::Source),
-            Ok(value) => *value,
-        });
+    fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
+        let tile = u32::from_be_bytes([0u8, value[1], value[2], value[3]]);
 
         let floor: object::common::map::Floor = match value[0] & 0xFF {
             0xF0 => object::common::map::Floor::Zero,

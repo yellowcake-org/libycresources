@@ -739,7 +739,7 @@ pub mod object {
 
             pub struct Instance {
                 pub direction: Direction,
-                pub destination: super::super::common::map::Destination,
+                pub destination: Option<super::super::common::map::Destination>,
             }
         }
 
