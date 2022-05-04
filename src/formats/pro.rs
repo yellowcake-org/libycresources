@@ -138,7 +138,7 @@ pub mod object {
         }
 
         pub mod critter {
-            #[derive(PartialEq, Eq, Hash, Copy, Clone)]
+            #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
             pub enum Statistic {
                 Strength,
                 Perception,
@@ -424,28 +424,34 @@ pub mod object {
         }
 
         pub mod drug {
+            use std::collections::HashMap;
             use std::ops::RangeInclusive;
 
             use crate::common::types::ScaledValue;
+            use crate::formats::pro::object::common::critter::Statistic;
 
+            #[derive(Debug)]
             pub enum Amount {
-                Fixed(u32),
-                Random(std::ops::RangeInclusive<u32>),
+                Fixed(i32),
+                Random(std::ops::RangeInclusive<i32>),
             }
 
+            #[derive(Debug)]
             pub struct Effect {
                 pub delay: Option<std::time::Duration>,
-                pub impact: std::collections::HashMap<super::super::common::critter::Statistic, Amount>,
+                pub impact: Amount,
             }
 
+            #[derive(Debug)]
             pub struct Addiction {
                 pub perk: super::super::common::critter::Perk,
                 pub delay: std::time::Duration,
                 pub chance: ScaledValue<u8, RangeInclusive<u8>>,
             }
 
+            #[derive(Debug)]
             pub struct Instance {
-                pub effects: [Effect; 3],
+                pub effects: HashMap<Statistic, [Effect; 3]>,
                 pub addiction: Option<Addiction>,
             }
         }
