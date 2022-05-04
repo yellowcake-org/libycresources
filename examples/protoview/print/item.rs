@@ -6,6 +6,7 @@ mod drug;
 mod weapon;
 mod ammo;
 mod misc;
+mod key;
 
 pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) {
     println!("Prototype is Item");
@@ -36,6 +37,6 @@ pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) 
         Type::Weapon(weapon) => { weapon::weapon(weapon) }
         Type::Ammo(ammo) => { ammo::ammo(ammo) }
         Type::Misc(misc) => { misc::misc(misc) }
-        Type::Key(_) => {}
+        Type::Key(key) => { key::key(key) }
     }
 }
