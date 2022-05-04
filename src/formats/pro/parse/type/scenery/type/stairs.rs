@@ -1,3 +1,5 @@
+use crate::formats::pro::traits::TryFromOptional;
+
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::stairs::Instance, errors::Error> {
@@ -21,7 +23,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::stair
                 Ok(value) => value,
                 Err(error) => return Err(error),
             },
-            target: match object::common::map::Destination::try_from(&destination_bytes) {
+            target: match object::common::map::Destination::
+            try_from_optional(&destination_bytes, &[0xFF, 0xFF, 0xFF, 0xFF]) {
                 Ok(value) => value,
                 Err(error) => return Err(error),
             },

@@ -715,7 +715,7 @@ pub mod object {
             #[derive(Debug)]
             pub struct Destination {
                 pub map: super::super::common::map::Map,
-                pub target: super::super::common::map::Destination,
+                pub target: Option<super::super::common::map::Destination>,
             }
 
             pub struct Instance {
