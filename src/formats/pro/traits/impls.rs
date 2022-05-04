@@ -129,7 +129,7 @@ impl TryFrom<u32> for object::common::weapons::Caliber {
             11 => Ok(Self::TwelveGauge),
             12 => Ok(Self::NineMillimeter),
             13 => Ok(Self::Bb),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            other => Ok(Self::Unknown(other))
         }
     }
 }

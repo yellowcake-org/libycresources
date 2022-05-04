@@ -8,6 +8,7 @@ pub(crate) fn drug(drug: &libycresources::formats::pro::object::item::drug::Inst
         for effect in effect.1 {
             println!("{:?}", effect)
         }
+
         println!();
     }
 

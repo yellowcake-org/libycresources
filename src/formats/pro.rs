@@ -318,6 +318,7 @@ pub mod object {
                 TwelveGauge,
                 NineMillimeter,
                 Bb,
+                Unknown(u32)
             }
         }
 
