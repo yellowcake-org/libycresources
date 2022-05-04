@@ -12,11 +12,13 @@ pub(crate) fn drug(drug: &libycresources::formats::pro::object::item::drug::Inst
     }
 
     match &drug.addiction {
-        None => println!("Non-addictive"),
+        None => println!("Drug is non-addictive"),
         Some(addiction) => {
-            println!("Addictive: {:?}", addiction.perk);
-            println!("Chance: {:?}", addiction.chance);
+            println!("Drug is addictive");
+            println!();
+            println!("Perk: {:?}", addiction.perk);
             println!("Delay: {:?}", addiction.delay);
+            println!("Chance: {:?}", addiction.chance);
         }
     }
 }
