@@ -135,12 +135,16 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 };
 
                 let effect1 = object::item::drug::Effect {
-                    delay: None,
+                    delay: if effect1_duration_raw > 0 {
+                        Some(Duration::new(effect1_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: object::item::drug::Amount::Fixed(effect1_amount0_raw),
                 };
 
                 let effect2 = object::item::drug::Effect {
-                    delay: None,
+                    delay: if effect2_duration_raw > 0 {
+                        Some(Duration::new(effect2_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: object::item::drug::Amount::Fixed(effect2_amount0_raw),
                 };
 
@@ -161,12 +165,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                     Err(error) => return Err(error)
                 };
 
-                let delay = if effect1_duration_raw > 0 {
-                    Some(Duration::new(effect1_duration_raw as u64 * 60, 0))
-                } else { None };
-
                 let effect0 = object::item::drug::Effect {
-                    delay,
+                    delay: None,
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect0_amount0_raw..=effect0_amount1_raw)
                     } else {
@@ -175,7 +175,9 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 };
 
                 let effect1 = object::item::drug::Effect {
-                    delay,
+                    delay: if effect1_duration_raw > 0 {
+                        Some(Duration::new(effect1_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect1_amount0_raw..=effect1_amount1_raw)
                     } else {
@@ -184,7 +186,9 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 };
 
                 let effect2 = object::item::drug::Effect {
-                    delay,
+                    delay: if effect2_duration_raw > 0 {
+                        Some(Duration::new(effect2_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect2_amount0_raw..=effect2_amount1_raw)
                     } else {
@@ -209,12 +213,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                     Err(error) => return Err(error)
                 };
 
-                let delay = if effect2_duration_raw > 0 {
-                    Some(Duration::new(effect2_duration_raw as u64 * 60, 0))
-                } else { None };
-
                 let effect0 = object::item::drug::Effect {
-                    delay,
+                    delay: None,
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect0_amount1_raw..=effect0_amount2_raw)
                     } else {
@@ -223,7 +223,9 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 };
 
                 let effect1 = object::item::drug::Effect {
-                    delay,
+                    delay: if effect1_duration_raw > 0 {
+                        Some(Duration::new(effect1_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect1_amount1_raw..=effect1_amount2_raw)
                     } else {
@@ -232,7 +234,9 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 };
 
                 let effect2 = object::item::drug::Effect {
-                    delay,
+                    delay: if effect2_duration_raw > 0 {
+                        Some(Duration::new(effect2_duration_raw as u64 * 60, 0))
+                    } else { None },
                     impact: if prev == -2 {
                         object::item::drug::Amount::Random(effect2_amount1_raw..=effect2_amount2_raw)
                     } else {
