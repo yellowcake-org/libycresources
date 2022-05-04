@@ -4,12 +4,12 @@ use crate::formats::pro::object::common::critter::Statistic;
 use crate::formats::pro::parse::*;
 
 pub(crate) fn map<S: Read>(source: &mut S) ->
-Result<HashMap<object::common::critter::Statistic, u32>, errors::Error> {
+Result<HashMap<object::common::critter::Statistic, i32>, errors::Error> {
     let mut statistics = HashMap::new();
 
     fn consume<S: Read>(statistic: object::common::critter::Statistic,
                         source: &mut S,
-                        into: &mut HashMap<object::common::critter::Statistic, u32>) ->
+                        into: &mut HashMap<object::common::critter::Statistic, i32>) ->
                         Result<(), errors::Error> {
         let mut value_bytes = [0u8; 4];
         match source.read_exact(&mut value_bytes) {
@@ -17,7 +17,7 @@ Result<HashMap<object::common::critter::Statistic, u32>, errors::Error> {
             Ok(value) => value,
         };
 
-        let value = u32::from_be_bytes(value_bytes);
+        let value = i32::from_be_bytes(value_bytes);
         into.insert(statistic, value);
 
         Ok(())

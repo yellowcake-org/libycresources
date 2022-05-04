@@ -3,6 +3,7 @@ use libycresources::formats::pro::object::Type;
 
 mod item;
 mod critter;
+mod scenery;
 
 pub fn prototype(prototype: &pro::Prototype) {
     println!("Object ID: {:?}", prototype.id);
@@ -18,7 +19,7 @@ pub fn prototype(prototype: &pro::Prototype) {
     match &prototype.r#type {
         Type::Item(item) => { item::item(item) }
         Type::Critter(critter) => { critter::critter(critter) }
-        Type::Scenery(_) => {}
+        Type::Scenery(scenery) => { scenery::scenery(scenery) }
         Type::Wall(_) => {}
         Type::Tile(_) => {}
         Type::Misc(_) => {}

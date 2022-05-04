@@ -107,7 +107,7 @@ pub mod object {
                 Leather,
             }
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Light {
                 Vertical,
                 Horizontal,
@@ -119,17 +119,20 @@ pub mod object {
         }
 
         pub mod map {
+            #[derive(Debug)]
             pub enum Map {
                 Local(u32),
                 World,
             }
 
+            #[derive(Debug)]
             pub enum Floor {
                 Zero,
                 First,
                 Second,
             }
 
+            #[derive(Debug)]
             pub struct Destination {
                 // TODO: Coordinates!
                 pub tile: u32,
@@ -641,8 +644,8 @@ pub mod object {
         }
 
         pub struct Statistics {
-            pub basic: HashMap<super::common::critter::Statistic, u32>,
-            pub bonuses: HashMap<super::common::critter::Statistic, u32>,
+            pub basic: HashMap<super::common::critter::Statistic, i32>,
+            pub bonuses: HashMap<super::common::critter::Statistic, i32>,
         }
 
         pub struct Connections {
@@ -696,7 +699,7 @@ pub mod object {
         pub mod door {
             use std::collections::HashSet;
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Flags {
                 Passable
             }
@@ -708,6 +711,7 @@ pub mod object {
         }
 
         pub mod stairs {
+            #[derive(Debug)]
             pub struct Destination {
                 pub map: super::super::common::map::Map,
                 pub target: super::super::common::map::Destination,
@@ -726,6 +730,7 @@ pub mod object {
         }
 
         pub mod ladder {
+            #[derive(Debug)]
             pub enum Direction {
                 Top,
                 Bottom,
