@@ -156,6 +156,7 @@ impl TryFrom<i32> for object::common::critter::Perk {
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
+            0 => Ok(Self::Unknown(0)),
             1 => Ok(Self::Awareness),
             2 => Ok(Self::BonusHtHAttacks),
             3 => Ok(Self::BonusHtHDamage),

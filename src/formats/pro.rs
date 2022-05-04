@@ -249,6 +249,7 @@ pub mod object {
                 WeaponKnockback,
                 PoweredArmor,
                 CombatArmor,
+                Unknown(u32)
             }
 
             #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]

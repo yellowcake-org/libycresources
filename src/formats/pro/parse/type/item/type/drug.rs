@@ -266,6 +266,11 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     };
 
     let addiction_perk_raw = i32::from_be_bytes(addiction_perk_bytes);
+    let addiction_perk = match object::common::critter::Perk::
+    try_from_optional(addiction_perk_raw, -1) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+    };
 
     let mut addiction_delay_bytes = [0u8; 4];
     match source.read_exact(&mut addiction_delay_bytes) {
@@ -274,12 +279,6 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     };
 
     let addiction_delay_raw = u32::from_be_bytes(addiction_delay_bytes);
-
-    let addiction_perk = match object::common::critter::Perk::
-    try_from_optional(addiction_perk_raw, -1) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-    };
 
     Ok(object::item::drug::Instance {
         effects,
