@@ -590,7 +590,7 @@ pub mod object {
 
         pub mod key {
             pub struct Instance {
-                pub code: u32,
+                pub code: Option<u32>,
             }
         }
     }

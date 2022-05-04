@@ -1,3 +1,4 @@
+use crate::formats::pro::traits::TryFromOptional;
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::key::Instance, errors::Error> {
@@ -7,7 +8,10 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::key::Ins
         Err(error) => return Err(errors::Error::Read(error)),
     };
 
-    let code = u32::from_be_bytes(code_bytes);
+    let code = match u32::try_from_optional(i32::from_be_bytes(code_bytes), -1) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Consistency))
+    };
 
     Ok(object::item::key::Instance { code })
 }
