@@ -9,7 +9,7 @@ pub(crate) mod print;
 #[derive(Parser)]
 #[clap(name = "protoview", version)]
 struct Options {
-    /// Path to the input proto file (.pro)
+    /// Path to the input prototype file (.pro)
     #[clap(short, long)]
     input: String,
     #[clap(subcommand)]
