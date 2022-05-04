@@ -5,6 +5,7 @@ mod item;
 mod critter;
 mod scenery;
 mod wall;
+mod tile;
 
 pub fn prototype(prototype: &pro::Prototype) {
     println!("Object ID: {:?}", prototype.id);
@@ -22,7 +23,7 @@ pub fn prototype(prototype: &pro::Prototype) {
         Type::Critter(critter) => { critter::critter(critter) }
         Type::Scenery(scenery) => { scenery::scenery(scenery) }
         Type::Wall(wall) => { wall::wall(wall) }
-        Type::Tile(_) => {}
+        Type::Tile(tile) => { tile::tile(tile) }
         Type::Misc(_) => {}
     }
 }
