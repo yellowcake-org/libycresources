@@ -92,7 +92,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let projectile_idx = u16::from_be_bytes(projectile_idx_bytes);
 
-    if 0xFFFF != projectile_idx && 0x0500 != projectile_header  {
+    if 0xFFFF != projectile_idx && 0x0500 != projectile_header {
         return Err(errors::Error::Format(errors::Format::Consistency));
     }
 
@@ -120,22 +120,28 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let cost2 = u32::from_be_bytes(cost2_bytes);
 
-    let attack1 = object::item::weapon::attack::Instance {
-        cost: cost1,
-        mode: match object::item::weapon::attack::Mode::try_from_optional(attack1_mode_raw, 0) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-        },
-        range: 0..=dmg_range_max1,
+    let attack1 = match object::item::weapon::attack::Mode::
+    try_from_optional(attack1_mode_raw, 0) {
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Ok(value) => value.map(|mode| {
+            object::item::weapon::attack::Instance {
+                cost: cost1,
+                mode,
+                range: 0..=dmg_range_max1,
+            }
+        }),
     };
 
-    let attack2 = object::item::weapon::attack::Instance {
-        cost: cost2,
-        mode: match object::item::weapon::attack::Mode::try_from_optional(attack2_mode_raw, 0) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-        },
-        range: 0..=dmg_range_max2,
+    let attack2 = match object::item::weapon::attack::Mode::
+    try_from_optional(attack2_mode_raw, 0) {
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Ok(value) => value.map(|mode| {
+            object::item::weapon::attack::Instance {
+                cost: cost2,
+                mode,
+                range: 0..=dmg_range_max2,
+            }
+        }),
     };
 
     let mut crit_list_idx_bytes = [0u8; 4];
@@ -144,7 +150,11 @@ pub(crate) fn instance<S: Read>(source: &mut S,
         Ok(value) => value,
     };
 
-    let crit_list_idx = u32::from_be_bytes(crit_list_idx_bytes);
+    let crit_list_idx =
+        match u16::try_from_optional(i32::from_be_bytes(crit_list_idx_bytes), -1) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Consistency)),
+        };
 
     let mut perk_bytes = [0u8; 4];
     match source.read_exact(&mut perk_bytes) {
@@ -174,6 +184,10 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     };
 
     let caliber_raw = u32::from_be_bytes(caliber_bytes);
+    let caliber = match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
+        Ok(value) => value,
+        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+    };
 
     let mut ammo_pid_bytes = [0u8; 4];
     match source.read_exact(&mut ammo_pid_bytes) {
@@ -181,7 +195,11 @@ pub(crate) fn instance<S: Read>(source: &mut S,
         Ok(value) => value,
     };
 
-    let ammo_pid = u32::from_be_bytes(ammo_pid_bytes);
+    let ammo_pid =
+        match u16::try_from_optional(i32::from_be_bytes(ammo_pid_bytes), -1) {
+            Ok(value) => value,
+            Err(_) => return Err(errors::Error::Format(errors::Format::Consistency)),
+        };
 
     let mut capacity_bytes = [0u8; 4];
     match source.read_exact(&mut capacity_bytes) {
@@ -207,19 +225,20 @@ pub(crate) fn instance<S: Read>(source: &mut S,
         requirements: object::item::weapon::Requirements {
             strength: min_strength
         },
-        rounds: object::item::weapon::Rounds {
-            burst: burst_count,
-            magazine: capacity,
-        },
-        caliber: match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
-        },
+        ammunition: caliber.map(|caliber| {
+            object::item::weapon::Ammunition {
+                rounds: object::item::weapon::Rounds {
+                    burst: burst_count,
+                    magazine: capacity,
+                },
+                caliber,
+            }
+        }),
         perk,
         connections: object::item::weapon::Connections {
             ammo_item_id: ammo_pid,
             failure_list_id: crit_list_idx,
-            projectile_misc_id: projectile_idx,
+            projectile_misc_id: if projectile_idx != 0xFFFF { Some(projectile_idx) } else { None },
             _sounds_ids: sound_ids,
         },
     })

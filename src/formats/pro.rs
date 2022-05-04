@@ -318,7 +318,7 @@ pub mod object {
                 TwelveGauge,
                 NineMillimeter,
                 Bb,
-                Unknown(u32)
+                Unknown(u32),
             }
         }
 
@@ -460,19 +460,20 @@ pub mod object {
         pub mod weapon {
             use std::collections::HashSet;
 
-            #[derive(PartialEq, Eq, Hash)]
+            #[derive(Debug, PartialEq, Eq, Hash)]
             pub enum Flag {
                 BigGun,
                 SecondHand,
             }
 
+            #[derive(Debug)]
             pub struct Damage {
                 pub value: std::ops::RangeInclusive<u32>,
                 pub r#type: super::super::common::combat::damage::Type,
             }
 
             pub mod attack {
-                #[derive(PartialEq, Eq, Hash)]
+                #[derive(Debug, PartialEq, Eq, Hash)]
                 pub enum Mode {
                     Punch,
                     Kick,
@@ -484,14 +485,15 @@ pub mod object {
                     Flame,
                 }
 
-                #[derive(PartialEq, Eq, Hash)]
+                #[derive(Debug, PartialEq, Eq, Hash)]
                 pub struct Instance {
                     pub cost: u32,
-                    pub mode: Option<Mode>,
+                    pub mode: Mode,
                     pub range: std::ops::RangeInclusive<u32>,
                 }
             }
 
+            #[derive(Debug)]
             pub enum Animation {
                 Knife,
                 Club,
@@ -505,19 +507,27 @@ pub mod object {
                 RocketLauncher,
             }
 
+            #[derive(Debug)]
             pub struct Rounds {
                 pub burst: u32,
                 pub magazine: u32,
             }
 
+            #[derive(Debug)]
+            pub struct Ammunition {
+                pub rounds: Rounds,
+                pub caliber: super::super::common::weapons::Caliber,
+            }
+
+            #[derive(Debug)]
             pub struct Requirements {
                 pub strength: u32,
             }
 
             pub struct Connections {
-                pub ammo_item_id: u32,
-                pub failure_list_id: u32,
-                pub projectile_misc_id: u16,
+                pub ammo_item_id: Option<u16>,
+                pub failure_list_id: Option<u16>,
+                pub projectile_misc_id: Option<u16>,
 
                 pub _sounds_ids: u8,
             }
@@ -525,12 +535,11 @@ pub mod object {
             pub struct Instance {
                 pub flags: HashSet<Flag>,
                 pub damage: Damage,
-                pub attacks: [attack::Instance; 2],
+                pub attacks: [Option<attack::Instance>; 2],
                 pub animation: Option<Animation>,
                 pub requirements: Requirements,
 
-                pub rounds: Rounds,
-                pub caliber: Option<super::super::common::weapons::Caliber>,
+                pub ammunition: Option<Ammunition>,
 
                 pub perk: Option<super::super::common::critter::Perk>,
                 pub connections: Connections,
