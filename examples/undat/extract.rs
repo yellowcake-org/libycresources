@@ -1,7 +1,7 @@
-use libycresources::formats::dat;
-
 use std::io::{Read, Seek};
 use std::path::PathBuf;
+
+use libycresources::formats::dat;
 
 #[derive(Debug)]
 pub(crate) enum Error {
@@ -13,9 +13,7 @@ pub(crate) enum Error {
 }
 
 pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error>
-where
-    R: Read + Seek,
-{
+    where R: Read + Seek {
     let mut path = PathBuf::new();
 
     for (depth, _, directory) in tree.iter() {

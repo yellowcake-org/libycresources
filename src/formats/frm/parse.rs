@@ -1,10 +1,9 @@
-use super::*;
-
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
-use std::collections::HashMap;
+use super::*;
 
 #[derive(Debug)]
 pub enum Error {

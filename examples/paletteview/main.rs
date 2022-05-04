@@ -1,10 +1,11 @@
-pub mod render;
+use std::fs::File;
+
+use clap::Parser;
 
 use libycresources::common::graphics;
 use libycresources::formats::pal;
 
-use clap::Parser;
-use std::fs::File;
+pub mod render;
 
 #[derive(Parser)]
 #[clap(name = "paletteview", version)]
@@ -52,7 +53,7 @@ fn main() {
 
     match options.action {
         Action::Info => {
-            let flatten_colors: Vec<graphics::ColorPixel> =
+            let flatten_colors: Vec<graphics::Pixel> =
                 palette.colors.into_iter().flatten().collect();
 
             println!("Palette contains {:} valid colors.", flatten_colors.len());

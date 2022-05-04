@@ -1,12 +1,14 @@
-pub mod parse;
+use std::ops::Range;
 
-use super::super::common::graphics::Pixel;
+use crate::common::types::ScaledValue;
+
+pub mod parse;
 
 pub struct Glyph {
     pub width: u16,
     pub height: u16,
 
-    pub pixels: Vec<Pixel>,
+    pub dots: Vec<ScaledValue<usize, Range<usize>>>,
 }
 
 pub struct Spacing {

@@ -1,8 +1,8 @@
-use super::File;
-
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::mem::size_of;
+
+use super::File;
 
 #[derive(Debug)]
 pub enum Error {

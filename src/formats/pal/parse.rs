@@ -1,9 +1,11 @@
-use super::Palette;
-use crate::common::graphics::{ColorPixel, Pixel};
-
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
+
+use crate::common::graphics::Pixel;
+use crate::common::types::ScaledValue;
+
+use super::Palette;
 
 #[derive(Debug)]
 pub enum Error {
@@ -61,16 +63,16 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
     let colors = colors.map(
         |(red, green, blue, is_regular): (usize, usize, usize, bool)| {
             if is_regular {
-                Some(ColorPixel {
-                    red: Pixel {
+                Some(Pixel {
+                    red: ScaledValue {
                         value: red,
                         scale: scale.start..scale.end,
                     },
-                    green: Pixel {
+                    green: ScaledValue {
                         value: green,
                         scale: scale.start..scale.end,
                     },
-                    blue: Pixel {
+                    blue: ScaledValue {
                         value: blue,
                         scale: scale.start..scale.end,
                     },

@@ -1,8 +1,10 @@
-use super::{Font, Glyph, Pixel, Spacing};
-
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
+
+use crate::common::types::ScaledValue;
+
+use super::{Font, Glyph, Spacing};
 
 #[derive(Debug)]
 pub enum Error {
@@ -112,9 +114,9 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
         let glyphs = data.map(|(width, height, bytes)| Glyph {
             width,
             height,
-            pixels: bytes
+            dots: bytes
                 .iter()
-                .map(|byte| Pixel {
+                .map(|byte| ScaledValue {
                     value: *byte as usize,
                     scale: 0..10,
                 })

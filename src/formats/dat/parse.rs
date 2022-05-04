@@ -1,10 +1,10 @@
-pub mod iterator;
-
-use super::{Directory, File};
-
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
+
+use super::{Directory, File};
+
+pub mod iterator;
 
 #[derive(Debug)]
 pub enum Error {

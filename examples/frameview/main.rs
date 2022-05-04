@@ -1,9 +1,10 @@
-pub mod render;
+use std::fs::File;
+
+use clap::Parser;
 
 use libycresources::formats::{frm, pal};
 
-use clap::Parser;
-use std::fs::File;
+pub mod render;
 
 #[derive(Parser)]
 #[clap(name = "frameview", version)]
@@ -87,7 +88,7 @@ fn main() {
             let directory_name = match std::path::Path::new(&options.input).file_stem() {
                 Some(value) => value,
                 None => {
-                    eprintln!("Couldn't determine palette output filename.");
+                    eprintln!("Couldn't determine frame output filename.");
                     return;
                 }
             };
