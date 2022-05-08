@@ -2,10 +2,12 @@ use std::io::{Read, Seek, SeekFrom};
 
 use super::*;
 
-pub mod errors;
-pub mod flags;
-pub mod defaults;
-pub mod variables;
+mod errors;
+
+mod flags;
+mod defaults;
+mod variables;
+mod tiles;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
@@ -103,6 +105,11 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
+    let tiles = match tiles::tiles(source, &elevations) {
+        Ok(value) => value,
+        Err(error) => return Err(error),
+    };
+
     Ok(Map {
         id,
         version,
@@ -110,8 +117,8 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         defaults,
         variables: common::Variables { local: local_vars, global: global_vars },
         flags,
-        elevations,
         ticks,
         darkness,
+        tiles
     })
 }

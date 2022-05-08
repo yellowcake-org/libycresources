@@ -1,7 +1,7 @@
 use std::io::Read;
 use super::*;
 
-pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, HashSet<u8>), errors::Error> {
+pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, [Option<()>; 3]), errors::Error> {
     let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -9,7 +9,7 @@ pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, HashSet<
     };
 
     let mut flags: HashSet<common::Flag> = HashSet::new();
-    let mut elevations: HashSet<u8> = HashSet::new();
+    let mut elevations = [None, None, None];
 
     if (flags_bytes[3] & 0x01) != 0x00 {
         if !flags.insert(common::Flag::Save) {
@@ -18,21 +18,15 @@ pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, HashSet<
     }
 
     if (flags_bytes[3] & 0x02) == 0x00 {
-        if !elevations.insert(0) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
+        elevations[0] = Some(());
     }
 
     if (flags_bytes[3] & 0x04) == 0x00 {
-        if !elevations.insert(1) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
+        elevations[1] = Some(());
     }
 
     if (flags_bytes[3] & 0x08) == 0x00 {
-        if !elevations.insert(2) {
-            return Err(errors::Error::Format(errors::Format::Flags));
-        }
+        elevations[2] = Some(());
     }
 
     Ok((flags, elevations))

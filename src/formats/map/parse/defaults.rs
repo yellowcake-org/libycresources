@@ -1,10 +1,10 @@
 use std::io::Read;
 
 use crate::common::types::ScaledValue;
+use crate::formats::map::defaults::Instance;
+use crate::formats::map::parse::errors;
 
-use super::*;
-
-pub fn instance<S: Read>(source: &mut S) -> Result<common::Defaults, errors::Error> {
+pub fn instance<S: Read>(source: &mut S) -> Result<Instance, errors::Error> {
     let mut default_position_bytes = [0u8; 4];
     match source.read_exact(&mut default_position_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -38,7 +38,7 @@ pub fn instance<S: Read>(source: &mut S) -> Result<common::Defaults, errors::Err
         _ => return Err(errors::Error::Format(errors::Format::Data))
     };
 
-    return Ok(common::Defaults {
+    return Ok(Instance {
         position: default_position,
         elevation: default_elevation,
         orientation: default_orientation,
