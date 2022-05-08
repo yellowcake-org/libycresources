@@ -1,7 +1,7 @@
 use std::io::Read;
 
 use crate::common::types::ScaledValue;
-use crate::formats::map::defaults::Instance;
+use crate::formats::map::defaults::{Instance, Position};
 use crate::formats::map::parse::errors;
 
 pub fn instance<S: Read>(source: &mut S) -> Result<Instance, errors::Error> {
@@ -11,8 +11,17 @@ pub fn instance<S: Read>(source: &mut S) -> Result<Instance, errors::Error> {
         Ok(value) => value,
     };
 
+    const SCALE: std::ops::Range<u8> = 0u8..200;
     let default_position = match u32::from_be_bytes(default_position_bytes) {
-        value if (0..40000).contains(&value) => ScaledValue { value: value as u16, scale: 0u16..40000 },
+        value if (0..(SCALE.end as u32).pow(2)).contains(&value) => {
+            let x = value / SCALE.end as u32;
+            let y = value - (x * SCALE.end as u32);
+
+            Position {
+                x: ScaledValue { value: x as u8, scale: SCALE },
+                y: ScaledValue { value: y as u8, scale: SCALE },
+            }
+        }
         _ => return Err(errors::Error::Format(errors::Format::Data))
     };
 

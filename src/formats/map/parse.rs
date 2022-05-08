@@ -119,6 +119,6 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         flags,
         ticks,
         darkness,
-        tiles
+        tiles,
     })
 }

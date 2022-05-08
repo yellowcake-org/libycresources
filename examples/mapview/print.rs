@@ -27,5 +27,5 @@ pub fn map(map: &map::Map) {
     println!("Global: {:?}", map.variables.global);
     println!();
 
-    self::tiles::print(map);
+    self::tiles::tiles(map);
 }

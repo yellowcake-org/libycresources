@@ -1,4 +1,5 @@
 use std::io::Read;
+
 use super::*;
 
 pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, [Option<()>; 3]), errors::Error> {

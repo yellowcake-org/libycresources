@@ -35,7 +35,12 @@ pub mod common {
 pub mod defaults {
     use crate::common::types::ScaledValue;
 
-    type Position = ScaledValue<u16, std::ops::Range<u16>>;
+    #[derive(Debug)]
+    pub struct Position {
+        pub x: ScaledValue<u8, std::ops::Range<u8>>,
+        pub y: ScaledValue<u8, std::ops::Range<u8>>
+    }
+
     type Elevation = ScaledValue<u8, std::ops::Range<u8>>;
     type Orientation = ScaledValue<u8, std::ops::Range<u8>>;
 

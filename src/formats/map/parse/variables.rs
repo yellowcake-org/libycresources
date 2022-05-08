@@ -1,4 +1,5 @@
 use std::io::Read;
+
 use super::*;
 
 pub fn set<S: Read>(source: &mut S, count: u32) -> Result<HashSet<i32>, errors::Error> {
