@@ -53,7 +53,8 @@ pub mod defaults {
 }
 
 pub mod tiles {
-    type Surface = [[Option<u16>; 100]; 100];
+    const SIDE_SIZE: usize = 100;
+    type Surface = [[Option<u16>; SIDE_SIZE]; SIDE_SIZE];
 
     #[derive(Debug)]
     pub struct Instance {
