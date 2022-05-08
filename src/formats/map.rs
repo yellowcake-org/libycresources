@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 pub mod parse;
 
+#[derive(Debug)]
 pub struct Map {
     pub id: u32,
     pub version: u32,
@@ -23,12 +24,13 @@ pub mod common {
     type Elevation = ScaledValue<u8, std::ops::Range<u8>>;
     type Orientation = ScaledValue<u8, std::ops::Range<u8>>;
 
+    #[derive(Debug)]
     pub struct Defaults {
         pub position: Position,
         pub elevation: Elevation,
         pub orientation: Orientation,
     }
 
-    #[derive(PartialEq, Eq, Hash)]
+    #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
 }
