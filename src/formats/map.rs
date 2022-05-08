@@ -9,6 +9,7 @@ pub struct Map {
     pub filename: String,
 
     pub defaults: common::Defaults,
+    pub variables: common::Variables,
 
     pub flags: HashSet<common::Flag>,
     pub elevations: HashSet<u8>,
@@ -18,6 +19,7 @@ pub struct Map {
 }
 
 pub mod common {
+    use std::collections::HashSet;
     use crate::common::types::ScaledValue;
 
     type Position = ScaledValue<u16, std::ops::Range<u16>>;
@@ -33,4 +35,10 @@ pub mod common {
 
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
+
+    #[derive(Debug)]
+    pub struct Variables {
+        pub local: HashSet<i32>,
+        pub global: HashSet<i32>,
+    }
 }

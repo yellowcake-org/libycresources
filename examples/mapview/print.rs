@@ -19,4 +19,10 @@ pub fn map(map: &map::Map) {
     println!("Position: {:?}", map.defaults.position);
     println!("Elevation: {:?}", map.defaults.elevation);
     println!("Orientation: {:?}", map.defaults.orientation);
+    println!();
+
+    println!("Variables");
+    println!();
+    println!("Global: {:?}", map.variables.global);
+    println!("Local: {:?}", map.variables.local);
 }

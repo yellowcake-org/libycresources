@@ -3,8 +3,9 @@ use std::io::{Read, Seek, SeekFrom};
 use super::*;
 
 pub mod errors;
-pub mod defaults;
 pub mod flags;
+pub mod defaults;
+pub mod variables;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
@@ -92,11 +93,22 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         return Err(errors::Error::Read(error));
     }
 
+    let global_vars = match variables::set(source, global_vars_count) {
+        Ok(value) => value,
+        Err(error) => return Err(error),
+    };
+
+    let local_vars = match variables::set(source, local_vars_count) {
+        Ok(value) => value,
+        Err(error) => return Err(error),
+    };
+
     Ok(Map {
         id,
         version,
         filename,
         defaults,
+        variables: common::Variables { local: local_vars, global: global_vars },
         flags,
         elevations,
         ticks,
