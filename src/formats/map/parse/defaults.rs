@@ -1,7 +1,8 @@
 use std::io::Read;
 
 use crate::common::types::ScaledValue;
-use crate::formats::map::defaults::{Instance, Position};
+use crate::formats::map::common::Position;
+use crate::formats::map::defaults::Instance;
 use crate::formats::map::parse::errors;
 
 pub fn instance<S: Read>(source: &mut S) -> Result<Instance, errors::Error> {

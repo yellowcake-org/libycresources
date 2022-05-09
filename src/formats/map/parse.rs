@@ -8,6 +8,7 @@ mod flags;
 mod defaults;
 mod variables;
 mod tiles;
+mod blueprints;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
@@ -105,7 +106,12 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
-    let tiles = match tiles::tiles(source, &elevations) {
+    let tiles = match tiles::list(source, &elevations) {
+        Ok(value) => value,
+        Err(error) => return Err(error),
+    };
+
+    let _blueprints = match blueprints::list(source) {
         Ok(value) => value,
         Err(error) => return Err(error),
     };

@@ -3,7 +3,7 @@ use std::io::Read;
 use super::*;
 use super::super::tiles::Instance;
 
-pub fn tiles<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<[Option<Instance>; 3], errors::Error> {
+pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<[Option<Instance>; 3], errors::Error> {
     let mut result = [None, None, None];
 
     for (idx, e) in elevations.iter().enumerate() {

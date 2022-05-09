@@ -22,6 +22,17 @@ pub struct Map {
 pub mod common {
     use std::collections::HashSet;
 
+    use crate::common::types::ScaledValue;
+
+    #[derive(Debug)]
+    pub struct Position {
+        pub x: ScaledValue<u8, std::ops::Range<u8>>,
+        pub y: ScaledValue<u8, std::ops::Range<u8>>,
+    }
+
+    pub type Elevation = ScaledValue<u8, std::ops::Range<u8>>;
+    pub type Orientation = ScaledValue<u8, std::ops::Range<u8>>;
+
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
 
@@ -33,16 +44,7 @@ pub mod common {
 }
 
 pub mod defaults {
-    use crate::common::types::ScaledValue;
-
-    #[derive(Debug)]
-    pub struct Position {
-        pub x: ScaledValue<u8, std::ops::Range<u8>>,
-        pub y: ScaledValue<u8, std::ops::Range<u8>>
-    }
-
-    type Elevation = ScaledValue<u8, std::ops::Range<u8>>;
-    type Orientation = ScaledValue<u8, std::ops::Range<u8>>;
+    use crate::formats::map::common::{Elevation, Orientation, Position};
 
     #[derive(Debug)]
     pub struct Instance {
@@ -54,11 +56,60 @@ pub mod defaults {
 
 pub mod tiles {
     const SIDE_SIZE: usize = 100;
+
     type Surface = [[Option<u16>; SIDE_SIZE]; SIDE_SIZE];
 
     #[derive(Debug)]
     pub struct Instance {
         pub roof: Surface,
         pub floor: Surface,
+    }
+}
+
+pub mod state {
+    pub mod blueprints {
+        pub enum Type {
+            System,
+            Spatial(spatial::Instance),
+            Time(time::Instance),
+            Item,
+            Critter,
+        }
+
+        pub struct Connections {
+            pub program_id: u32,
+            pub object_id: Option<u32>,
+        }
+
+        pub struct Variables {
+            pub offset: u32,
+            pub count: u32,
+        }
+
+        pub struct Instance {
+            pub id: u32,
+            pub r#type: Type,
+            pub variables: Option<Variables>,
+            pub connections: Connections,
+        }
+
+        pub mod spatial {
+            use crate::formats::map::common::{Elevation, Position};
+
+            pub struct Instance {
+                pub position: Position,
+                pub distance: u16,
+                pub elevation: Elevation,
+            }
+        }
+
+        pub mod time {
+            use crate::formats::map::common::Elevation;
+
+            pub struct Instance {
+                pub duration: std::time::Duration,
+                pub elevation: Elevation,
+            }
+        }
     }
 }
