@@ -24,7 +24,7 @@ pub mod common {
 
     use crate::common::types::ScaledValue;
 
-    #[derive(Debug)]
+    #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Position {
         pub x: ScaledValue<u8, std::ops::Range<u8>>,
         pub y: ScaledValue<u8, std::ops::Range<u8>>,
@@ -68,6 +68,7 @@ pub mod tiles {
 
 pub mod state {
     pub mod blueprints {
+        #[derive(Hash, Eq, PartialEq)]
         pub enum Type {
             System,
             Spatial(spatial::Instance),
@@ -76,16 +77,19 @@ pub mod state {
             Critter,
         }
 
+        #[derive(Hash, Eq, PartialEq)]
         pub struct Connections {
             pub program_id: u32,
             pub object_id: Option<u32>,
         }
 
+        #[derive(Hash, Eq, PartialEq)]
         pub struct Variables {
             pub offset: u32,
             pub count: u32,
         }
 
+        #[derive(Hash, Eq, PartialEq)]
         pub struct Instance {
             pub id: u32,
             pub r#type: Type,
@@ -96,6 +100,7 @@ pub mod state {
         pub mod spatial {
             use crate::formats::map::common::{Elevation, Position};
 
+            #[derive(Hash, Eq, PartialEq)]
             pub struct Instance {
                 pub position: Position,
                 pub distance: u16,
@@ -106,6 +111,7 @@ pub mod state {
         pub mod time {
             use crate::formats::map::common::Elevation;
 
+            #[derive(Hash, Eq, PartialEq)]
             pub struct Instance {
                 pub duration: std::time::Duration,
                 pub elevation: Elevation,
