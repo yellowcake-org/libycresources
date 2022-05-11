@@ -47,13 +47,13 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
 
     let local_vars_count = u32::from_be_bytes(local_vars_count_bytes);
 
-    let mut script_id_bytes = [0u8; 4];
-    match source.read_exact(&mut script_id_bytes) {
+    let mut program_id_bytes = [0u8; 4];
+    match source.read_exact(&mut program_id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let _script_id = i32::from_be_bytes(script_id_bytes);
+    let _program_id = i32::from_be_bytes(program_id_bytes);
 
     let (flags, elevations) = match flags::tuple(source) {
         Ok(value) => value,
