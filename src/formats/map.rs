@@ -17,6 +17,7 @@ pub struct Map {
     pub darkness: u32,
 
     pub tiles: [Option<tiles::Instance>; 3],
+    pub objects: HashSet<state::object::Instance>,
     pub blueprints: HashSet<state::blueprint::Instance>,
 }
 
@@ -114,6 +115,13 @@ pub mod state {
             pub struct Instance {
                 pub duration: std::time::Duration,
             }
+        }
+    }
+
+    pub mod object {
+        #[derive(Debug)]
+        pub struct Instance {
+            pub reference_id: u32,
         }
     }
 }

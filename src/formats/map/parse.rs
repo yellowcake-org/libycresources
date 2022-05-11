@@ -8,6 +8,7 @@ mod flags;
 mod defaults;
 mod variables;
 mod tiles;
+mod objects;
 mod blueprints;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
@@ -116,6 +117,11 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
+    let objects = match objects::list(source) {
+        Ok(value) => value,
+        Err(error) => return Err(error),
+    };
+
     Ok(Map {
         id,
         version,
@@ -126,6 +132,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         ticks,
         darkness,
         tiles,
+        objects,
         blueprints
     })
 }
