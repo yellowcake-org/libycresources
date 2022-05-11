@@ -117,7 +117,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
-    let objects = match objects::list(source) {
+    let objects = match objects::list(source, &elevations) {
         Ok(value) => value,
         Err(error) => return Err(error),
     };

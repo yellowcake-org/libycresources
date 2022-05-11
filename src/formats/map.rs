@@ -119,7 +119,7 @@ pub mod state {
     }
 
     pub mod object {
-        #[derive(Debug)]
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
             pub reference_id: u32,
         }
