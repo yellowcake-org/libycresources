@@ -1,6 +1,7 @@
 use libycresources::formats::map;
 
 mod tiles;
+mod blueprints;
 
 pub fn map(map: &map::Map) {
     println!("Map ID: {:?}", map.id);
@@ -27,5 +28,6 @@ pub fn map(map: &map::Map) {
     println!("Global: {:?}", map.variables.global);
     println!();
 
-    self::tiles::tiles(map);
+    tiles::print(map);
+    blueprints::print(map);
 }

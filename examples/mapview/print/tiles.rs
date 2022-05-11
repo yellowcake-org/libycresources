@@ -1,6 +1,6 @@
 use libycresources::formats::map;
 
-pub(crate) fn tiles(map: &map::Map) {
+pub(crate) fn print(map: &map::Map) {
     println!("Tiles");
     println!();
 

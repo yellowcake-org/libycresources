@@ -17,6 +17,7 @@ pub struct Map {
     pub darkness: u32,
 
     pub tiles: [Option<tiles::Instance>; 3],
+    pub blueprints: HashSet<state::blueprint::Instance>,
 }
 
 pub mod common {
@@ -67,8 +68,8 @@ pub mod tiles {
 }
 
 pub mod state {
-    pub mod blueprints {
-        #[derive(Hash, Eq, PartialEq)]
+    pub mod blueprint {
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub enum Type {
             System,
             Spatial(spatial::Instance),
@@ -77,21 +78,21 @@ pub mod state {
             Critter,
         }
 
-        #[derive(Hash, Eq, PartialEq)]
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Connections {
             pub program_id: u32,
             pub object_id: Option<u32>,
         }
 
-        #[derive(Hash, Eq, PartialEq)]
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Variables {
             pub offset: u32,
             pub count: u32,
         }
 
-        #[derive(Hash, Eq, PartialEq)]
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
-            pub id: u32,
+            pub id: u16,
             pub r#type: Type,
             pub variables: Option<Variables>,
             pub connections: Connections,
@@ -100,7 +101,7 @@ pub mod state {
         pub mod spatial {
             use crate::formats::map::common::{Elevation, Position};
 
-            #[derive(Hash, Eq, PartialEq)]
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
                 pub position: Position,
                 pub distance: u16,
@@ -109,12 +110,9 @@ pub mod state {
         }
 
         pub mod time {
-            use crate::formats::map::common::Elevation;
-
-            #[derive(Hash, Eq, PartialEq)]
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
                 pub duration: std::time::Duration,
-                pub elevation: Elevation,
             }
         }
     }

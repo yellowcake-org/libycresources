@@ -2,7 +2,7 @@ use super::*;
 
 mod blueprint;
 
-pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprints::Instance>, errors::Error> {
+pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprint::Instance>, errors::Error> {
     let mut list = HashSet::new();
 
     for type_raw in 0..5 {
@@ -26,7 +26,7 @@ pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprints:
                         Err(_) => return Err(errors::Error::Format(errors::Format::Data))
                     }
                 } else {
-                    if let Err(_) = blueprint::skip(source, type_raw) {
+                    if let Err(_) = blueprint::skip(source) {
                         return Err(errors::Error::Format(errors::Format::Consistency));
                     }
                 }

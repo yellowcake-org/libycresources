@@ -111,7 +111,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
-    let _blueprints = match blueprints::list(source) {
+    let blueprints = match blueprints::list(source) {
         Ok(value) => value,
         Err(error) => return Err(error),
     };
@@ -126,5 +126,6 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         ticks,
         darkness,
         tiles,
+        blueprints
     })
 }
