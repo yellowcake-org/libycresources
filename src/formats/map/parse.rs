@@ -1,5 +1,7 @@
 use std::io::{Read, Seek, SeekFrom};
 
+use byteorder::{BigEndian, ReadBytesExt};
+
 use crate::common::types::errors;
 
 use super::*;
@@ -8,119 +10,40 @@ mod flags;
 mod defaults;
 mod variables;
 mod tiles;
-mod objects;
+mod prototypes;
 mod scripts;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
-    if let Err(error) = source.seek(SeekFrom::Start(0)) {
-        return Err(errors::Error::Read(error));
-    }
+    source.seek(SeekFrom::Start(0))?;
 
-    let mut version_bytes = [0u8; 4];
-    match source.read_exact(&mut version_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let version = u32::from_be_bytes(version_bytes);
+    let version = source.read_u32::<BigEndian>()?;
 
     let mut filename_bytes = [0u8; 16];
-    match source.read_exact(&mut filename_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
+    source.read_exact(&mut filename_bytes)?;
 
     let filename = String::from(match std::str::from_utf8(&filename_bytes) {
         Ok(value) => value,
         Err(_) => return Err(errors::Error::Format),
     });
 
-    let defaults = match defaults::instance(source) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
+    let defaults = defaults::instance(source)?;
+    let local_vars_count = source.read_u32::<BigEndian>()?;
+    let _program_id = source.read_i32::<BigEndian>()?;
+    let (flags, elevations) = flags::tuple(source)?;
+    let darkness = source.read_u32::<BigEndian>()?;
+    let global_vars_count = source.read_u32::<BigEndian>()?;
 
-    let mut local_vars_count_bytes = [0u8; 4];
-    match source.read_exact(&mut local_vars_count_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
+    let id = source.read_u32::<BigEndian>()?;
+    let ticks = source.read_u32::<BigEndian>()?;
 
-    let local_vars_count = u32::from_be_bytes(local_vars_count_bytes);
+    source.seek(SeekFrom::Current(4 * 44))?;
 
-    let mut program_id_bytes = [0u8; 4];
-    match source.read_exact(&mut program_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
+    let global_vars = variables::set(source, global_vars_count)?;
+    let local_vars = variables::set(source, local_vars_count)?;
 
-    let _program_id = i32::from_be_bytes(program_id_bytes);
-
-    let (flags, elevations) = match flags::tuple(source) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
-
-    let mut darkness_bytes = [0u8; 4];
-    match source.read_exact(&mut darkness_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let darkness = u32::from_be_bytes(darkness_bytes);
-
-    let mut global_vars_count_bytes = [0u8; 4];
-    match source.read_exact(&mut global_vars_count_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let global_vars_count = u32::from_be_bytes(global_vars_count_bytes);
-
-    let mut id_bytes = [0u8; 4];
-    match source.read_exact(&mut id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let id = u32::from_be_bytes(id_bytes);
-
-    let mut ticks_bytes = [0u8; 4];
-    match source.read_exact(&mut ticks_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let ticks = u32::from_be_bytes(ticks_bytes);
-
-    if let Err(error) = source.seek(SeekFrom::Current(4 * 44)) {
-        return Err(errors::Error::Read(error));
-    }
-
-    let global_vars = match variables::set(source, global_vars_count) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
-
-    let local_vars = match variables::set(source, local_vars_count) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
-
-    let tiles = match tiles::list(source, &elevations) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
-
-    let blueprints = match scripts::list(source) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
-
-    let objects = match objects::list(source, &elevations) {
-        Ok(value) => value,
-        Err(error) => return Err(error),
-    };
+    let tiles = tiles::list(source, &elevations)?;
+    let scripts = scripts::list(source)?;
+    let prototypes = prototypes::list(source, &elevations)?;
 
     Ok(Map {
         id,
@@ -132,7 +55,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         ticks,
         darkness,
         tiles,
-        objects,
-        blueprints,
+        scripts,
+        prototypes,
     })
 }

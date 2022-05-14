@@ -12,20 +12,10 @@ mod r#type;
 mod flags;
 
 pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Error> {
-    if let Err(error) = source.seek(SeekFrom::Start(0)) {
-        return Err(errors::Error::Read(error));
-    }
+    source.seek(SeekFrom::Start(0))?;
 
     let identifier = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
-
-    let mut text_id_bytes = [0u8; 4];
-    match source.read_exact(&mut text_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let text_id = u32::from_be_bytes(text_id_bytes);
-
+    let text_id = source.read_u32::<BigEndian>()?;
     let sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
     let mut light_radius_bytes = [0u8; 4];

@@ -18,8 +18,8 @@ pub struct Map {
     pub darkness: u32,
 
     pub tiles: [Option<tiles::Instance>; 3],
-    pub objects: HashSet<blueprint::prototype::Instance>,
-    pub blueprints: HashSet<blueprint::script::Instance>,
+    pub scripts: HashSet<blueprint::script::Instance>,
+    pub prototypes: HashSet<blueprint::prototype::Instance>,
 }
 
 pub mod common {

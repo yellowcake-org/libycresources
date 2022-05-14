@@ -3,11 +3,10 @@ use std::io::{Read, Seek, SeekFrom};
 use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::geometry::Scaled;
-use crate::common::types::models;
 use crate::common::types::models::Identifier;
+use crate::formats::map::blueprint;
 use crate::formats::map::common::{Coordinate, Elevation, Orientation};
 use crate::formats::map::parse::errors;
-use crate::formats::map::blueprint;
 
 pub fn instance<S: Read + Seek>(source: &mut S) -> Result<blueprint::prototype::Instance, errors::Error> {
     let _entry_id = source.read_u32::<BigEndian>()?;
