@@ -30,6 +30,42 @@ pub fn instance<S: Read>(source: &mut S) -> Result<state::object::Instance, erro
     let mut sprite_id_bytes = [0u8; 4];
     source.read_exact(&mut sprite_id_bytes)?;
 
+    let mut flags_bytes = [0u8; 4];
+    source.read_exact(&mut flags_bytes)?;
+
+    let mut flags_bytes = [0u8; 4];
+    source.read_exact(&mut flags_bytes)?;
+
+    let mut elevation_bytes = [0u8; 4];
+    source.read_exact(&mut elevation_bytes)?;
+
+    let mut prototype_id_bytes = [0u8; 4];
+    source.read_exact(&mut prototype_id_bytes)?;
+
+    let mut prototype_id_bytes = [0u8; 4];
+    source.read_exact(&mut prototype_id_bytes)?;
+
+    let mut critter_idx_bytes = [0u8; 4];
+    source.read_exact(&mut critter_idx_bytes)?;
+
+    let mut light_radius_bytes = [0u8; 4];
+    source.read_exact(&mut light_radius_bytes)?;
+
+    let mut light_intensity_bytes = [0u8; 4];
+    source.read_exact(&mut light_intensity_bytes)?;
+
+    let mut outline_color_bytes = [0u8; 4];
+    source.read_exact(&mut outline_color_bytes)?;
+
+    let mut script_id_bytes = [0u8; 4];
+    source.read_exact(&mut script_id_bytes)?;
+
+    let mut inventory_count_bytes = [0u8; 4];
+    source.read_exact(&mut inventory_count_bytes)?;
+
+    let mut inventory_capacity_bytes = [0u8; 4];
+    source.read_exact(&mut inventory_capacity_bytes)?;
+
     let id = u32::from_be_bytes(id_bytes);
     let position = Coordinate::try_from(u32::from_be_bytes(position_bytes))?;
 
@@ -39,9 +75,9 @@ pub fn instance<S: Read>(source: &mut S) -> Result<state::object::Instance, erro
     let sp_x = i32::from_be_bytes(sp_x_bytes);
     let sp_y = i32::from_be_bytes(sp_y_bytes);
 
-    let sprite_id = u32::from_be_bytes(sprite_id_bytes);
+    let sprite_id = u32::from_be_bytes(elevation_bytes);
     let frame_idx = u32::from_be_bytes(frame_idx_bytes);
     let orientation = Orientation::try_from(u32::from_be_bytes(orientation_bytes))?;
 
-    todo!()
+    Ok(state::object::Instance { reference_id: u32::from_be_bytes(prototype_id_bytes) })
 }

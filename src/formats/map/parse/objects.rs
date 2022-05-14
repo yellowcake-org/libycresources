@@ -4,6 +4,7 @@ mod object;
 
 pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSet<state::object::Instance>, errors::Error> {
     let mut list = HashSet::new();
+    return Ok(list); // todo
 
     let mut total_count_bytes = [0u8; 4];
     match source.read_exact(&mut total_count_bytes) {
@@ -13,20 +14,22 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSe
 
     let total_count = u32::from_be_bytes(total_count_bytes);
 
-    for _ in elevations {
-        let mut count_bytes = [0u8; 4];
-        match source.read_exact(&mut count_bytes) {
-            Err(error) => return Err(errors::Error::Read(error)),
-            Ok(value) => value,
-        };
-
-        for _ in 0..u32::from_be_bytes(count_bytes) {
-            match object::instance(source) {
-                Ok(value) => {
-                    if !list.insert(value) { return Err(errors::Error::Format(errors::Format::Consistency)); }
-                }
-                Err(error) => return Err(error)
+    for e in elevations {
+        if e.is_some() {
+            let mut count_bytes = [0u8; 4];
+            match source.read_exact(&mut count_bytes) {
+                Err(error) => return Err(errors::Error::Read(error)),
+                Ok(value) => value,
             };
+
+            for _ in 0..u32::from_be_bytes(count_bytes) {
+                match object::instance(source) {
+                    Ok(value) => {
+                        if !list.insert(value) { return Err(errors::Error::Format(errors::Format::Consistency)); }
+                    }
+                    Err(error) => return Err(error)
+                };
+            }
         }
     }
 
