@@ -1,20 +1,26 @@
-use std::ops::Range;
+use std::io::Read;
+
+use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::Scaled;
 use crate::formats::map::common::{Coordinate, Elevation, Orientation};
-
-use super::super::*;
-use super::super::super::super::super::*;
+use crate::formats::map::parse::errors;
+use crate::formats::map::state;
 
 pub fn instance<S: Read>(source: &mut S) -> Result<state::object::Instance, errors::Error> {
-    let entry_id = source.read_u32::<BigEndian>()?;
+    let _entry_id = source.read_u32::<BigEndian>()?;
+
     let position = Coordinate::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let screen_shift_x = source.read_u32::<BigEndian>()?;
-    let screen_shift_y = source.read_u32::<BigEndian>()?;
+    let screen_shift = Coordinate {
+        x: Scaled { value: source.read_u32::<BigEndian>()?, scale: u32::MIN..u32::MAX },
+        y: Scaled { value: source.read_u32::<BigEndian>()?, scale: u32::MIN..u32::MAX },
+    };
 
-    let screen_position_x = source.read_i32::<BigEndian>()?;
-    let screen_position_y = source.read_i32::<BigEndian>()?;
+    let screen_position = Coordinate {
+        x: Scaled { value: source.read_i32::<BigEndian>()?, scale: i32::MIN..i32::MAX },
+        y: Scaled { value: source.read_i32::<BigEndian>()?, scale: i32::MIN..i32::MAX },
+    };
 
     let frame_idx = source.read_u32::<BigEndian>()?;
     let orientation = Orientation::try_from(source.read_u32::<BigEndian>()?)?;
@@ -27,8 +33,8 @@ pub fn instance<S: Read>(source: &mut S) -> Result<state::object::Instance, erro
     let prototype_id = source.read_u32::<BigEndian>()?;
     let critter_idx = source.read_i32::<BigEndian>()?;
 
-    let lradius = source.read_u32::<BigEndian>()?;
-    let lintensity = source.read_u32::<BigEndian>()?;
+    let light_radius = source.read_u32::<BigEndian>()?;
+    let light_intensity = source.read_u32::<BigEndian>()?;
 
     let outline_color = source.read_u32::<BigEndian>()?;
     let script_id = source.read_u32::<BigEndian>()?;

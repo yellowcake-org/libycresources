@@ -2,7 +2,7 @@ use crate::common::types::Scaled;
 
 use super::super::*;
 
-impl TryFrom<u32> for common::Coordinate {
+impl TryFrom<u32> for common::Coordinate<u8, std::ops::Range<u8>> {
     type Error = parse::errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {

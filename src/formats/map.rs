@@ -28,9 +28,9 @@ pub mod common {
     use crate::common::types::Scaled;
 
     #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct Coordinate {
-        pub x: Scaled<u8, std::ops::Range<u8>>,
-        pub y: Scaled<u8, std::ops::Range<u8>>,
+    pub struct Coordinate<V, S> {
+        pub x: Scaled<V, S>,
+        pub y: Scaled<V, S>,
     }
 
     #[derive(Debug, Hash, Eq, PartialEq)]
@@ -58,7 +58,7 @@ pub mod defaults {
 
     #[derive(Debug)]
     pub struct Instance {
-        pub position: Coordinate,
+        pub position: Coordinate<u8, std::ops::Range<u8>>,
         pub elevation: Elevation,
         pub orientation: Orientation,
     }
@@ -112,7 +112,7 @@ pub mod state {
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
-                pub position: Coordinate,
+                pub position: Coordinate<u8, std::ops::Range<u8>>,
                 pub distance: u16,
                 pub elevation: Elevation,
             }
