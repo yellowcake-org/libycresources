@@ -20,7 +20,7 @@ pub mod meta {
     pub mod info {
         use std::ops::RangeInclusive;
 
-        use crate::common::types::Scaled;
+        use crate::common::types::geometry::Scaled;
 
         pub struct Light {
             pub distance: Scaled<u8, RangeInclusive<u8>>,
@@ -433,7 +433,7 @@ pub mod object {
             use std::collections::HashMap;
             use std::ops::RangeInclusive;
 
-            use crate::common::types::Scaled;
+            use crate::common::types::geometry::Scaled;
             use crate::formats::pro::object::common::critter::Statistic;
 
             #[derive(Debug)]

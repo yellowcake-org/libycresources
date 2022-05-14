@@ -1,4 +1,4 @@
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 use crate::formats::map::common::{Coordinate, Elevation};
 use crate::formats::map::state::blueprint::Type::{Critter, Item, Spatial, System, Time};
 

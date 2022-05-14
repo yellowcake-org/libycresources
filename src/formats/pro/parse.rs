@@ -1,7 +1,7 @@
 use std::io::{Read, Seek, SeekFrom};
 
 use super::*;
-use super::super::super::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 mod r#type;
 mod flags;

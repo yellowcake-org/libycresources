@@ -3,7 +3,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
 use crate::common::graphics::Pixel;
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 use super::Palette;
 

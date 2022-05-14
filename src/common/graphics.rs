@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 pub mod builtin;
 

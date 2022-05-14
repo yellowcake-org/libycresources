@@ -1,4 +1,4 @@
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 use super::super::*;
 

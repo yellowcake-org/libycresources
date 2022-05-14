@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 use super::{Font, Glyph, Spacing};
 

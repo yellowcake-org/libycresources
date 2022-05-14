@@ -1,5 +1,5 @@
 use crate::common::graphics::{AnimatedPixel, Pixel};
-use crate::common::types::Scaled;
+use crate::common::types::geometry::Scaled;
 
 impl AnimatedPixel {
     #[inline]

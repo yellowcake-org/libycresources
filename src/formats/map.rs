@@ -25,7 +25,7 @@ pub struct Map {
 pub mod common {
     use std::collections::HashSet;
 
-    use crate::common::types::Scaled;
+    use crate::common::types::geometry::Scaled;
 
     #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Coordinate<V, S> {
