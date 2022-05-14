@@ -14,7 +14,7 @@ pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, [Option<
 
     if (flags_bytes[3] & 0x01) != 0x00 {
         if !flags.insert(common::Flag::Save) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 

@@ -24,7 +24,7 @@ pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result
             for _ in 0..u32::from_be_bytes(count_bytes) {
                 match object::instance(source) {
                     Ok(value) => {
-                        if !list.insert(value) { return Err(errors::Error::Format(errors::Format::Consistency)); }
+                        if !list.insert(value) { return Err(errors::Error::Format); }
                     }
                     Err(error) => return Err(error)
                 };
@@ -33,7 +33,7 @@ pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result
     }
 
     if list.len() != total_count as usize {
-        return Err(errors::Error::Format(errors::Format::Consistency));
+        return Err(errors::Error::Format);
     }
 
     Ok(list)

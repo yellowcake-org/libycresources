@@ -42,6 +42,6 @@ pub(crate) fn instance<S: Read>(source: &mut S, type_id: u32,
             Ok(value) => object::item::Type::Key(value),
             Err(error) => return Err(error)
         }
-        _ => return Err(errors::Error::Format(errors::Format::Type)),
+        _ => return Err(errors::Error::Format),
     })
 }

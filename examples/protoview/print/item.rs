@@ -22,8 +22,8 @@ pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) 
     match &item.sprite {
         None => { println!("No inventory sprite.") }
         Some(sprite) => {
-            println!("Sprite ID: {:?}", sprite.id);
-            println!("Sprite type: {:?}", sprite.r#type);
+            println!("Sprite ID: {:?}", sprite.value);
+            println!("Sprite type: {:?}", sprite.kind);
         }
     }
 

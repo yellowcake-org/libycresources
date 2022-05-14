@@ -1,33 +1,35 @@
+use crate::common::types::errors;
+
 use super::super::object;
 use super::super::parse;
 
 impl TryFrom<u32> for object::common::critter::body::Type {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Self::Biped),
             1 => Ok(Self::Quadruped),
             2 => Ok(Self::Robotic),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u8> for object::common::critter::Gender {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Self::Male),
             1 => Ok(Self::Female),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u32> for object::critter::murder::Type {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -50,13 +52,13 @@ impl TryFrom<u32> for object::critter::murder::Type {
             16 => Ok(Self::Aliens),
             17 => Ok(Self::GiantAnts),
             18 => Ok(Self::GiantAnts),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u32> for object::item::weapon::Animation {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -70,13 +72,13 @@ impl TryFrom<u32> for object::item::weapon::Animation {
             0x08 => Ok(Self::BigGun),
             0x09 => Ok(Self::Minigun),
             0x0A => Ok(Self::RocketLauncher),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u8> for object::item::weapon::attack::Mode {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
@@ -88,13 +90,13 @@ impl TryFrom<u8> for object::item::weapon::attack::Mode {
             6 => Ok(Self::FireSingle),
             7 => Ok(Self::FireBurst),
             8 => Ok(Self::Flame),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u32> for object::common::world::Material {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -106,13 +108,13 @@ impl TryFrom<u32> for object::common::world::Material {
             5 => Ok(Self::Stone),
             6 => Ok(Self::Cement),
             7 => Ok(Self::Leather),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<u32> for object::common::weapons::Caliber {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -135,7 +137,7 @@ impl TryFrom<u32> for object::common::weapons::Caliber {
 }
 
 impl TryFrom<u8> for object::common::combat::damage::Type {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
@@ -146,13 +148,13 @@ impl TryFrom<u8> for object::common::combat::damage::Type {
             4 => Ok(Self::Electrical),
             5 => Ok(Self::Emp),
             6 => Ok(Self::Explosive),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<i32> for object::common::critter::Perk {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
@@ -221,13 +223,13 @@ impl TryFrom<i32> for object::common::critter::Perk {
             62 => Ok(Self::WeaponKnockback),
             63 => Ok(Self::PoweredArmor),
             64 => Ok(Self::CombatArmor),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
 impl TryFrom<i32> for object::common::critter::Statistic {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
@@ -269,65 +271,13 @@ impl TryFrom<i32> for object::common::critter::Statistic {
             35 => Ok(Self::CurrentHitPoints),
             36 => Ok(Self::CurrentPoisonLevel),
             37 => Ok(Self::CurrentRadiationLevel),
-            _ => Err(parse::errors::Error::Format(parse::errors::Format::Data))
+            _ => Err(errors::Error::Format)
         }
     }
 }
 
-impl TryFrom<[u8; 4]> for object::common::sprite::Reference {
-    type Error = parse::errors::Error;
-
-    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        let (type_id, id) = match parse::id::instance(value) {
-            Ok(value) => value,
-            Err(error) => return Err(error)
-        };
-
-        let r#type = match type_id {
-            0x00 => object::common::sprite::Type::Item,
-            0x01 => object::common::sprite::Type::Critter,
-            0x02 => object::common::sprite::Type::Scenery,
-            0x03 => object::common::sprite::Type::Wall,
-            0x04 => object::common::sprite::Type::Tile,
-            0x05 => object::common::sprite::Type::Background,
-            0x06 => object::common::sprite::Type::Interface,
-            0x07 => object::common::sprite::Type::Inventory,
-            _ => return Err(parse::errors::Error::Format(parse::errors::Format::Data)),
-        };
-
-        return Ok(Self {
-            id,
-            r#type,
-        });
-    }
-}
-
-impl TryFrom<[u8; 4]> for object::common::script::Reference {
-    type Error = parse::errors::Error;
-
-    fn try_from(value: [u8; 4]) -> Result<Self, Self::Error> {
-        let (type_id, id) = match parse::id::instance(value) {
-            Ok(value) => value,
-            Err(error) => return Err(error)
-        };
-
-        let r#type = match type_id {
-            0x01 => object::common::script::Type::Spatial,
-            0x02 => object::common::script::Type::Item,
-            0x03 => object::common::script::Type::Scenery,
-            0x04 => object::common::script::Type::Critter,
-            _ => return Err(parse::errors::Error::Format(parse::errors::Format::Data)),
-        };
-
-        return Ok(Self {
-            id,
-            r#type,
-        });
-    }
-}
-
 impl TryFrom<&[u8; 4]> for object::common::map::Destination {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
         let tile = u32::from_be_bytes([0u8, value[1], value[2], value[3]]);
@@ -336,7 +286,7 @@ impl TryFrom<&[u8; 4]> for object::common::map::Destination {
             0xF0 => object::common::map::Floor::Zero,
             0xF2 => object::common::map::Floor::First,
             0xF4 => object::common::map::Floor::Second,
-            _ => return Err(parse::errors::Error::Format(parse::errors::Format::Data)),
+            _ => return Err(errors::Error::Format),
         };
 
         Ok(Self { tile, floor })
@@ -344,7 +294,7 @@ impl TryFrom<&[u8; 4]> for object::common::map::Destination {
 }
 
 impl TryFrom<i32> for object::common::map::Map {
-    type Error = parse::errors::Error;
+    type Error = errors::Error;
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
@@ -352,7 +302,7 @@ impl TryFrom<i32> for object::common::map::Map {
             value => Ok(
                 Self::Local(match u32::try_from(value) {
                     Ok(value) => value,
-                    Err(_) => return Err(parse::errors::Error::Format(parse::errors::Format::Data))
+                    Err(_) => return Err(errors::Error::Format)
                 })
             )
         }

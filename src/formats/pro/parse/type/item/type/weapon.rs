@@ -20,7 +20,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let animation = match animation_raw {
         0x00 => None,
         value => Some(match object::item::weapon::Animation::try_from(value) {
-            Err(_) => return Err(errors::Error::Source),
+            Err(_) => return Err(errors::Error::Format),
             Ok(value) => value,
         })
     };
@@ -52,7 +52,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let dmg_type =
         match object::common::combat::damage::Type::try_from(dmg_type_raw as u8) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+            Err(_) => return Err(errors::Error::Format),
         };
 
     let damage = object::item::weapon::Damage {
@@ -93,7 +93,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let projectile_idx = u16::from_be_bytes(projectile_idx_bytes);
 
     if 0xFFFF != projectile_idx && 0x0500 != projectile_header {
-        return Err(errors::Error::Format(errors::Format::Consistency));
+        return Err(errors::Error::Format);
     }
 
     let mut min_strength_bytes = [0u8; 4];
@@ -122,7 +122,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let attack1 = match object::item::weapon::attack::Mode::
     try_from_optional(attack1_mode_raw, 0) {
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
         Ok(value) => value.map(|mode| {
             object::item::weapon::attack::Instance {
                 cost: cost1,
@@ -134,7 +134,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let attack2 = match object::item::weapon::attack::Mode::
     try_from_optional(attack2_mode_raw, 0) {
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
         Ok(value) => value.map(|mode| {
             object::item::weapon::attack::Instance {
                 cost: cost2,
@@ -153,7 +153,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let crit_list_idx =
         match u16::try_from_optional(i32::from_be_bytes(crit_list_idx_bytes), -1) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Consistency)),
+            Err(_) => return Err(errors::Error::Format),
         };
 
     let mut perk_bytes = [0u8; 4];
@@ -166,7 +166,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let perk = match object::common::critter::Perk::try_from_optional(perk_raw, -1) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        Err(_) => return Err(errors::Error::Format)
     };
 
     let mut burst_bytes = [0u8; 4];
@@ -186,7 +186,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let caliber_raw = u32::from_be_bytes(caliber_bytes);
     let caliber = match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        Err(_) => return Err(errors::Error::Format)
     };
 
     let mut ammo_pid_bytes = [0u8; 4];
@@ -198,7 +198,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let ammo_pid =
         match u16::try_from_optional(i32::from_be_bytes(ammo_pid_bytes), -1) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Consistency)),
+            Err(_) => return Err(errors::Error::Format),
         };
 
     let mut capacity_bytes = [0u8; 4];

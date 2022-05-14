@@ -150,7 +150,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic0, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -198,7 +198,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic1, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -246,7 +246,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic2, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -269,7 +269,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     let addiction_perk = match object::common::critter::Perk::
     try_from_optional(addiction_perk_raw, -1) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
     };
 
     let mut addiction_delay_bytes = [0u8; 4];

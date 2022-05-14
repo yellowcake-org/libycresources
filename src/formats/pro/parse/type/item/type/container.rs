@@ -21,13 +21,13 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::containe
 
     if (flags_bytes[3] & 0x01) == 0x01 {
         if !flags.insert(object::item::container::Flag::NoPickUp) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[3] & 0x08) == 0x08 {
         if !flags.insert(object::item::container::Flag::MagicHands) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 

@@ -23,11 +23,11 @@ pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprint::
                 if (page * BATCH_LENGTH) + record < count {
                     match blueprint::instance(source, type_raw) {
                         Ok(value) => { list.insert(value); }
-                        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+                        Err(_) => return Err(errors::Error::Format)
                     }
                 } else {
                     if let Err(_) = blueprint::skip(source) {
-                        return Err(errors::Error::Format(errors::Format::Consistency));
+                        return Err(errors::Error::Format);
                     }
                 }
             }
@@ -46,7 +46,7 @@ pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprint::
         }
 
         if read != count {
-            return Err(errors::Error::Format(errors::Format::Consistency));
+            return Err(errors::Error::Format);
         }
     }
 

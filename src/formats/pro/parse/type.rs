@@ -1,3 +1,5 @@
+use crate::common::types::models::prototype;
+
 use super::*;
 
 mod common;
@@ -9,32 +11,13 @@ mod wall;
 mod tile;
 mod misc;
 
-pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::Type, errors::Error> {
-    Ok(match type_id {
-        0 => object::Type::Item(match item::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        1 => object::Type::Critter(match critter::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        2 => object::Type::Scenery(match scenery::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        3 => object::Type::Wall(match wall::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        4 => object::Type::Tile(match tile::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        5 => object::Type::Misc(match misc::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        _ => return Err(errors::Error::Format(errors::Format::Type)),
+pub(crate) fn instance<S: Read>(source: &mut S, kind: &prototype::Kind) -> Result<object::Type, errors::Error> {
+    Ok(match kind {
+        prototype::Kind::Item => object::Type::Item(item::instance(source)?),
+        prototype::Kind::Critter => object::Type::Critter(critter::instance(source)?),
+        prototype::Kind::Scenery => object::Type::Scenery(scenery::instance(source)?),
+        prototype::Kind::Wall => object::Type::Wall(wall::instance(source)?),
+        prototype::Kind::Tile => object::Type::Tile(tile::instance(source)?),
+        prototype::Kind::Misc => object::Type::Misc(misc::instance(source)?),
     })
 }

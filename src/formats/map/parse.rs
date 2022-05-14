@@ -1,8 +1,8 @@
 use std::io::{Read, Seek, SeekFrom};
 
-use super::*;
+use crate::common::types::errors;
 
-pub mod errors;
+use super::*;
 
 mod flags;
 mod defaults;
@@ -32,7 +32,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
 
     let filename = String::from(match std::str::from_utf8(&filename_bytes) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
     });
 
     let defaults = match defaults::instance(source) {

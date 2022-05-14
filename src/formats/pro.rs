@@ -10,10 +10,13 @@ pub struct Prototype {
 pub mod meta {
     use std::collections::HashSet;
 
+    use crate::common::types::models;
+    use crate::common::types::models::Identifier;
+
     pub struct Info {
         pub light: info::Light,
         pub flags: HashSet<info::flags::Instance>,
-        pub sprite: super::object::common::sprite::Reference,
+        pub sprite: Identifier<models::sprite::Kind>,
         pub connections: info::Connections,
     }
 
@@ -58,26 +61,6 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
-        pub mod sprite {
-            #[derive(Debug)]
-            pub enum Type {
-                Item,
-                Critter,
-                Scenery,
-                Wall,
-                Tile,
-                Background,
-                Interface,
-                Inventory,
-            }
-
-            #[derive(Debug)]
-            pub struct Reference {
-                pub id: u16,
-                pub r#type: Type,
-            }
-        }
-
         pub mod script {
             #[derive(Debug)]
             pub enum Type {
@@ -357,6 +340,9 @@ pub mod object {
     pub mod item {
         use std::collections::HashSet;
 
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
         #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
             Hidden
@@ -380,8 +366,8 @@ pub mod object {
             pub r#type: Type,
             pub flags: HashSet<Flag>,
 
-            pub sprite: Option<super::common::sprite::Reference>,
-            pub script: Option<super::common::script::Reference>,
+            pub sprite: Option<Identifier<models::sprite::Kind>>,
+            pub script: Option<Identifier<models::script::Kind>>,
 
             pub actions: HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
@@ -396,11 +382,14 @@ pub mod object {
         pub mod armor {
             use std::collections::HashMap;
 
-            use super::super::common::{combat::damage, critter, sprite};
+            use crate::common::types::models;
+            use crate::common::types::models::Identifier;
+
+            use super::super::common::{combat::damage, critter};
 
             #[derive(Debug)]
             pub struct Appearance {
-                pub sprites: HashMap<critter::Gender, sprite::Reference>,
+                pub sprites: HashMap<critter::Gender, Identifier<models::sprite::Kind>>,
             }
 
             pub struct Instance {
@@ -598,6 +587,9 @@ pub mod object {
     pub mod critter {
         use std::collections::{HashMap, HashSet};
 
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
         #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
             BarterAvailable,
@@ -660,8 +652,8 @@ pub mod object {
             pub damage: Option<super::common::combat::damage::Type>, // Fallout 2 only
 
             pub body: super::common::critter::body::Type,
-            pub head: Option<super::common::sprite::Reference>,
-            pub script: Option<super::common::script::Reference>,
+            pub head: Option<Identifier<models::sprite::Kind>>,
+            pub script: Option<Identifier<models::script::Kind>>,
 
             pub flags: HashSet<Flag>,
             pub skills: HashMap<super::common::critter::Skill, u32>,
@@ -673,6 +665,9 @@ pub mod object {
 
     pub mod scenery {
         use std::collections::HashSet;
+
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
 
         pub enum Type {
             Door(door::Instance),
@@ -690,10 +685,10 @@ pub mod object {
             pub r#type: Type,
 
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<super::common::script::Reference>,
+            pub script: Option<Identifier<models::script::Kind>>,
             pub material: super::common::world::Material,
 
-            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub actions: HashSet<super::common::actions::Instance>,
             pub connections: Connections,
         }
 
@@ -753,12 +748,15 @@ pub mod object {
     pub mod wall {
         use std::collections::HashSet;
 
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
         pub struct Instance {
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<super::common::script::Reference>,
+            pub script: Option<Identifier<models::script::Kind>>,
             pub material: super::common::world::Material,
 
-            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub actions: HashSet<super::common::actions::Instance>,
         }
     }
 

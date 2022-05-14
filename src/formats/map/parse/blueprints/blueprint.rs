@@ -12,7 +12,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
     };
 
     let id = u16::from_be_bytes(match &id_bytes[2..4].try_into() {
-        Err(_) => return Err(errors::Error::Source),
+        Err(_) => return Err(errors::Error::Format),
         Ok(value) => *value,
     });
 
@@ -34,19 +34,19 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
             const LEVELS_SCALE: std::ops::Range<u8> = 0u8..3;
             let elevation =
                 match u16::from_be_bytes(match &elevation_n_tile_bytes[0..2].try_into() {
-                    Err(_) => return Err(errors::Error::Source),
+                    Err(_) => return Err(errors::Error::Format),
                     Ok(value) => *value,
                 }) {
                     0x0000 => Elevation { level: Scaled { value: 0u8, scale: LEVELS_SCALE } },
                     0x2000 => Elevation { level: Scaled { value: 1u8, scale: LEVELS_SCALE } },
                     0x4000 => Elevation { level: Scaled { value: 2u8, scale: LEVELS_SCALE } },
-                    _ => return Err(errors::Error::Format(errors::Format::Data))
+                    _ => return Err(errors::Error::Format)
                 };
 
             let position =
                 match Coordinate::try_from(
                     u16::from_be_bytes(match &elevation_n_tile_bytes[2..4].try_into() {
-                        Err(_) => return Err(errors::Error::Source),
+                        Err(_) => return Err(errors::Error::Format),
                         Ok(value) => *value,
                     }) as u32) {
                     Ok(value) => value,
@@ -189,15 +189,15 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
             0 => System,
             1 => Spatial(match spatial_inners {
                 Some(value) => value,
-                None => return Err(errors::Error::Format(errors::Format::Consistency))
+                None => return Err(errors::Error::Format)
             }),
             2 => Time(match timed_inners {
                 Some(value) => value,
-                None => return Err(errors::Error::Format(errors::Format::Consistency))
+                None => return Err(errors::Error::Format)
             }),
             3 => Item,
             4 => Critter,
-            _ => return Err(errors::Error::Format(errors::Format::Consistency))
+            _ => return Err(errors::Error::Format)
         },
         variables: if lvars_offset > -1 && lvars_count > 0 {
             Some(state::blueprint::Variables {
@@ -213,5 +213,5 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
 }
 
 pub fn skip<S: Seek>(source: &mut S) -> Result<(), errors::Error> {
-    source.seek(SeekFrom::Current(4 * 16)).map(|_| { () }).map_err(|_| { errors::Error::Source })
+    source.seek(SeekFrom::Current(4 * 16)).map(|_| { () }).map_err(|_| { errors::Error::Format })
 }

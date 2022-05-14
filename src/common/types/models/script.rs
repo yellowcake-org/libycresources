@@ -1,11 +1,9 @@
 #[derive(Debug)]
 pub enum Kind {
+    Spatial,
     Item,
-    Critter,
     Scenery,
-    Wall,
-    Tile,
-    Misc,
+    Critter,
 }
 
 impl TryFrom<u8> for Kind {
@@ -13,12 +11,10 @@ impl TryFrom<u8> for Kind {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Ok(match value {
-            0 => Self::Item,
-            1 => Self::Critter,
-            2 => Self::Scenery,
-            3 => Self::Wall,
-            4 => Self::Tile,
-            5 => Self::Misc,
+            1 => Self::Spatial,
+            2 => Self::Item,
+            3 => Self::Scenery,
+            4 => Self::Critter,
             _ => return Err(Self::Error::Format)
         })
     }

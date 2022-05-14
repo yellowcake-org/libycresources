@@ -13,25 +13,25 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::fl
 
     if (flags_bytes[3] & 0x08) == 0x08 {
         if !flags.insert(meta::info::flags::Instance::Flat) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[3] & 0x10) == 0x10 {
         if !flags.insert(meta::info::flags::Instance::NotBlocking) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[2] & 0x08) == 0x08 {
         if !flags.insert(meta::info::flags::Instance::MultiHex) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[2] & 0x10) == 0x10 {
         if !flags.insert(meta::info::flags::Instance::NotBordered) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
@@ -51,19 +51,19 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::fl
         Some(Some(meta::info::flags::Transparency::End))
     } else { None } {
         if !flags.insert(meta::info::flags::Instance::Transparency(transparency)) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[0] & 0x20) == 0x20 {
         if !flags.insert(meta::info::flags::Instance::LightThrough) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[0] & 0x80) == 0x80 {
         if !flags.insert(meta::info::flags::Instance::ShotThrough) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 
