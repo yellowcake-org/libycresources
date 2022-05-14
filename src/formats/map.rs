@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 pub mod parse;
+mod traits;
 
 #[derive(Debug)]
 pub struct Map {
@@ -27,13 +28,20 @@ pub mod common {
     use crate::common::types::ScaledValue;
 
     #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct Position {
+    pub struct Coordinate {
         pub x: ScaledValue<u8, std::ops::Range<u8>>,
         pub y: ScaledValue<u8, std::ops::Range<u8>>,
     }
 
-    pub type Elevation = ScaledValue<u8, std::ops::Range<u8>>;
-    pub type Orientation = ScaledValue<u8, std::ops::Range<u8>>;
+    #[derive(Debug, Hash, Eq, PartialEq)]
+    pub struct Elevation {
+        pub level: ScaledValue<u8, std::ops::Range<u8>>,
+    }
+
+    #[derive(Debug, Hash, Eq, PartialEq)]
+    pub struct Orientation {
+        pub value: ScaledValue<u8, std::ops::Range<u8>>,
+    }
 
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
@@ -46,11 +54,11 @@ pub mod common {
 }
 
 pub mod defaults {
-    use crate::formats::map::common::{Elevation, Orientation, Position};
+    use crate::formats::map::common::{Coordinate, Elevation, Orientation};
 
     #[derive(Debug)]
     pub struct Instance {
-        pub position: Position,
+        pub position: Coordinate,
         pub elevation: Elevation,
         pub orientation: Orientation,
     }
@@ -100,11 +108,11 @@ pub mod state {
         }
 
         pub mod spatial {
-            use crate::formats::map::common::{Elevation, Position};
+            use crate::formats::map::common::{Coordinate, Elevation};
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
-                pub position: Position,
+                pub position: Coordinate,
                 pub distance: u16,
                 pub elevation: Elevation,
             }
@@ -123,5 +131,7 @@ pub mod state {
         pub struct Instance {
             pub reference_id: u32,
         }
+
+        pub mod patch {}
     }
 }

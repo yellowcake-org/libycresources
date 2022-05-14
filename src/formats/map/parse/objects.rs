@@ -31,7 +31,7 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSe
     }
 
     if list.len() != total_count as usize {
-        return Err(errors::Error::Format(errors::Format::Consistency))
+        return Err(errors::Error::Format(errors::Format::Consistency));
     }
 
     Ok(list)

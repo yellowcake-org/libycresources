@@ -1,5 +1,5 @@
 use crate::common::types::ScaledValue;
-use crate::formats::map::common::Position;
+use crate::formats::map::common::{Coordinate, Elevation};
 use crate::formats::map::state::blueprint::Type::{Critter, Item, Spatial, System, Time};
 
 use super::super::*;
@@ -37,28 +37,21 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
                     Err(_) => return Err(errors::Error::Source),
                     Ok(value) => *value,
                 }) {
-                    0x0000 => ScaledValue { value: 0u8, scale: LEVELS_SCALE },
-                    0x2000 => ScaledValue { value: 1u8, scale: LEVELS_SCALE },
-                    0x4000 => ScaledValue { value: 2u8, scale: LEVELS_SCALE },
+                    0x0000 => Elevation { level: ScaledValue { value: 0u8, scale: LEVELS_SCALE } },
+                    0x2000 => Elevation { level: ScaledValue { value: 1u8, scale: LEVELS_SCALE } },
+                    0x4000 => Elevation { level: ScaledValue { value: 2u8, scale: LEVELS_SCALE } },
                     _ => return Err(errors::Error::Format(errors::Format::Data))
                 };
 
-            const TILES_SCALE: std::ops::Range<u8> = 0u8..200;
-            let position = match u16::from_be_bytes(match &elevation_n_tile_bytes[2..4].try_into() {
-                Err(_) => return Err(errors::Error::Source),
-                Ok(value) => *value,
-            }) {
-                value if (0..(TILES_SCALE.end as u16).pow(2)).contains(&value) => {
-                    let x = value / TILES_SCALE.end as u16;
-                    let y = value - (x * TILES_SCALE.end as u16);
-
-                    Position {
-                        x: ScaledValue { value: x as u8, scale: TILES_SCALE },
-                        y: ScaledValue { value: y as u8, scale: TILES_SCALE },
-                    }
-                }
-                _ => return Err(errors::Error::Format(errors::Format::Data))
-            };
+            let position =
+                match Coordinate::try_from(
+                    u16::from_be_bytes(match &elevation_n_tile_bytes[2..4].try_into() {
+                        Err(_) => return Err(errors::Error::Source),
+                        Ok(value) => *value,
+                    }) as u32) {
+                    Ok(value) => value,
+                    Err(error) => return Err(error)
+                };
 
             let mut distance_bytes = [0u8; 4];
             match source.read_exact(&mut distance_bytes) {

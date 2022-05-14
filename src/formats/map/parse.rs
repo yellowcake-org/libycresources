@@ -2,7 +2,7 @@ use std::io::{Read, Seek, SeekFrom};
 
 use super::*;
 
-mod errors;
+pub mod errors;
 
 mod flags;
 mod defaults;
@@ -133,6 +133,6 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         darkness,
         tiles,
         objects,
-        blueprints
+        blueprints,
     })
 }
