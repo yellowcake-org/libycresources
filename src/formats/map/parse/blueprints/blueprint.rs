@@ -1,4 +1,4 @@
-use crate::common::types::ScaledValue;
+use crate::common::types::Scaled;
 use crate::formats::map::common::{Coordinate, Elevation};
 use crate::formats::map::state::blueprint::Type::{Critter, Item, Spatial, System, Time};
 
@@ -37,9 +37,9 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
                     Err(_) => return Err(errors::Error::Source),
                     Ok(value) => *value,
                 }) {
-                    0x0000 => Elevation { level: ScaledValue { value: 0u8, scale: LEVELS_SCALE } },
-                    0x2000 => Elevation { level: ScaledValue { value: 1u8, scale: LEVELS_SCALE } },
-                    0x4000 => Elevation { level: ScaledValue { value: 2u8, scale: LEVELS_SCALE } },
+                    0x0000 => Elevation { level: Scaled { value: 0u8, scale: LEVELS_SCALE } },
+                    0x2000 => Elevation { level: Scaled { value: 1u8, scale: LEVELS_SCALE } },
+                    0x4000 => Elevation { level: Scaled { value: 2u8, scale: LEVELS_SCALE } },
                     _ => return Err(errors::Error::Format(errors::Format::Data))
                 };
 

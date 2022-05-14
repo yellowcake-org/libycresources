@@ -1,13 +1,13 @@
 use std::ops::Range;
 
-use crate::common::types::ScaledValue;
+use crate::common::types::Scaled;
 
 pub mod builtin;
 
 pub struct Pixel {
-    pub red: ScaledValue<usize, Range<usize>>,
-    pub green: ScaledValue<usize, Range<usize>>,
-    pub blue: ScaledValue<usize, Range<usize>>,
+    pub red: Scaled<usize, Range<usize>>,
+    pub green: Scaled<usize, Range<usize>>,
+    pub blue: Scaled<usize, Range<usize>>,
 }
 
 pub struct AnimatedPixel {

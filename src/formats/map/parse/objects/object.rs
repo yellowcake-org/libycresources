@@ -1,83 +1,42 @@
-use crate::formats::map::common::{Coordinate, Orientation};
+use std::ops::Range;
+
+use crate::common::types::Scaled;
+use crate::formats::map::common::{Coordinate, Elevation, Orientation};
 
 use super::super::*;
+use super::super::super::super::super::*;
 
 pub fn instance<S: Read>(source: &mut S) -> Result<state::object::Instance, errors::Error> {
-    let mut id_bytes = [0u8; 4];
-    source.read_exact(&mut id_bytes)?;
+    let entry_id = source.read_u32::<BigEndian>()?;
+    let position = Coordinate::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let mut position_bytes = [0u8; 4];
-    source.read_exact(&mut position_bytes)?;
+    let screen_shift_x = source.read_u32::<BigEndian>()?;
+    let screen_shift_y = source.read_u32::<BigEndian>()?;
 
-    let mut sh_x_bytes = [0u8; 4];
-    source.read_exact(&mut sh_x_bytes)?;
+    let screen_position_x = source.read_i32::<BigEndian>()?;
+    let screen_position_y = source.read_i32::<BigEndian>()?;
 
-    let mut sh_y_bytes = [0u8; 4];
-    source.read_exact(&mut sh_y_bytes)?;
+    let frame_idx = source.read_u32::<BigEndian>()?;
+    let orientation = Orientation::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let mut sp_x_bytes = [0u8; 4];
-    source.read_exact(&mut sp_x_bytes)?;
+    let sprite_id = source.read_u32::<BigEndian>()?;
 
-    let mut sp_y_bytes = [0u8; 4];
-    source.read_exact(&mut sp_y_bytes)?;
+    let flags = source.read_u32::<BigEndian>()?;
+    let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let mut frame_idx_bytes = [0u8; 4];
-    source.read_exact(&mut frame_idx_bytes)?;
+    let prototype_id = source.read_u32::<BigEndian>()?;
+    let critter_idx = source.read_i32::<BigEndian>()?;
 
-    let mut orientation_bytes = [0u8; 4];
-    source.read_exact(&mut orientation_bytes)?;
+    let lradius = source.read_u32::<BigEndian>()?;
+    let lintensity = source.read_u32::<BigEndian>()?;
 
-    let mut sprite_id_bytes = [0u8; 4];
-    source.read_exact(&mut sprite_id_bytes)?;
+    let outline_color = source.read_u32::<BigEndian>()?;
+    let script_id = source.read_u32::<BigEndian>()?;
 
-    let mut flags_bytes = [0u8; 4];
-    source.read_exact(&mut flags_bytes)?;
+    let inventory_count = Scaled {
+        value: source.read_u32::<BigEndian>()?,
+        scale: 0..=source.read_u32::<BigEndian>()?,
+    };
 
-    let mut flags_bytes = [0u8; 4];
-    source.read_exact(&mut flags_bytes)?;
-
-    let mut elevation_bytes = [0u8; 4];
-    source.read_exact(&mut elevation_bytes)?;
-
-    let mut prototype_id_bytes = [0u8; 4];
-    source.read_exact(&mut prototype_id_bytes)?;
-
-    let mut prototype_id_bytes = [0u8; 4];
-    source.read_exact(&mut prototype_id_bytes)?;
-
-    let mut critter_idx_bytes = [0u8; 4];
-    source.read_exact(&mut critter_idx_bytes)?;
-
-    let mut light_radius_bytes = [0u8; 4];
-    source.read_exact(&mut light_radius_bytes)?;
-
-    let mut light_intensity_bytes = [0u8; 4];
-    source.read_exact(&mut light_intensity_bytes)?;
-
-    let mut outline_color_bytes = [0u8; 4];
-    source.read_exact(&mut outline_color_bytes)?;
-
-    let mut script_id_bytes = [0u8; 4];
-    source.read_exact(&mut script_id_bytes)?;
-
-    let mut inventory_count_bytes = [0u8; 4];
-    source.read_exact(&mut inventory_count_bytes)?;
-
-    let mut inventory_capacity_bytes = [0u8; 4];
-    source.read_exact(&mut inventory_capacity_bytes)?;
-
-    let id = u32::from_be_bytes(id_bytes);
-    let position = Coordinate::try_from(u32::from_be_bytes(position_bytes))?;
-
-    let sh_x = i32::from_be_bytes(sh_x_bytes);
-    let sh_y = i32::from_be_bytes(sh_y_bytes);
-
-    let sp_x = i32::from_be_bytes(sp_x_bytes);
-    let sp_y = i32::from_be_bytes(sp_y_bytes);
-
-    let sprite_id = u32::from_be_bytes(elevation_bytes);
-    let frame_idx = u32::from_be_bytes(frame_idx_bytes);
-    let orientation = Orientation::try_from(u32::from_be_bytes(orientation_bytes))?;
-
-    Ok(state::object::Instance { reference_id: u32::from_be_bytes(prototype_id_bytes) })
+    Ok(state::object::Instance { reference_id: prototype_id })
 }

@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::common::types::ScaledValue;
+use crate::common::types::Scaled;
 
 pub mod parse;
 
@@ -8,7 +8,7 @@ pub struct Glyph {
     pub width: u16,
     pub height: u16,
 
-    pub dots: Vec<ScaledValue<usize, Range<usize>>>,
+    pub dots: Vec<Scaled<usize, Range<usize>>>,
 }
 
 pub struct Spacing {

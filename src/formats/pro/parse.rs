@@ -1,7 +1,7 @@
 use std::io::{Read, Seek, SeekFrom};
 
 use super::*;
-use super::super::super::common::types::ScaledValue;
+use super::super::super::common::types::Scaled;
 
 mod r#type;
 mod flags;
@@ -73,11 +73,11 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
         id: object_id,
         meta: meta::Info {
             light: meta::info::Light {
-                distance: ScaledValue {
+                distance: Scaled {
                     value: light_radius,
                     scale: 0..=7,
                 },
-                intensity: ScaledValue {
+                intensity: Scaled {
                     value: light_intensity,
                     scale: 0..=u16::MAX,
                 },

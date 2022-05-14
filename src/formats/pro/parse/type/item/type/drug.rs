@@ -289,7 +289,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 delay: Duration::new(
                     addiction_delay_raw as u64 * 60, 0,
                 ),
-                chance: ScaledValue {
+                chance: Scaled {
                     value: addiction_rate_raw as u8,
                     scale: 0u8..=100u8,
                 },

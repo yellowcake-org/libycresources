@@ -20,11 +20,11 @@ pub mod meta {
     pub mod info {
         use std::ops::RangeInclusive;
 
-        use crate::common::types::ScaledValue;
+        use crate::common::types::Scaled;
 
         pub struct Light {
-            pub distance: ScaledValue<u8, RangeInclusive<u8>>,
-            pub intensity: ScaledValue<u16, RangeInclusive<u16>>,
+            pub distance: Scaled<u8, RangeInclusive<u8>>,
+            pub intensity: Scaled<u16, RangeInclusive<u16>>,
         }
 
         pub struct Connections {
@@ -433,7 +433,7 @@ pub mod object {
             use std::collections::HashMap;
             use std::ops::RangeInclusive;
 
-            use crate::common::types::ScaledValue;
+            use crate::common::types::Scaled;
             use crate::formats::pro::object::common::critter::Statistic;
 
             #[derive(Debug)]
@@ -452,7 +452,7 @@ pub mod object {
             pub struct Addiction {
                 pub perk: super::super::common::critter::Perk,
                 pub delay: std::time::Duration,
-                pub chance: ScaledValue<u8, RangeInclusive<u8>>,
+                pub chance: Scaled<u8, RangeInclusive<u8>>,
             }
 
             #[derive(Debug)]

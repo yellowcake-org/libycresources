@@ -25,22 +25,22 @@ pub struct Map {
 pub mod common {
     use std::collections::HashSet;
 
-    use crate::common::types::ScaledValue;
+    use crate::common::types::Scaled;
 
     #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Coordinate {
-        pub x: ScaledValue<u8, std::ops::Range<u8>>,
-        pub y: ScaledValue<u8, std::ops::Range<u8>>,
+        pub x: Scaled<u8, std::ops::Range<u8>>,
+        pub y: Scaled<u8, std::ops::Range<u8>>,
     }
 
     #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Elevation {
-        pub level: ScaledValue<u8, std::ops::Range<u8>>,
+        pub level: Scaled<u8, std::ops::Range<u8>>,
     }
 
     #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Orientation {
-        pub value: ScaledValue<u8, std::ops::Range<u8>>,
+        pub value: Scaled<u8, std::ops::Range<u8>>,
     }
 
     #[derive(Debug, PartialEq, Eq, Hash)]

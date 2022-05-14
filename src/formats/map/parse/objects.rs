@@ -4,7 +4,6 @@ mod object;
 
 pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSet<state::object::Instance>, errors::Error> {
     let mut list = HashSet::new();
-    return Ok(list); // todo
 
     let mut total_count_bytes = [0u8; 4];
     match source.read_exact(&mut total_count_bytes) {
