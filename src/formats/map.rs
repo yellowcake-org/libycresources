@@ -18,8 +18,8 @@ pub struct Map {
     pub darkness: u32,
 
     pub tiles: [Option<tiles::Instance>; 3],
-    pub objects: HashSet<state::object::Instance>,
-    pub blueprints: HashSet<state::blueprint::Instance>,
+    pub objects: HashSet<blueprint::prototype::Instance>,
+    pub blueprints: HashSet<blueprint::script::Instance>,
 }
 
 pub mod common {
@@ -76,8 +76,8 @@ pub mod tiles {
     }
 }
 
-pub mod state {
-    pub mod blueprint {
+pub mod blueprint {
+    pub mod script {
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub enum Type {
             System,
@@ -126,10 +126,13 @@ pub mod state {
         }
     }
 
-    pub mod object {
+    pub mod prototype {
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
-            pub reference_id: u32,
+            pub identifier: Identifier<models::prototype::Kind>,
         }
 
         pub mod patch {}

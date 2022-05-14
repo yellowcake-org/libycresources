@@ -1,10 +1,10 @@
 use crate::common::types::geometry::Scaled;
 use crate::formats::map::common::{Coordinate, Elevation};
-use crate::formats::map::state::blueprint::Type::{Critter, Item, Spatial, System, Time};
+use crate::formats::map::blueprint::script::Type::{Critter, Item, Spatial, System, Time};
 
 use super::super::*;
 
-pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::blueprint::Instance, errors::Error> {
+pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<blueprint::script::Instance, errors::Error> {
     let mut id_bytes = [0u8; 4];
     match source.read_exact(&mut id_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
@@ -20,8 +20,8 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
         return Err(errors::Error::Read(error));
     }
 
-    let mut timed_inners: Option<state::blueprint::time::Instance> = None;
-    let mut spatial_inners: Option<state::blueprint::spatial::Instance> = None;
+    let mut timed_inners: Option<blueprint::script::time::Instance> = None;
+    let mut spatial_inners: Option<blueprint::script::spatial::Instance> = None;
 
     match type_raw {
         1 => {
@@ -61,7 +61,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
 
             let distance = u32::from_be_bytes(distance_bytes) as u16;
 
-            spatial_inners = Some(state::blueprint::spatial::Instance {
+            spatial_inners = Some(blueprint::script::spatial::Instance {
                 position,
                 distance,
                 elevation,
@@ -76,7 +76,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
 
             let delay = u32::from_be_bytes(delay_bytes);
 
-            timed_inners = Some(state::blueprint::time::Instance {
+            timed_inners = Some(blueprint::script::time::Instance {
                 duration: std::time::Duration::new(delay as u64, 0)
             });
         }
@@ -183,7 +183,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
         return Err(errors::Error::Read(error));
     }
 
-    Ok(state::blueprint::Instance {
+    Ok(blueprint::script::Instance {
         id,
         r#type: match type_raw {
             0 => System,
@@ -200,12 +200,12 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<state::
             _ => return Err(errors::Error::Format)
         },
         variables: if lvars_offset > -1 && lvars_count > 0 {
-            Some(state::blueprint::Variables {
+            Some(blueprint::script::Variables {
                 offset: lvars_offset as u32,
                 count: lvars_count as u32,
             })
         } else { None },
-        connections: state::blueprint::Connections {
+        connections: blueprint::script::Connections {
             program_id,
             object_id: if object_id > -1 { Some(object_id as u32) } else { None },
         },

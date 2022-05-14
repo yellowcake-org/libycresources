@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Kind {
     Item,
     Critter,

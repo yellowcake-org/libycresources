@@ -1,8 +1,8 @@
-pub mod prototype;
 pub mod sprite;
 pub mod script;
+pub mod prototype;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Identifier<Kind> {
     pub kind: Kind,
     pub value: u16,

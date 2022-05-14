@@ -1,8 +1,8 @@
 use super::*;
 
-mod blueprint;
+mod script;
 
-pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprint::Instance>, errors::Error> {
+pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<blueprint::script::Instance>, errors::Error> {
     let mut list = HashSet::new();
 
     for type_raw in 0..5 {
@@ -21,12 +21,12 @@ pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<state::blueprint::
         for page in 0..batches {
             for record in 0..BATCH_LENGTH {
                 if (page * BATCH_LENGTH) + record < count {
-                    match blueprint::instance(source, type_raw) {
+                    match script::instance(source, type_raw) {
                         Ok(value) => { list.insert(value); }
                         Err(_) => return Err(errors::Error::Format)
                     }
                 } else {
-                    if let Err(_) = blueprint::skip(source) {
+                    if let Err(_) = script::skip(source) {
                         return Err(errors::Error::Format);
                     }
                 }

@@ -3,11 +3,13 @@ use std::io::{Read, Seek, SeekFrom};
 use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::geometry::Scaled;
+use crate::common::types::models;
+use crate::common::types::models::Identifier;
 use crate::formats::map::common::{Coordinate, Elevation, Orientation};
 use crate::formats::map::parse::errors;
-use crate::formats::map::state;
+use crate::formats::map::blueprint;
 
-pub fn instance<S: Read + Seek>(source: &mut S) -> Result<state::object::Instance, errors::Error> {
+pub fn instance<S: Read + Seek>(source: &mut S) -> Result<blueprint::prototype::Instance, errors::Error> {
     let _entry_id = source.read_u32::<BigEndian>()?;
 
     let position = Coordinate::try_from(source.read_u32::<BigEndian>()?)?;
@@ -30,7 +32,7 @@ pub fn instance<S: Read + Seek>(source: &mut S) -> Result<state::object::Instanc
     let flags = source.read_u32::<BigEndian>()?;
     let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let prototype_id = source.read_u32::<BigEndian>()?;
+    let identifier = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
     let critter_idx = source.read_i32::<BigEndian>()?;
 
     let light_radius = source.read_u32::<BigEndian>()?;
@@ -48,5 +50,5 @@ pub fn instance<S: Read + Seek>(source: &mut S) -> Result<state::object::Instanc
 
     let flags_patch = source.read_u32::<BigEndian>()?;
 
-    Ok(state::object::Instance { reference_id: prototype_id })
+    Ok(blueprint::prototype::Instance { identifier })
 }

@@ -9,7 +9,7 @@ mod defaults;
 mod variables;
 mod tiles;
 mod objects;
-mod blueprints;
+mod scripts;
 
 pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
     if let Err(error) = source.seek(SeekFrom::Start(0)) {
@@ -112,7 +112,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
         Err(error) => return Err(error),
     };
 
-    let blueprints = match blueprints::list(source) {
+    let blueprints = match scripts::list(source) {
         Ok(value) => value,
         Err(error) => return Err(error),
     };

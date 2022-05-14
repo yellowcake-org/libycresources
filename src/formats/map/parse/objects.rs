@@ -2,7 +2,7 @@ use super::*;
 
 mod object;
 
-pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSet<state::object::Instance>, errors::Error> {
+pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSet<blueprint::prototype::Instance>, errors::Error> {
     let mut list = HashSet::new();
 
     let mut total_count_bytes = [0u8; 4];
