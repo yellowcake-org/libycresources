@@ -84,7 +84,7 @@ pub mod blueprint {
 
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Connections {
-            pub program_id: u32,
+            pub program_id: Option<u32>,
             pub object_id: Option<u32>,
         }
 

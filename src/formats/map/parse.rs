@@ -2,7 +2,9 @@ use std::io::{Read, Seek, SeekFrom};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::errors;
+use crate::common::types::{errors, models};
+use crate::common::types::models::Identifier;
+use crate::formats::pro;
 
 use super::*;
 
@@ -13,7 +15,11 @@ mod tiles;
 mod prototypes;
 mod scripts;
 
-pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
+pub trait PrototypeProvider {
+    fn provide(&self, identifier: &Identifier<models::prototype::Kind>) -> Result<pro::Prototype, errors::Error>;
+}
+
+pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -> Result<Map, errors::Error> {
     source.seek(SeekFrom::Start(0))?;
 
     let version = source.read_u32::<BigEndian>()?;
@@ -21,10 +27,9 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
     let mut filename_bytes = [0u8; 16];
     source.read_exact(&mut filename_bytes)?;
 
-    let filename = String::from(match std::str::from_utf8(&filename_bytes) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format),
-    });
+    let filename = String::from(
+        std::str::from_utf8(&filename_bytes).map_err(|_| errors::Error::Format)?
+    );
 
     let defaults = defaults::instance(source)?;
     let local_vars_count = source.read_u32::<BigEndian>()?;
@@ -43,7 +48,7 @@ pub fn map<S: Read + Seek>(source: &mut S) -> Result<Map, errors::Error> {
 
     let tiles = tiles::list(source, &elevations)?;
     let scripts = scripts::list(source)?;
-    let prototypes = prototypes::list(source, &elevations)?;
+    let prototypes = prototypes::list(source, provider, &elevations)?;
 
     Ok(Map {
         id,

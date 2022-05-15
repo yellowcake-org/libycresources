@@ -5,10 +5,9 @@ use crate::formats::map::common::Elevation;
 use super::super::*;
 
 pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<blueprint::script::Instance, errors::Error> {
-    let mut id_bytes = [0u8; 4];
-    source.read_exact(&mut id_bytes)?;
+    source.seek(SeekFrom::Current(2))?;
+    let id = source.read_u16::<BigEndian>()?;
 
-    let id = u16::from_be_bytes(id_bytes[2..4].try_into().map_err(|_| errors::Error::Format)?);
     source.seek(SeekFrom::Current(4))?;
 
     let mut timed_inners: Option<blueprint::script::time::Instance> = None;
@@ -30,7 +29,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
                     _ => return Err(errors::Error::Format)
                 };
 
-            let position = Coordinate::try_from(source.read_u32::<BigEndian>()?)?;
+            let position = Coordinate::try_from(elevation_n_tile_bytes[3] as u32)?;
             let distance = source.read_u32::<BigEndian>()? as u16;
 
             spatial_inners = Some(blueprint::script::spatial::Instance {
@@ -48,7 +47,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
     }
 
     let _flags = source.read_u32::<BigEndian>()? as u16;
-    let program_id = source.read_u32::<BigEndian>()?;
+    let program_id = source.read_i32::<BigEndian>()?.checked_add(1);
 
     source.seek(SeekFrom::Current(4))?;
 
@@ -92,7 +91,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
             })
         } else { None },
         connections: blueprint::script::Connections {
-            program_id,
+            program_id: program_id.and_then(|v| { if v > -1 { Some(v as u32) } else { None } }),
             object_id: if object_id > -1 { Some(object_id as u32) } else { None },
         },
     })

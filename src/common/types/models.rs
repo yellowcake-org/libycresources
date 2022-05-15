@@ -17,10 +17,7 @@ impl<Kind> TryFrom<u32> for Identifier<Kind> where Kind: TryFrom<u8> {
                 Ok(value) => value,
                 Err(_) => return Err(super::errors::Error::Format),
             },
-            value: u16::from_be_bytes([
-                (value >> u8::BITS * 0) as u8,
-                (value >> u8::BITS * 1) as u8
-            ]),
+            value: (value & 0xFFFFFFFF) as u16,
         })
     }
 }

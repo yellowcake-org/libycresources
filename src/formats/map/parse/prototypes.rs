@@ -2,7 +2,8 @@ use super::*;
 
 mod prototype;
 
-pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result<HashSet<blueprint::prototype::Instance>, errors::Error> {
+pub fn list<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P, elevations: &[Option<()>]) ->
+Result<HashSet<blueprint::prototype::Instance>, errors::Error> {
     let mut list = HashSet::new();
     let count = source.read_u32::<BigEndian>()?;
 
@@ -10,7 +11,7 @@ pub fn list<S: Read + Seek>(source: &mut S, elevations: &[Option<()>]) -> Result
         if e.is_none() { continue; }
 
         for _ in 0..source.read_u32::<BigEndian>()? {
-            if !list.insert(prototype::instance(source)?) { return Err(errors::Error::Format); }
+            if !list.insert(prototype::instance(source, provider)?) { return Err(errors::Error::Format); }
         }
     }
 

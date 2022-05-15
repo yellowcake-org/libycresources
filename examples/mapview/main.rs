@@ -1,10 +1,13 @@
 use std::fs::File;
+use std::path::Path;
 
 use clap::Parser;
 
 use libycresources::formats::map;
+use crate::provider::Provider;
 
-pub(crate) mod print;
+mod print;
+mod provider;
 
 #[derive(Parser)]
 #[clap(name = "mapview", version)]
@@ -12,6 +15,9 @@ struct Options {
     /// Path to the input map file (.map)
     #[clap(short, long)]
     input: String,
+    /// Path to the 'PROTO' directory
+    #[clap(short, long)]
+    protos: String,
     #[clap(subcommand)]
     action: Action,
 }
@@ -34,8 +40,9 @@ fn main() {
     };
 
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
+    let provider = Provider { directory: Path::new(&options.protos) };
 
-    let map = match map::parse::map(&mut reader) {
+    let map = match map::parse::map(&mut reader, &provider) {
         Ok(value) => value,
         Err(error) => {
             eprintln!("Error occurred: {:?}", error);
