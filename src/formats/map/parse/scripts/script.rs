@@ -1,6 +1,6 @@
-use crate::common::types::geometry::Scaled;
-use crate::formats::map::common::{Coordinate, Elevation};
+use crate::common::types::geometry::{Coordinate, Scaled};
 use crate::formats::map::blueprint::script::Type::{Critter, Item, Spatial, System, Time};
+use crate::formats::map::common::Elevation;
 
 use super::super::*;
 

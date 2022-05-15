@@ -1,6 +1,7 @@
 use std::io::Read;
+use crate::common::types::geometry::Coordinate;
 
-use crate::formats::map::common::{Coordinate, Elevation, Orientation};
+use crate::formats::map::common::{Elevation, Orientation};
 use crate::formats::map::defaults::Instance;
 use crate::formats::map::parse::errors;
 

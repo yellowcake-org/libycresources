@@ -1,9 +1,9 @@
 use crate::common::types::errors;
-use crate::common::types::geometry::Scaled;
+use crate::common::types::geometry::{Coordinate, Scaled};
 
 use super::super::*;
 
-impl TryFrom<u32> for common::Coordinate<u8, std::ops::Range<u8>> {
+impl TryFrom<u32> for Coordinate<u8, std::ops::Range<u8>> {
     type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {

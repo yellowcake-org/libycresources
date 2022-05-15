@@ -28,12 +28,6 @@ pub mod common {
     use crate::common::types::geometry::Scaled;
 
     #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct Coordinate<V, S> {
-        pub x: Scaled<V, S>,
-        pub y: Scaled<V, S>,
-    }
-
-    #[derive(Debug, Hash, Eq, PartialEq)]
     pub struct Elevation {
         pub level: Scaled<u8, std::ops::Range<u8>>,
     }
@@ -54,7 +48,8 @@ pub mod common {
 }
 
 pub mod defaults {
-    use crate::formats::map::common::{Coordinate, Elevation, Orientation};
+    use crate::common::types::geometry::Coordinate;
+    use crate::formats::map::common::{Elevation, Orientation};
 
     #[derive(Debug)]
     pub struct Instance {
@@ -108,7 +103,8 @@ pub mod blueprint {
         }
 
         pub mod spatial {
-            use crate::formats::map::common::{Coordinate, Elevation};
+            use crate::common::types::geometry::Coordinate;
+            use crate::formats::map::common::Elevation;
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {

@@ -2,10 +2,10 @@ use std::io::{Read, Seek, SeekFrom};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::geometry::Scaled;
+use crate::common::types::geometry::{Coordinate, Scaled};
 use crate::common::types::models::Identifier;
 use crate::formats::map::blueprint;
-use crate::formats::map::common::{Coordinate, Elevation, Orientation};
+use crate::formats::map::common::{Elevation, Orientation};
 use crate::formats::map::parse::errors;
 
 pub fn instance<S: Read + Seek>(source: &mut S) -> Result<blueprint::prototype::Instance, errors::Error> {
