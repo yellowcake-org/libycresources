@@ -31,7 +31,7 @@ impl PrototypeProvider for Provider<'_> {
             let file = File::open(lst)?;
             let reader = BufReader::with_capacity(1 * 1024 * 1024, file);
 
-            reader.lines().nth(identifier.value as usize).unwrap()
+            reader.lines().nth(identifier.value as usize - 1).unwrap()
         };
 
         let path = directory.join(filename()?);
