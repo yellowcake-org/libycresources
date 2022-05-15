@@ -25,16 +25,15 @@ impl PrototypeProvider for Provider<'_> {
         };
 
         let directory = &self.directory.join(kind);
-
-        let filename = || {
+        let path = directory.join((|| -> Result<String, Error> {
             let lst = &directory.join(kind.to_owned() + ".LST");
-            let file = File::open(lst)?;
-            let reader = BufReader::with_capacity(1 * 1024 * 1024, file);
 
-            reader.lines().nth(identifier.value as usize - 1).unwrap()
-        };
-
-        let path = directory.join(filename()?);
+            return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
+                .lines()
+                .nth(identifier.value as usize - 1)
+                .ok_or(Error::Format)?
+                .map_err(|e| Error::Read(e));
+        })()?);
 
         let file = File::open(&path)?;
         let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
