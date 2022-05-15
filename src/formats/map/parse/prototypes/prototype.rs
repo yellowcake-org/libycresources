@@ -3,7 +3,7 @@ use std::io::{Read, Seek, SeekFrom};
 use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::geometry::{Coordinate, Scaled};
-use crate::common::types::models::Identifier;
+use crate::common::types::models;
 use crate::formats::map::blueprint;
 use crate::formats::map::common::{Elevation, Orientation};
 use crate::formats::map::parse::errors;
@@ -31,7 +31,7 @@ pub fn instance<S: Read + Seek>(source: &mut S) -> Result<blueprint::prototype::
     let flags = source.read_u32::<BigEndian>()?;
     let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let identifier = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
+    let identifier = models::Identifier::try_from(source.read_u32::<BigEndian>()?)?;
     let critter_idx = source.read_i32::<BigEndian>()?;
 
     let light_radius = source.read_u32::<BigEndian>()?;
@@ -42,7 +42,7 @@ pub fn instance<S: Read + Seek>(source: &mut S) -> Result<blueprint::prototype::
 
     let inventory_count = Scaled {
         value: source.read_u32::<BigEndian>()?,
-        scale: 0..=source.read_u32::<BigEndian>()?,
+        scale: u32::MIN..=source.read_u32::<BigEndian>()?,
     };
 
     source.seek(SeekFrom::Current(4))?;

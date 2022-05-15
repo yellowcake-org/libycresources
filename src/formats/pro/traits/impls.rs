@@ -1,7 +1,6 @@
 use crate::common::types::errors;
 
 use super::super::object;
-use super::super::parse;
 
 impl TryFrom<u32> for object::common::critter::body::Type {
     type Error = errors::Error;

@@ -4,10 +4,7 @@ use super::*;
 
 pub fn tuple<S: Read>(source: &mut S) -> Result<(HashSet<common::Flag>, [Option<()>; 3]), errors::Error> {
     let mut flags_bytes = [0u8; 4];
-    match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
+    source.read_exact(&mut flags_bytes)?;
 
     let mut flags: HashSet<common::Flag> = HashSet::new();
     let mut elevations = [None, None, None];
