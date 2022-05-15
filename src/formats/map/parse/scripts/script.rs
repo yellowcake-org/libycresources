@@ -15,21 +15,16 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
 
     match type_raw {
         1 => {
-            let mut elevation_n_tile_bytes = [0u8; 4];
-            source.read_exact(&mut elevation_n_tile_bytes)?;
-
             const LEVELS_SCALE: std::ops::Range<u8> = 0u8..3;
             let elevation =
-                match u16::from_be_bytes(elevation_n_tile_bytes[0..2].try_into()
-                    .map_err(|_| errors::Error::Format)?
-                ) {
+                match source.read_u16::<BigEndian>()? {
                     0x0000 => Elevation { level: Scaled { value: 0u8, scale: LEVELS_SCALE } },
                     0x2000 => Elevation { level: Scaled { value: 1u8, scale: LEVELS_SCALE } },
                     0x4000 => Elevation { level: Scaled { value: 2u8, scale: LEVELS_SCALE } },
                     _ => return Err(errors::Error::Format)
                 };
 
-            let position = Coordinate::try_from(elevation_n_tile_bytes[3] as u32)?;
+            let position = Coordinate::try_from(source.read_u16::<BigEndian>()? as u32)?;
             let distance = source.read_u32::<BigEndian>()? as u16;
 
             spatial_inners = Some(blueprint::script::spatial::Instance {
@@ -72,14 +67,8 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
         id,
         r#type: match type_raw {
             0 => System,
-            1 => Spatial(match spatial_inners {
-                Some(value) => value,
-                None => return Err(errors::Error::Format)
-            }),
-            2 => Time(match timed_inners {
-                Some(value) => value,
-                None => return Err(errors::Error::Format)
-            }),
+            1 => Spatial(spatial_inners.ok_or(errors::Error::Format)?),
+            2 => Time(timed_inners.ok_or(errors::Error::Format)?),
             3 => Item,
             4 => Critter,
             _ => return Err(errors::Error::Format)
