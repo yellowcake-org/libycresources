@@ -46,7 +46,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
 
     let outline_color = source.read_u32::<BigEndian>()?;
 
-    let script_id = source.read_u32::<BigEndian>()?;
+    let script_id = source.read_i32::<BigEndian>()?;
     let program_id = source.read_i32::<BigEndian>()?;
 
     let inventory_count = Scaled {
