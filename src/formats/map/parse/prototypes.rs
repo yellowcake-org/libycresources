@@ -7,9 +7,7 @@ Result<HashSet<blueprint::prototype::Instance>, errors::Error> {
     let mut list = HashSet::new();
     let count = source.read_u32::<BigEndian>()?;
 
-    for e in elevations {
-        if e.is_none() { continue; }
-
+    for _ in elevations {
         for _ in 0..source.read_u32::<BigEndian>()? {
             if !list.insert(prototype::instance(source, provider)?) { return Err(errors::Error::Format); }
         }
