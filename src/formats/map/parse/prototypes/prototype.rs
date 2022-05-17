@@ -6,6 +6,8 @@ use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled}
 use crate::common::types::models;
 use crate::formats::map::blueprint;
 use crate::formats::map::parse::{errors, PrototypeProvider};
+use crate::formats::pro::meta;
+use crate::formats::pro::meta::info::Light;
 
 mod patch;
 
@@ -54,5 +56,14 @@ Result<blueprint::prototype::Instance, errors::Error> {
     let flags_patch = source.read_u32::<BigEndian>()?;
     let patch = patch::instance(source, provider, &identifier)?;
 
-    Ok(blueprint::prototype::Instance { identifier, patch })
+    Ok(blueprint::prototype::Instance {
+        identifier,
+        patch: blueprint::prototype::Patch {
+            meta: meta::Patch {
+                light: Light::try_from((light_radius as u8, light_intensity as u16))?,
+                flags: Default::default(),
+            },
+            object: patch,
+        },
+    })
 }

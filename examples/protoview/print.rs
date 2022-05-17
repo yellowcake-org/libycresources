@@ -1,5 +1,5 @@
 use libycresources::formats::pro;
-use libycresources::formats::pro::object::Type;
+use libycresources::formats::pro::Type;
 
 mod item;
 mod critter;
@@ -19,7 +19,7 @@ pub fn prototype(prototype: &pro::Prototype) {
 
     println!();
 
-    match &prototype.r#type {
+    match &prototype.object {
         Type::Item(item) => { item::item(item) }
         Type::Critter(critter) => { critter::critter(critter) }
         Type::Scenery(scenery) => { scenery::scenery(scenery) }

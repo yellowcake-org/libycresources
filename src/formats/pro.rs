@@ -31,8 +31,8 @@ pub type ObjectPatch = Type<
 
 pub struct Prototype {
     pub id: u16,
-    pub meta: meta::Info,
-    pub r#type: ObjectInstance,
+    pub meta: meta::Instance,
+    pub object: ObjectInstance,
 }
 
 pub mod meta {
@@ -41,11 +41,17 @@ pub mod meta {
     use crate::common::types::models;
     use crate::common::types::models::Identifier;
 
-    pub struct Info {
+    pub struct Instance {
         pub light: info::Light,
         pub flags: HashSet<info::flags::Instance>,
         pub sprite: Identifier<models::sprite::Kind>,
         pub connections: info::Connections,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Patch {
+        pub light: info::Light,
+        pub flags: HashSet<info::flags::Instance>,
     }
 
     pub mod info {
@@ -53,6 +59,7 @@ pub mod meta {
 
         use crate::common::types::geometry::Scaled;
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Light {
             pub distance: Scaled<u8, RangeInclusive<u8>>,
             pub intensity: Scaled<u16, RangeInclusive<u16>>,

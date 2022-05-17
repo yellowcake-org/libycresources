@@ -3,13 +3,13 @@ use super::*;
 mod prototype;
 
 pub fn list<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P, elevations: &[Option<()>]) ->
-Result<HashSet<blueprint::prototype::Instance>, errors::Error> {
-    let mut list = HashSet::new();
+Result<Vec<blueprint::prototype::Instance>, errors::Error> {
+    let mut list = Vec::new();
     let count = source.read_u32::<BigEndian>()?;
 
     for _ in elevations {
         for _ in 0..source.read_u32::<BigEndian>()? {
-            if !list.insert(prototype::instance(source, provider)?) { return Err(errors::Error::Format); }
+            list.push(prototype::instance(source, provider)?);
         }
     }
 

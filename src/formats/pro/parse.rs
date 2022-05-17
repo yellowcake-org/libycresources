@@ -5,6 +5,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 use crate::common::types::errors;
 use crate::common::types::geometry::Scaled;
 use crate::common::types::models::Identifier;
+use crate::formats::pro::meta::info::Light;
 
 use super::*;
 
@@ -46,21 +47,12 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     Ok(Prototype {
         id: identifier.value,
-        meta: meta::Info {
-            light: meta::info::Light {
-                distance: Scaled {
-                    value: light_radius,
-                    scale: 0..=7,
-                },
-                intensity: Scaled {
-                    value: light_intensity,
-                    scale: 0..=u16::MAX,
-                },
-            },
+        meta: meta::Instance {
+            light: Light::try_from((light_radius as u8, light_intensity as u16))?,
             flags,
             sprite,
             connections: meta::info::Connections { description_id: text_id },
         },
-        r#type,
+        object: r#type,
     })
 }

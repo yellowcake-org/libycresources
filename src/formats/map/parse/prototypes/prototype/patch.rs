@@ -9,7 +9,7 @@ pub(crate) fn instance<S: Read, P: PrototypeProvider>
 (source: &mut S, provider: &P, identifier: &Identifier<ObjectType>) -> Result<ObjectPatch, errors::Error> {
     let prototype = provider.provide(&identifier)?;
 
-    Ok(match prototype.r#type {
+    Ok(match prototype.object {
         ObjectInstance::Item(_) => { todo!() }
         ObjectInstance::Critter(_) => { todo!() }
         ObjectInstance::Scenery(_) => { todo!() }

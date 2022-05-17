@@ -1,5 +1,6 @@
 use crate::common::types::errors;
 use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
+use crate::formats::pro::meta::info::Light;
 
 use super::super::object;
 
@@ -307,5 +308,22 @@ impl TryFrom<i32> for object::common::map::Map {
                 })
             )
         }
+    }
+}
+
+impl TryFrom<(u8, u16)> for Light {
+    type Error = errors::Error;
+
+    fn try_from(value: (u8, u16)) -> Result<Self, Self::Error> {
+        Ok(Self {
+            distance: Scaled {
+                value: value.0,
+                scale: u8::MIN..=7,
+            },
+            intensity: Scaled {
+                value: value.1,
+                scale: u16::MIN..=u16::MAX,
+            },
+        })
     }
 }

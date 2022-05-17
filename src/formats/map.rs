@@ -19,7 +19,7 @@ pub struct Map {
 
     pub tiles: [Option<tiles::Instance>; 3],
     pub scripts: HashSet<blueprint::script::Instance>,
-    pub prototypes: HashSet<blueprint::prototype::Instance>,
+    pub prototypes: Vec<blueprint::prototype::Instance>,
 }
 
 pub mod common {
@@ -111,12 +111,18 @@ pub mod blueprint {
     pub mod prototype {
         use crate::common::types::models::Identifier;
         use crate::formats::pro;
-        use crate::formats::pro::ObjectPatch;
+        use crate::formats::pro::{meta, ObjectPatch};
 
-        #[derive(Debug, Hash, Eq, PartialEq)]
+        #[derive(Debug, Eq, PartialEq)]
         pub struct Instance {
             pub identifier: Identifier<pro::ObjectType>,
-            pub patch: ObjectPatch,
+            pub patch: Patch,
+        }
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub struct Patch {
+            pub meta: meta::Patch,
+            pub object: ObjectPatch,
         }
     }
 }
