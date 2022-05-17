@@ -1,5 +1,3 @@
-use crate::common::types::models::prototype;
-
 use super::*;
 
 mod common;
@@ -11,13 +9,14 @@ mod wall;
 mod tile;
 mod misc;
 
-pub(crate) fn instance<S: Read>(source: &mut S, kind: &prototype::Kind) -> Result<object::Type, errors::Error> {
-    Ok(match kind {
-        prototype::Kind::Item => object::Type::Item(item::instance(source)?),
-        prototype::Kind::Critter => object::Type::Critter(critter::instance(source)?),
-        prototype::Kind::Scenery => object::Type::Scenery(scenery::instance(source)?),
-        prototype::Kind::Wall => object::Type::Wall(wall::instance(source)?),
-        prototype::Kind::Tile => object::Type::Tile(tile::instance(source)?),
-        prototype::Kind::Misc => object::Type::Misc(misc::instance(source)?),
+pub(crate) fn instance<S: Read>(source: &mut S, r#type: &Type<(), (), (), (), (), ()>) ->
+Result<ObjectInstance, errors::Error> {
+    Ok(match r#type {
+        Type::Item(_) => Type::Item(item::instance(source)?),
+        Type::Critter(_) => Type::Critter(critter::instance(source)?),
+        Type::Scenery(_) => Type::Scenery(scenery::instance(source)?),
+        Type::Wall(_) => Type::Wall(wall::instance(source)?),
+        Type::Tile(_) => Type::Tile(tile::instance(source)?),
+        Type::Misc(_) => Type::Misc(misc::instance(source)?),
     })
 }

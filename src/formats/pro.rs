@@ -1,10 +1,38 @@
 pub mod parse;
 mod traits;
 
+#[derive(Debug, Hash, Eq, PartialEq)]
+pub enum Type<I, C, S, W, T, M> {
+    Item(I),
+    Critter(C),
+    Scenery(S),
+    Wall(W),
+    Tile(T),
+    Misc(M),
+}
+
+pub type ObjectType = Type<(), (), (), (), (), (), >;
+pub type ObjectInstance = Type<
+    object::item::Instance,
+    object::critter::Instance,
+    object::scenery::Instance,
+    object::wall::Instance,
+    object::tile::Instance,
+    object::misc::Instance,
+>;
+pub type ObjectPatch = Type<
+    object::item::Patch,
+    object::critter::Patch,
+    object::scenery::Patch,
+    (),
+    (),
+    Option<object::misc::Patch>,
+>;
+
 pub struct Prototype {
     pub id: u16,
     pub meta: meta::Info,
-    pub r#type: object::Type,
+    pub r#type: ObjectInstance,
 }
 
 pub mod meta {
@@ -102,6 +130,8 @@ pub mod object {
         }
 
         pub mod map {
+            use crate::common::types::geometry::{Coordinate, Elevation};
+
             #[derive(Debug)]
             pub enum Map {
                 Local(u32),
@@ -109,17 +139,9 @@ pub mod object {
             }
 
             #[derive(Debug)]
-            pub enum Floor {
-                Zero,
-                First,
-                Second,
-            }
-
-            #[derive(Debug)]
             pub struct Destination {
-                // TODO: Coordinates!
-                pub tile: u32,
-                pub floor: Floor,
+                pub elevation: Elevation,
+                pub position: Coordinate<u8, std::ops::Range<u8>>,
             }
         }
 
@@ -328,15 +350,6 @@ pub mod object {
         }
     }
 
-    pub enum Type {
-        Item(item::Instance),
-        Critter(critter::Instance),
-        Scenery(scenery::Instance),
-        Wall(wall::Instance),
-        Tile(tile::Instance),
-        Misc(misc::Instance),
-    }
-
     pub mod item {
         use std::collections::HashSet;
 
@@ -348,14 +361,25 @@ pub mod object {
             Hidden
         }
 
-        pub enum Type {
-            Armor(armor::Instance),
-            Container(container::Instance),
-            Drug(drug::Instance),
-            Weapon(weapon::Instance),
-            Ammo(ammo::Instance),
-            Misc(misc::Instance),
-            Key(key::Instance),
+        pub type ItemType = Type<(), (), (), (), (), (), ()>;
+        pub type ItemInstance = Type<
+            armor::Instance,
+            container::Instance,
+            drug::Instance,
+            weapon::Instance,
+            ammo::Instance,
+            misc::Instance,
+            key::Instance,
+        >;
+
+        pub enum Type<Ar, C, D, W, Am, M, K> {
+            Armor(Ar),
+            Container(C),
+            Drug(D),
+            Weapon(W),
+            Ammo(Am),
+            Misc(M),
+            Key(K),
         }
 
         pub struct Connections {
@@ -363,7 +387,7 @@ pub mod object {
         }
 
         pub struct Instance {
-            pub r#type: Type,
+            pub r#type: ItemInstance,
             pub flags: HashSet<Flag>,
 
             pub sprite: Option<Identifier<models::sprite::Kind>>,
@@ -378,6 +402,8 @@ pub mod object {
 
             pub connections: Connections,
         }
+
+        pub struct Patch {}
 
         pub mod armor {
             use std::collections::HashMap;
@@ -575,6 +601,10 @@ pub mod object {
                 pub caliber: Option<super::super::common::weapons::Caliber>,
                 pub connections: Connections,
             }
+
+            pub struct Patch {
+                pub count: u32,
+            }
         }
 
         pub mod key {
@@ -661,6 +691,8 @@ pub mod object {
             pub statistics: Statistics,
             pub connections: Connections,
         }
+
+        pub struct Patch {}
     }
 
     pub mod scenery {
@@ -691,6 +723,8 @@ pub mod object {
             pub actions: HashSet<super::common::actions::Instance>,
             pub connections: Connections,
         }
+
+        pub struct Patch {}
 
         pub mod door {
             use std::collections::HashSet;
@@ -767,8 +801,23 @@ pub mod object {
     }
 
     pub mod misc {
+        pub mod exit {
+            use crate::common::types::geometry::Orientation;
+            use crate::formats::pro::object::common::map::{Destination, Map};
+
+            pub struct Instance {
+                pub map: Map,
+                pub destination: Destination,
+                pub orientation: Orientation,
+            }
+        }
+
         pub struct Instance {
             pub _unknown: u32,
+        }
+
+        pub enum Patch {
+            Exit(exit::Instance)
         }
     }
 }

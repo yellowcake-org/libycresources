@@ -25,18 +25,6 @@ pub struct Map {
 pub mod common {
     use std::collections::HashSet;
 
-    use crate::common::types::geometry::Scaled;
-
-    #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct Elevation {
-        pub level: Scaled<u8, std::ops::Range<u8>>,
-    }
-
-    #[derive(Debug, Hash, Eq, PartialEq)]
-    pub struct Orientation {
-        pub value: Scaled<u8, std::ops::Range<u8>>,
-    }
-
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
 
@@ -48,8 +36,7 @@ pub mod common {
 }
 
 pub mod defaults {
-    use crate::common::types::geometry::Coordinate;
-    use crate::formats::map::common::{Elevation, Orientation};
+    use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
 
     #[derive(Debug)]
     pub struct Instance {
@@ -103,8 +90,7 @@ pub mod blueprint {
         }
 
         pub mod spatial {
-            use crate::common::types::geometry::Coordinate;
-            use crate::formats::map::common::Elevation;
+            use crate::common::types::geometry::{Coordinate, Elevation};
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
@@ -123,14 +109,13 @@ pub mod blueprint {
     }
 
     pub mod prototype {
-        use crate::common::types::models;
         use crate::common::types::models::Identifier;
+        use crate::formats::pro;
 
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
-            pub identifier: Identifier<models::prototype::Kind>,
+            pub identifier: Identifier<pro::ObjectType>,
+            // pub patch: Option<pro::patch::Instance>,
         }
-
-        pub mod patch {}
     }
 }

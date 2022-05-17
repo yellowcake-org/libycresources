@@ -4,24 +4,23 @@ use std::path::Path;
 
 use libycresources::common::types::errors::Error;
 use libycresources::common::types::models::Identifier;
-use libycresources::common::types::models::prototype::Kind;
 use libycresources::formats::map::parse::PrototypeProvider;
 use libycresources::formats::pro;
-use libycresources::formats::pro::Prototype;
+use libycresources::formats::pro::{ObjectType, Prototype};
 
 pub struct Provider<'a> {
     pub directory: &'a Path,
 }
 
 impl PrototypeProvider for Provider<'_> {
-    fn provide(&self, identifier: &Identifier<Kind>) -> Result<Prototype, Error> {
+    fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<Prototype, Error> {
         let kind = match identifier.kind {
-            Kind::Item => "ITEMS",
-            Kind::Critter => "CRITTERS",
-            Kind::Scenery => "SCENERY",
-            Kind::Wall => "WALLS",
-            Kind::Tile => "TILES",
-            Kind::Misc => "MISC",
+            ObjectType::Item(_) => "ITEMS",
+            ObjectType::Critter(_) => "CRITTERS",
+            ObjectType::Scenery(_) => "SCENERY",
+            ObjectType::Wall(_) => "WALLS",
+            ObjectType::Tile(_) => "TILES",
+            ObjectType::Misc(_) => "MISC",
         };
 
         let directory = &self.directory.join(kind);

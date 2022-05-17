@@ -2,7 +2,7 @@ use std::io::{Read, Seek, SeekFrom};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::{errors, models};
+use crate::common::types::errors;
 use crate::common::types::models::Identifier;
 use crate::formats::pro;
 
@@ -16,7 +16,7 @@ mod prototypes;
 mod scripts;
 
 pub trait PrototypeProvider {
-    fn provide(&self, identifier: &Identifier<models::prototype::Kind>) -> Result<pro::Prototype, errors::Error>;
+    fn provide(&self, identifier: &Identifier<pro::ObjectType>) -> Result<pro::Prototype, errors::Error>;
 }
 
 pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -> Result<Map, errors::Error> {

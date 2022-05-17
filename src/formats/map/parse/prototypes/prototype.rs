@@ -2,12 +2,12 @@ use std::io::{Read, Seek, SeekFrom};
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::geometry::{Coordinate, Scaled};
+use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 use crate::common::types::models;
 use crate::formats::map::blueprint;
-use crate::formats::map::common::{Elevation, Orientation};
 use crate::formats::map::parse::{errors, PrototypeProvider};
-use crate::formats::pro::object::Type;
+
+mod patch;
 
 pub fn instance<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) ->
 Result<blueprint::prototype::Instance, errors::Error> {
@@ -50,16 +50,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
     source.seek(SeekFrom::Current(4))?;
 
     let flags_patch = source.read_u32::<BigEndian>()?;
-
-    let prototype = provider.provide(&identifier)?;
-    match prototype.r#type {
-        Type::Item(_) => {}
-        Type::Critter(_) => {}
-        Type::Scenery(_) => {}
-        Type::Wall(_) => {}
-        Type::Tile(_) => {}
-        Type::Misc(_) => {}
-    }
+    let patch = patch::instance(source, provider, &identifier)?;
 
     Ok(blueprint::prototype::Instance { identifier })
 }

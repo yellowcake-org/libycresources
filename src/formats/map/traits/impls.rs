@@ -1,7 +1,5 @@
 use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Scaled};
-
-use super::super::*;
+use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 
 impl TryFrom<u32> for Coordinate<u8, std::ops::Range<u8>> {
     type Error = errors::Error;
@@ -22,19 +20,19 @@ impl TryFrom<u32> for Coordinate<u8, std::ops::Range<u8>> {
     }
 }
 
-impl TryFrom<u32> for common::Elevation {
+impl TryFrom<u32> for Elevation {
     type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         if (0..3).contains(&value) {
-            Ok(Self { level: Scaled { value: value as u8, scale: 0u8..3 } })
+            Ok(Self { level: Scaled { value: value as u8, scale: u8::MIN..3 } })
         } else {
             return Err(errors::Error::Format);
         }
     }
 }
 
-impl TryFrom<u32> for common::Orientation {
+impl TryFrom<u32> for Orientation {
     type Error = errors::Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {

@@ -1,4 +1,5 @@
 use crate::common::types::errors;
+use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
 
 use super::super::object;
 
@@ -279,16 +280,17 @@ impl TryFrom<&[u8; 4]> for object::common::map::Destination {
     type Error = errors::Error;
 
     fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
-        let tile = u32::from_be_bytes([0u8, value[1], value[2], value[3]]);
-
-        let floor: object::common::map::Floor = match value[0] & 0xFF {
-            0xF0 => object::common::map::Floor::Zero,
-            0xF2 => object::common::map::Floor::First,
-            0xF4 => object::common::map::Floor::Second,
+        let floor: Elevation = match value[0] & 0xFF {
+            0xF0 => Elevation { level: Scaled { value: 0, scale: u8::MIN..3 } },
+            0xF2 => Elevation { level: Scaled { value: 1, scale: u8::MIN..3 } },
+            0xF4 => Elevation { level: Scaled { value: 2, scale: u8::MIN..3 } },
             _ => return Err(errors::Error::Format),
         };
 
-        Ok(Self { tile, floor })
+        Ok(Self {
+            elevation: floor,
+            position: Coordinate::try_from(u32::from_be_bytes([0u8, value[1], value[2], value[3]]))?,
+        })
     }
 }
 
