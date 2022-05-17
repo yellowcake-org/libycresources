@@ -52,5 +52,5 @@ Result<blueprint::prototype::Instance, errors::Error> {
     let flags_patch = source.read_u32::<BigEndian>()?;
     let patch = patch::instance(source, provider, &identifier)?;
 
-    Ok(blueprint::prototype::Instance { identifier })
+    Ok(blueprint::prototype::Instance { identifier, patch })
 }

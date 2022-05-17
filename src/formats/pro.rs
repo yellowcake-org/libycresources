@@ -132,13 +132,13 @@ pub mod object {
         pub mod map {
             use crate::common::types::geometry::{Coordinate, Elevation};
 
-            #[derive(Debug)]
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub enum Map {
                 Local(u32),
                 World,
             }
 
-            #[derive(Debug)]
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Destination {
                 pub elevation: Elevation,
                 pub position: Coordinate<u8, std::ops::Range<u8>>,
@@ -403,6 +403,7 @@ pub mod object {
             pub connections: Connections,
         }
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Patch {}
 
         pub mod armor {
@@ -692,6 +693,7 @@ pub mod object {
             pub connections: Connections,
         }
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Patch {}
     }
 
@@ -724,6 +726,7 @@ pub mod object {
             pub connections: Connections,
         }
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Patch {}
 
         pub mod door {
@@ -805,6 +808,7 @@ pub mod object {
             use crate::common::types::geometry::Orientation;
             use crate::formats::pro::object::common::map::{Destination, Map};
 
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {
                 pub map: Map,
                 pub destination: Destination,
@@ -816,6 +820,7 @@ pub mod object {
             pub _unknown: u32,
         }
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub enum Patch {
             Exit(exit::Instance)
         }

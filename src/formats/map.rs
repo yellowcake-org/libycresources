@@ -111,11 +111,12 @@ pub mod blueprint {
     pub mod prototype {
         use crate::common::types::models::Identifier;
         use crate::formats::pro;
+        use crate::formats::pro::ObjectPatch;
 
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
             pub identifier: Identifier<pro::ObjectType>,
-            // pub patch: Option<pro::patch::Instance>,
+            pub patch: ObjectPatch,
         }
     }
 }
