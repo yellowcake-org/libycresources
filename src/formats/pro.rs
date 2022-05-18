@@ -674,11 +674,13 @@ pub mod object {
             }
         }
 
+        #[derive(Debug, Eq, PartialEq)]
         pub struct Statistics {
             pub basic: HashMap<super::common::critter::Statistic, i32>,
             pub bonuses: HashMap<super::common::critter::Statistic, i32>,
         }
 
+        #[derive(Debug, Eq, PartialEq)]
         pub struct Connections {
             pub ai_packet_id: u32,
         }
@@ -700,8 +702,13 @@ pub mod object {
             pub connections: Connections,
         }
 
-        #[derive(Debug, Hash, Eq, PartialEq)]
-        pub struct Patch {}
+        #[derive(Debug, Eq, PartialEq)]
+        pub struct Patch {
+            pub team: u32,
+
+            pub statistics: Statistics,
+            pub connections: Connections,
+        }
     }
 
     pub mod scenery {
