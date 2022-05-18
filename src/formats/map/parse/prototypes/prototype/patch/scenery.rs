@@ -10,7 +10,7 @@ mod ladder;
 
 pub(crate) fn patch<S: Read>(source: &mut S, scenery: &Instance) -> Result<Patch, errors::Error> {
     Ok(match &scenery.body {
-        Body::Door(door) => { Patch::Door(door::patch(source, door)?) }
+        Body::Door(_) => { Patch::Door(door::patch(source)?) }
         Body::Stairs(stairs) => { Patch::Stairs(stairs::patch(source, stairs)?) }
         Body::Elevator(elevator) => { Patch::Elevator(elevator::patch(source, elevator)?) }
         Body::Ladder(ladder) => { Patch::Ladder(ladder::patch(source, ladder)?) }
