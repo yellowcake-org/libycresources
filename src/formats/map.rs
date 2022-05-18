@@ -117,12 +117,18 @@ pub mod blueprint {
         pub struct Instance {
             pub identifier: Identifier<pro::ObjectType>,
             pub patch: Patch,
+            pub inventory: inventory::Instance,
         }
 
         #[derive(Debug, Eq, PartialEq)]
         pub struct Patch {
             pub meta: meta::Patch,
             pub object: ObjectPatch,
+        }
+
+        pub mod inventory {
+            pub type Item = super::Instance;
+            pub type Instance = Vec<Option<Item>>;
         }
     }
 }

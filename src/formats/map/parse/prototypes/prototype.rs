@@ -5,6 +5,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 use crate::common::types::models;
 use crate::formats::map::blueprint;
+use crate::formats::map::blueprint::prototype::inventory;
 use crate::formats::map::parse::{errors, PrototypeProvider};
 use crate::formats::pro::meta;
 use crate::formats::pro::meta::info::Light;
@@ -50,7 +51,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
     let script_id = source.read_i32::<BigEndian>()?;
     let program_id = source.read_i32::<BigEndian>()?;
 
-    let inventory_count = Scaled {
+    let inventory_container = Scaled {
         value: source.read_u32::<BigEndian>()?,
         scale: u32::MIN..=source.read_u32::<BigEndian>()?,
     };
@@ -59,6 +60,13 @@ Result<blueprint::prototype::Instance, errors::Error> {
 
     let flags_patch = source.read_u32::<BigEndian>()?;
     let patch = patch::instance(source, provider, &identifier)?;
+
+    let mut inventory = Vec::new();
+
+    for _ in inventory_container.scale { inventory.push(None); }
+    for _ in u32::MIN..inventory_container.value {
+        inventory[source.read_u32::<BigEndian>()? as usize] = Some(self::instance(source, provider)?);
+    }
 
     Ok(blueprint::prototype::Instance {
         identifier,
@@ -69,5 +77,6 @@ Result<blueprint::prototype::Instance, errors::Error> {
             },
             object: patch,
         },
+        inventory,
     })
 }
