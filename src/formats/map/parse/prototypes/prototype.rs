@@ -69,7 +69,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
         let overhead = i32::max(index as i32 - (inventory_items_capacity - 1) as i32, 0) as usize;
         for _ in usize::MIN..overhead { inventory.push(None) }
 
-        // Now this operations is safe from panic
+        // Now this operation is safe from panic
         inventory[index as usize] = Some(self::instance(source, provider)?);
     }
 
