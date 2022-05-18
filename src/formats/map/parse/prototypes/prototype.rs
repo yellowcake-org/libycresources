@@ -50,10 +50,8 @@ Result<blueprint::prototype::Instance, errors::Error> {
     let script_id = source.read_i32::<BigEndian>()?;
     let program_id = source.read_i32::<BigEndian>()?;
 
-    let inventory_container = Scaled {
-        value: source.read_u32::<BigEndian>()?,
-        scale: u32::MIN..=source.read_u32::<BigEndian>()?,
-    };
+    let inventory_items_count = source.read_u32::<BigEndian>()?;
+    let inventory_items_capacity = source.read_u32::<BigEndian>()?;
 
     source.seek(SeekFrom::Current(4))?;
 
@@ -62,12 +60,12 @@ Result<blueprint::prototype::Instance, errors::Error> {
 
     let mut inventory = Vec::new();
 
-    for _ in inventory_container.scale.clone() { inventory.push(None) }
-    for _ in u32::MIN..inventory_container.value {
+    for _ in u32::MIN..inventory_items_capacity { inventory.push(None) }
+    for _ in u32::MIN..inventory_items_count {
         let index = usize::try_from(source.read_u32::<BigEndian>()?).map_err(|_| errors::Error::Format)?;
 
-        if !inventory_container.scale.contains(&(index as u32)) { return Err(errors::Error::Format); }
-        if !(u32::MIN..inventory_container.value).contains(&(index as u32)) { return Err(errors::Error::Format); }
+        if index >= usize::try_from(inventory_items_capacity)
+            .map_err(|_| errors::Error::Format)? { return Err(errors::Error::Format); }
 
         inventory[index as usize] = Some(self::instance(source, provider)?);
     }

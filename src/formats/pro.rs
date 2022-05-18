@@ -21,7 +21,7 @@ pub type ObjectInstance = Type<
     object::misc::Instance,
 >;
 pub type ObjectPatch = Type<
-    object::item::ItemPatch,
+    object::item::Patch,
     object::critter::Patch,
     object::scenery::Patch,
     (),
@@ -368,8 +368,7 @@ pub mod object {
             Hidden
         }
 
-        pub type ItemType = Type<(), (), (), (), (), (), ()>;
-        pub type ItemInstance = Type<
+        pub type Body = Type<
             armor::Instance,
             container::Instance,
             drug::Instance,
@@ -379,6 +378,17 @@ pub mod object {
             key::Instance,
         >;
 
+        pub type Patch = Type<
+            (),
+            (),
+            (),
+            weapon::Patch,
+            ammo::Patch,
+            misc::Patch,
+            key::Patch,
+        >;
+
+        #[derive(Debug, Eq, PartialEq)]
         pub enum Type<Ar, C, D, W, Am, M, K> {
             Armor(Ar),
             Container(C),
@@ -394,7 +404,7 @@ pub mod object {
         }
 
         pub struct Instance {
-            pub r#type: ItemInstance,
+            pub r#type: Body,
             pub flags: HashSet<Flag>,
 
             pub sprite: Option<Identifier<models::sprite::Kind>>,
@@ -409,9 +419,6 @@ pub mod object {
 
             pub connections: Connections,
         }
-
-        #[derive(Debug, Hash, Eq, PartialEq)]
-        pub struct ItemPatch {}
 
         pub mod armor {
             use std::collections::HashMap;
@@ -572,6 +579,12 @@ pub mod object {
                 pub perk: Option<super::super::common::critter::Perk>,
                 pub connections: Connections,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub rounds: u32,
+                pub ammo_item_id: Option<u16>,
+            }
         }
 
         pub mod ammo {
@@ -597,6 +610,11 @@ pub mod object {
                 pub caliber: Option<super::super::common::weapons::Caliber>,
                 pub adjustments: adjustments::Instance,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub count: u32,
+            }
         }
 
         pub mod misc {
@@ -610,15 +628,19 @@ pub mod object {
                 pub connections: Connections,
             }
 
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
-                pub count: u32,
+                pub count: Option<u32>,
             }
         }
 
         pub mod key {
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub code: Option<u32>,
             }
+
+            pub type Patch = Instance;
         }
     }
 
@@ -772,7 +794,7 @@ pub mod object {
 
             #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
-                pub flags: HashSet<Flag>
+                pub flags: HashSet<Flag>,
             }
         }
 
@@ -815,7 +837,8 @@ pub mod object {
 
             #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
-                pub map: Option<super::super::common::map::Map>, // Fallout 2 only
+                pub map: Option<super::super::common::map::Map>,
+                // Fallout 2 only
                 pub destination: super::super::common::map::Destination,
             }
         }

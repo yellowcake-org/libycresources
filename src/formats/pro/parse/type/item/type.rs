@@ -12,7 +12,7 @@ mod key;
 
 pub(crate) fn instance<S: Read>(source: &mut S, type_id: u32,
                                 weapon_flags: HashSet<object::item::weapon::Flag>,
-                                attack_modes: u8) -> Result<object::item::ItemInstance, errors::Error> {
+                                attack_modes: u8) -> Result<object::item::Body, errors::Error> {
     Ok(match type_id {
         0 => match armor::instance(source) {
             Ok(value) => object::item::Type::Armor(value),
