@@ -1,19 +1,19 @@
 use std::io::Read;
 
 use crate::common::types::errors;
-use crate::formats::pro::object::scenery::{Instance, SceneryInstance, SceneryPatch};
+use crate::formats::pro::object::scenery::{Instance, Body, Patch};
 
 mod door;
 mod stairs;
 mod elevator;
 mod ladder;
 
-pub(crate) fn patch<S: Read>(source: &mut S, scenery: &Instance) -> Result<SceneryPatch, errors::Error> {
-    Ok(match &scenery.r#type {
-        SceneryInstance::Door(door) => { SceneryPatch::Door(door::patch(source, door)?) }
-        SceneryInstance::Stairs(stairs) => { SceneryPatch::Stairs(stairs::patch(source, stairs)?) }
-        SceneryInstance::Elevator(elevator) => { SceneryPatch::Elevator(elevator::patch(source, elevator)?) }
-        SceneryInstance::Ladder(ladder) => { SceneryPatch::Ladder(ladder::patch(source, ladder)?) }
-        SceneryInstance::Generic(_) => { SceneryPatch::Generic(()) }
+pub(crate) fn patch<S: Read>(source: &mut S, scenery: &Instance) -> Result<Patch, errors::Error> {
+    Ok(match &scenery.body {
+        Body::Door(door) => { Patch::Door(door::patch(source, door)?) }
+        Body::Stairs(stairs) => { Patch::Stairs(stairs::patch(source, stairs)?) }
+        Body::Elevator(elevator) => { Patch::Elevator(elevator::patch(source, elevator)?) }
+        Body::Ladder(ladder) => { Patch::Ladder(ladder::patch(source, ladder)?) }
+        Body::Generic(_) => { Patch::Generic(()) }
     })
 }

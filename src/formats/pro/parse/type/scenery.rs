@@ -61,13 +61,13 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
 
     let sound_ids = u8::from_be_bytes(sound_ids_bytes);
 
-    let r#type = match r#type::instance(source, type_id) {
+    let body = match r#type::body(source, type_id) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
     Ok(object::scenery::Instance {
-        r#type,
+        body,
         light,
         script,
         material,

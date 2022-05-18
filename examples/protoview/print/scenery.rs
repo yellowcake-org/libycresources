@@ -17,7 +17,7 @@ pub(crate) fn scenery(scenery: &libycresources::formats::pro::object::scenery::I
     println!("Sound IDs: 0x{:x}", scenery.connections._sounds_ids);
     println!();
 
-    match &scenery.r#type {
+    match &scenery.body {
         SceneryType::Door(door) => { door::door(door) }
         SceneryType::Stairs(stairs) => { stairs::stairs(stairs) }
         SceneryType::Elevator(elevator) => { elevator::elevator(elevator) }

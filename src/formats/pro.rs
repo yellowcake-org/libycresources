@@ -23,7 +23,7 @@ pub type ObjectInstance = Type<
 pub type ObjectPatch = Type<
     object::item::ItemPatch,
     object::critter::Patch,
-    object::scenery::SceneryPatch,
+    object::scenery::Patch,
     (),
     (),
     Option<object::misc::Patch>,
@@ -719,7 +719,7 @@ pub mod object {
             Generic(G),
         }
 
-        pub type SceneryInstance = SceneryType<
+        pub type Body = SceneryType<
             door::Instance,
             stairs::Instance,
             elevator::Instance,
@@ -727,7 +727,7 @@ pub mod object {
             generic::Instance,
         >;
 
-        pub type SceneryPatch = SceneryType<
+        pub type Patch = SceneryType<
             door::Patch,
             stairs::Patch,
             elevator::Patch,
@@ -740,7 +740,7 @@ pub mod object {
         }
 
         pub struct Instance {
-            pub r#type: SceneryInstance,
+            pub body: Body,
 
             pub light: HashSet<super::common::world::Light>,
             pub script: Option<Identifier<models::script::Kind>>,
