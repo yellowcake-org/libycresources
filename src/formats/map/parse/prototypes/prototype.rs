@@ -64,9 +64,12 @@ Result<blueprint::prototype::Instance, errors::Error> {
     for _ in u32::MIN..inventory_items_count {
         let index = usize::try_from(source.read_u32::<BigEndian>()?).map_err(|_| errors::Error::Format)?;
 
-        if index >= usize::try_from(inventory_items_capacity)
-            .map_err(|_| errors::Error::Format)? { return Err(errors::Error::Format); }
+        // Sometimes we face here an inventory item which have index
+        // greater than original capacity of the inventory itself, so we grow the vec in this case
+        let overhead = i32::max(index as i32 - (inventory_items_capacity - 1) as i32, 0) as usize;
+        for _ in usize::MIN..overhead { inventory.push(None) }
 
+        // Now this operations is safe from panic
         inventory[index as usize] = Some(self::instance(source, provider)?);
     }
 
