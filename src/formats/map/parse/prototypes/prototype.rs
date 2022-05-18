@@ -5,7 +5,6 @@ use byteorder::{BigEndian, ReadBytesExt};
 use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 use crate::common::types::models;
 use crate::formats::map::blueprint;
-use crate::formats::map::blueprint::prototype::inventory;
 use crate::formats::map::parse::{errors, PrototypeProvider};
 use crate::formats::pro::meta;
 use crate::formats::pro::meta::info::Light;
@@ -63,9 +62,14 @@ Result<blueprint::prototype::Instance, errors::Error> {
 
     let mut inventory = Vec::new();
 
-    for _ in inventory_container.scale { inventory.push(None); }
+    for _ in inventory_container.scale.clone() { inventory.push(None) }
     for _ in u32::MIN..inventory_container.value {
-        inventory[source.read_u32::<BigEndian>()? as usize] = Some(self::instance(source, provider)?);
+        let index = usize::try_from(source.read_u32::<BigEndian>()?).map_err(|_| errors::Error::Format)?;
+
+        if !inventory_container.scale.contains(&(index as u32)) { return Err(errors::Error::Format); }
+        if !(u32::MIN..inventory_container.value).contains(&(index as u32)) { return Err(errors::Error::Format); }
+
+        inventory[index as usize] = Some(self::instance(source, provider)?);
     }
 
     Ok(blueprint::prototype::Instance {
