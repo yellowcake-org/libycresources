@@ -11,7 +11,7 @@ use crate::formats::pro::meta::info::Light;
 
 mod patch;
 
-pub fn instance<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) ->
+pub fn instance<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P, read_ladders_map: bool) ->
 Result<blueprint::prototype::Instance, errors::Error> {
     let _entry_id = source.read_u32::<BigEndian>()?;
 
@@ -56,7 +56,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
     source.seek(SeekFrom::Current(4))?;
 
     let flags_patch = source.read_u32::<BigEndian>()?;
-    let patch = patch::instance(source, provider, &identifier)?;
+    let patch = patch::instance(source, provider, &identifier, read_ladders_map)?;
 
     let mut inventory = Vec::new();
 
@@ -70,7 +70,7 @@ Result<blueprint::prototype::Instance, errors::Error> {
         for _ in usize::MIN..overhead { inventory.push(None) }
 
         // Now this operation is safe from panic
-        inventory[index as usize] = Some(self::instance(source, provider)?);
+        inventory[index as usize] = Some(self::instance(source, provider, read_ladders_map)?);
     }
 
     Ok(blueprint::prototype::Instance {

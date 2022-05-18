@@ -838,8 +838,7 @@ pub mod object {
             #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
                 pub map: Option<super::super::common::map::Map>,
-                // Fallout 2 only
-                pub destination: super::super::common::map::Destination,
+                pub destination: Option<super::super::common::map::Destination>, // Fallout 2 only
             }
         }
 
@@ -891,7 +890,7 @@ pub mod object {
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub enum Patch {
             None,
-            Exit(exit::Instance)
+            Exit(exit::Instance),
         }
     }
 }

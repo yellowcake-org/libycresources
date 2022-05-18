@@ -6,7 +6,7 @@ pub(crate) fn print(map: &map::Map) {
 
     for (idx, elevation) in map.tiles.iter().enumerate() {
         match elevation {
-            None => println!("Level {:?} has not presented.", idx),
+            None => println!("Level {:?} is not presented.", idx),
             Some(e) => {
                 println!("Level {:?}", idx);
                 println!();

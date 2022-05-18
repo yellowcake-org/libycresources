@@ -29,5 +29,8 @@ pub fn map(map: &map::Map) {
     println!();
 
     tiles::print(map);
+    println!();
+
     blueprints::print(map);
+    println!();
 }
