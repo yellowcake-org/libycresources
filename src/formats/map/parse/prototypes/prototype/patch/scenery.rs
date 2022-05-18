@@ -13,7 +13,7 @@ pub(crate) fn patch<S: Read>(source: &mut S, scenery: &Instance, read_ladders_ma
         Body::Door(_) => { Patch::Door(door::patch(source)?) }
         Body::Stairs(_) => { Patch::Stairs(stairs::patch(source)?) }
         Body::Elevator(elevator) => { Patch::Elevator(elevator::patch(source, elevator)?) }
-        Body::Ladder(ladder) => { Patch::Ladder(ladder::patch(source, read_ladders_map)?) }
+        Body::Ladder(_) => { Patch::Ladder(ladder::patch(source, read_ladders_map)?) }
         Body::Generic(_) => { Patch::Generic(()) }
     })
 }

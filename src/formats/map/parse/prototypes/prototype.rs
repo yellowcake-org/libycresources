@@ -59,8 +59,9 @@ Result<blueprint::prototype::Instance, errors::Error> {
     let patch = patch::instance(source, provider, &identifier, read_ladders_map)?;
 
     let mut inventory = Vec::new();
-
     for _ in u32::MIN..inventory_items_capacity { inventory.push(None) }
+
+    // Fill specific slots with objects
     for _ in u32::MIN..inventory_items_count {
         let index = usize::try_from(source.read_u32::<BigEndian>()?).map_err(|_| errors::Error::Format)?;
 

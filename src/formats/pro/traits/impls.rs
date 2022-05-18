@@ -282,9 +282,9 @@ impl TryFrom<&[u8; 4]> for object::common::map::Destination {
 
     fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
         let floor: Elevation = match value[0] & 0xFF {
-            0xF0 => Elevation { level: Scaled { value: 0, scale: u8::MIN..3 } },
-            0xF2 => Elevation { level: Scaled { value: 1, scale: u8::MIN..3 } },
-            0xF4 => Elevation { level: Scaled { value: 2, scale: u8::MIN..3 } },
+            0x00 => Elevation { level: Scaled { value: 0, scale: u8::MIN..3 } },
+            0x02 => Elevation { level: Scaled { value: 1, scale: u8::MIN..3 } },
+            0x04 => Elevation { level: Scaled { value: 2, scale: u8::MIN..3 } },
             _ => return Err(errors::Error::Format),
         };
 
