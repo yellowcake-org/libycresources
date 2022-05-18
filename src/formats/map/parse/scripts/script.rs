@@ -41,7 +41,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
     }
 
     let _flags = source.read_u32::<BigEndian>()? as u16;
-    let program_id = source.read_i32::<BigEndian>()?.checked_add(1);
+    let program_id = source.read_i32::<BigEndian>()?;
 
     source.seek(SeekFrom::Current(4))?;
 
@@ -79,12 +79,19 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
             })
         } else { None },
         connections: blueprint::script::Connections {
-            program_id: program_id.and_then(|v| { if v > -1 { Some(v as u32) } else { None } }),
-            object_id: if object_id > -1 { Some(object_id as u32) } else { None },
+            program_id: u32::try_from(program_id).ok(),
+            object_id: u32::try_from(object_id).ok(),
         },
     })
 }
 
-pub fn skip<S: Seek>(source: &mut S) -> std::io::Result<u64> {
-    source.seek(SeekFrom::Current(4 * 16))
+pub fn skip<S: Read + Seek>(source: &mut S) -> std::io::Result<u64> {
+    let read_type = source.read_u8()?;
+    source.seek(SeekFrom::Current(3))?;
+
+    source.seek(SeekFrom::Current(4 * (15 + match read_type {
+        1 => 2,
+        2 => 0,
+        _ => 0
+    })))
 }

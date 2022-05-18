@@ -21,7 +21,9 @@ pub fn list<S: Read + Seek>(source: &mut S) -> Result<HashSet<blueprint::script:
                 }
             }
 
-            read += source.read_u32::<BigEndian>()? as usize;
+            println!("POS == {:?}", source.seek(SeekFrom::Current(0)));
+            let cccount = source.read_u32::<BigEndian>()? as usize;
+            read += cccount;
             source.seek(SeekFrom::Current(4))?;
         }
 
