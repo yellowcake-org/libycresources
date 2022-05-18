@@ -47,7 +47,6 @@ pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -
     let local_vars = variables::set(source, local_vars_count)?;
 
     let tiles = tiles::list(source, &elevations)?;
-    println!("POS == {:?}", source.seek(SeekFrom::Current(0)));
     let scripts = scripts::list(source)?;
     let prototypes = prototypes::list(source, provider, &elevations)?;
 
