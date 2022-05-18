@@ -26,7 +26,7 @@ pub type ObjectPatch = Type<
     object::scenery::Patch,
     (),
     (),
-    Option<object::misc::Patch>,
+    object::misc::Patch,
 >;
 
 pub struct Prototype {
@@ -890,6 +890,7 @@ pub mod object {
 
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub enum Patch {
+            None,
             Exit(exit::Instance)
         }
     }

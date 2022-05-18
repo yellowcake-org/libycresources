@@ -17,6 +17,6 @@ pub(crate) fn instance<S: Read, P: PrototypeProvider>
         ObjectInstance::Scenery(scenery) => { ObjectPatch::Scenery(scenery::patch(source, scenery)?) }
         ObjectInstance::Wall(_) => { ObjectPatch::Wall(()) }
         ObjectInstance::Tile(_) => { ObjectPatch::Tile(()) }
-        ObjectInstance::Misc(_) => { ObjectPatch::Misc(misc::patch(source, &prototype.id)?) }
+        ObjectInstance::Misc(_) => { ObjectPatch::Misc(misc::patch(source, &identifier.value)?) }
     })
 }

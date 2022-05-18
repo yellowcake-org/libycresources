@@ -1,6 +1,13 @@
 use crate::common::types::errors;
 use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 
+impl TryFrom<i32> for Coordinate<u8, std::ops::Range<u8>> {
+    type Error = errors::Error;
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        Self::try_from(u32::try_from(value).map_err(|_| errors::Error::Format)?)
+    }
+}
+
 impl TryFrom<u32> for Coordinate<u8, std::ops::Range<u8>> {
     type Error = errors::Error;
 
