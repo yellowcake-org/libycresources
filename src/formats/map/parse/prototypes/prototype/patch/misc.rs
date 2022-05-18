@@ -26,7 +26,7 @@ Result<Patch, errors::Error> {
                 }
             )
         } else {
-            Patch::None
+            Patch::None // TODO: This case is actually World map. Handle it properly.
         }
     } else {
         Patch::None
