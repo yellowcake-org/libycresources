@@ -1,5 +1,5 @@
 pub mod parse;
-mod traits;
+pub(crate) mod traits;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Type<I, C, S, W, T, M> {
