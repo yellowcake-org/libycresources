@@ -21,9 +21,9 @@ pub type ObjectInstance = Type<
     object::misc::Instance,
 >;
 pub type ObjectPatch = Type<
-    object::item::Patch,
+    object::item::ItemPatch,
     object::critter::Patch,
-    object::scenery::Patch,
+    object::scenery::SceneryPatch,
     (),
     (),
     Option<object::misc::Patch>,
@@ -411,7 +411,7 @@ pub mod object {
         }
 
         #[derive(Debug, Hash, Eq, PartialEq)]
-        pub struct Patch {}
+        pub struct ItemPatch {}
 
         pub mod armor {
             use std::collections::HashMap;
@@ -710,20 +710,37 @@ pub mod object {
         use crate::common::types::models;
         use crate::common::types::models::Identifier;
 
-        pub enum Type {
-            Door(door::Instance),
-            Stairs(stairs::Instance),
-            Elevator(elevator::Instance),
-            Ladder(ladder::Instance),
-            Generic(generic::Instance),
+        #[derive(Debug, Eq, PartialEq)]
+        pub enum SceneryType<D, S, E, L, G> {
+            Door(D),
+            Stairs(S),
+            Elevator(E),
+            Ladder(L),
+            Generic(G),
         }
+
+        pub type SceneryInstance = SceneryType<
+            door::Instance,
+            stairs::Instance,
+            elevator::Instance,
+            ladder::Instance,
+            generic::Instance,
+        >;
+
+        pub type SceneryPatch = SceneryType<
+            door::Patch,
+            stairs::Patch,
+            elevator::Patch,
+            ladder::Patch,
+            (),
+        >;
 
         pub struct Connections {
             pub _sounds_ids: u8,
         }
 
         pub struct Instance {
-            pub r#type: Type,
+            pub r#type: SceneryInstance,
 
             pub light: HashSet<super::common::world::Light>,
             pub script: Option<Identifier<models::script::Kind>>,
@@ -733,40 +750,48 @@ pub mod object {
             pub connections: Connections,
         }
 
-        #[derive(Debug, Hash, Eq, PartialEq)]
-        pub struct Patch {}
-
         pub mod door {
             use std::collections::HashSet;
 
             #[derive(Debug, PartialEq, Eq, Hash)]
-            pub enum Flags {
+            pub enum Flag {
                 Passable
             }
 
             pub struct Instance {
-                pub flags: HashSet<Flags>,
+                pub flags: HashSet<Flag>,
                 pub _unknown: u32,
+            }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub flags: HashSet<Flag>
             }
         }
 
         pub mod stairs {
-            #[derive(Debug)]
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Destination {
                 pub map: super::super::common::map::Map,
                 pub target: Option<super::super::common::map::Destination>,
             }
 
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub destination: Destination,
             }
+
+            pub type Patch = Instance;
         }
 
         pub mod elevator {
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub floor: i32,
                 pub r#type: Option<u16>,
             }
+
+            pub type Patch = Instance;
         }
 
         pub mod ladder {
@@ -779,6 +804,12 @@ pub mod object {
             pub struct Instance {
                 pub direction: Direction,
                 pub destination: Option<super::super::common::map::Destination>,
+            }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub map: Option<super::super::common::map::Map>, // Fallout 2 only
+                pub destination: super::super::common::map::Destination,
             }
         }
 

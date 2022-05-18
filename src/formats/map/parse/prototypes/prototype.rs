@@ -15,7 +15,8 @@ pub fn instance<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: 
 Result<blueprint::prototype::Instance, errors::Error> {
     let _entry_id = source.read_u32::<BigEndian>()?;
 
-    let position = u32::try_from(source.read_i32::<BigEndian>()?).ok()
+    let position = u32::try_from(source.read_i32::<BigEndian>()?)
+        .ok()
         .map_or(Ok(None), |v| {
             Coordinate::try_from(v).map(|c| Some(c))
         })?;
