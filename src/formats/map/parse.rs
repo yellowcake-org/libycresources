@@ -9,7 +9,7 @@ use crate::formats::pro;
 use super::*;
 
 mod flags;
-mod defaults;
+mod entrance;
 mod variables;
 mod tiles;
 mod prototypes;
@@ -32,7 +32,7 @@ pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -
         std::str::from_utf8(&filename_bytes).map_err(|_| errors::Error::Format)?
     );
 
-    let defaults = defaults::instance(source)?;
+    let entrance = entrance::instance(source)?;
     let local_vars_count = source.read_u32::<BigEndian>()?;
     let _program_id = source.read_i32::<BigEndian>()?;
     let (flags, elevations) = flags::tuple(source)?;
@@ -55,7 +55,7 @@ pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -
         id,
         version,
         filename,
-        defaults,
+        entrance,
         variables: common::Variables { local: local_vars, global: global_vars },
         flags,
         ticks,

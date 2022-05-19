@@ -15,11 +15,11 @@ pub fn map(map: &map::Map) {
     println!("Darkness: {:?}", map.darkness);
     println!();
 
-    println!("Player's Defaults");
+    println!("Entrance");
     println!();
-    println!("Position: {:?}", map.defaults.position);
-    println!("Elevation: {:?}", map.defaults.elevation);
-    println!("Orientation: {:?}", map.defaults.orientation);
+    println!("Position: {:?}", map.entrance.position);
+    println!("Elevation: {:?}", map.entrance.elevation);
+    println!("Orientation: {:?}", map.entrance.orientation);
     println!();
 
     println!("Variables");

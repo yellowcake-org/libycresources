@@ -11,7 +11,7 @@ pub struct Map {
 
     pub flags: HashSet<common::Flag>,
 
-    pub defaults: defaults::Instance,
+    pub entrance: location::Grid,
     pub variables: common::Variables,
 
     pub ticks: u32,
@@ -35,14 +35,22 @@ pub mod common {
     }
 }
 
-pub mod defaults {
+pub mod location {
+    use std::ops::{Range, RangeInclusive};
+
     use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
 
-    #[derive(Debug)]
-    pub struct Instance {
-        pub position: Coordinate<u8, std::ops::Range<u8>>,
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Grid {
+        pub position: Coordinate<u8, Range<u8>>,
         pub elevation: Elevation,
         pub orientation: Orientation,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Screen {
+        pub position: Coordinate<i32, RangeInclusive<i32>>,
+        pub correction: Coordinate<i32, RangeInclusive<i32>>,
     }
 }
 
@@ -110,13 +118,16 @@ pub mod blueprint {
 
     pub mod prototype {
         use crate::common::types::models::Identifier;
-        use crate::formats::pro;
-        use crate::formats::pro::{meta, ObjectPatch};
+        use crate::formats::frm::FrameIndex;
+        use crate::formats::map::location;
+        use crate::formats::pro::{meta, ObjectPatch, ObjectType};
 
         #[derive(Debug, Eq, PartialEq)]
         pub struct Instance {
-            pub identifier: Identifier<pro::ObjectType>,
+            pub id: Identifier<ObjectType>,
             pub patch: Patch,
+            pub location: Location,
+            pub appearance: Appearance,
             pub inventory: inventory::Instance,
         }
 
@@ -124,6 +135,18 @@ pub mod blueprint {
         pub struct Patch {
             pub meta: meta::Patch,
             pub object: ObjectPatch,
+        }
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub struct Location {
+            pub grid: Option<location::Grid>,
+            pub screen: location::Screen,
+        }
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub struct Appearance {
+            pub frame: Option<FrameIndex>,
+            pub sprite_id: u32,
         }
 
         pub mod inventory {

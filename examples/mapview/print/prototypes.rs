@@ -5,8 +5,10 @@ pub(crate) fn print(map: &map::Map) {
     println!();
 
     for prototype in &map.prototypes {
-        println!("ID: {:?}", prototype.identifier);
+        println!("ID: {:?}", prototype.id);
         println!("Patch: {:?}", prototype.patch);
+        println!("Location: {:?}", prototype.location);
+        println!("Appearance: {:?}", prototype.appearance);
         println!("Inventory: {:?}", prototype.inventory);
         println!();
     }
