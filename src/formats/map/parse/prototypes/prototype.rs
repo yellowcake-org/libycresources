@@ -5,6 +5,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
 use crate::common::types::models;
+use crate::common::types::models::Identifier;
 use crate::formats::map::blueprint::prototype;
 use crate::formats::map::blueprint::prototype::Appearance;
 use crate::formats::map::location::{Grid, Screen};
@@ -37,7 +38,7 @@ Result<prototype::Instance, errors::Error> {
     let frame_idx = source.read_u32::<BigEndian>()?;
     let orientation = Orientation::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let sprite_id = source.read_u32::<BigEndian>()?;
+    let sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
     let flags = source.read_u32::<BigEndian>()?;
     let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
@@ -96,7 +97,7 @@ Result<prototype::Instance, errors::Error> {
             frame: if frame_idx > 0 {
                 Some(u16::try_from(frame_idx).map_err(|_| errors::Error::Format)?)
             } else { None },
-            sprite_id,
+            sprite,
         },
         inventory,
     })

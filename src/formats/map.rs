@@ -117,6 +117,7 @@ pub mod blueprint {
     }
 
     pub mod prototype {
+        use crate::common::types::models;
         use crate::common::types::models::Identifier;
         use crate::formats::frm::FrameIndex;
         use crate::formats::map::location;
@@ -146,7 +147,7 @@ pub mod blueprint {
         #[derive(Debug, Eq, PartialEq)]
         pub struct Appearance {
             pub frame: Option<FrameIndex>,
-            pub sprite_id: u32,
+            pub sprite: Identifier<models::sprite::Kind>,
         }
 
         pub mod inventory {

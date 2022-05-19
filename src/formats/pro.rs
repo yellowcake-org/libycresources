@@ -104,12 +104,6 @@ pub mod object {
                 Scenery,
                 Critter,
             }
-
-            #[derive(Debug)]
-            pub struct Reference {
-                pub id: u16,
-                pub r#type: Type,
-            }
         }
 
         pub mod world {
