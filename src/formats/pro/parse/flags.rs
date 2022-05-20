@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use errors::Error;
-use meta::info::flags::{Root};
+use meta::info::flags::Root;
 
 use super::*;
 

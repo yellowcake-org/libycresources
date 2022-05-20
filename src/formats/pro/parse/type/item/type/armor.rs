@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
-use super::super::super::traits::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::Instance, errors::Error> {
     let mut ac_bytes = [0u8; 4];

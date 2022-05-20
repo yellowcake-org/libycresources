@@ -90,7 +90,7 @@ pub mod meta {
                 LightThrough,
                 Transparency(Option<Transparency>),
                 Locked,
-                Jammed
+                Jammed,
             }
         }
     }

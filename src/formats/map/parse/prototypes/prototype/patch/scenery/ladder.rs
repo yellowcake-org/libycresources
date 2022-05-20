@@ -2,11 +2,11 @@ use std::io::Read;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
+use crate::common::traits::TryFromOptional;
 use crate::common::types::errors;
 use crate::formats::pro::object::common::map;
 use crate::formats::pro::object::common::map::Map;
 use crate::formats::pro::object::scenery::ladder::Patch;
-use crate::formats::pro::traits::TryFromOptional;
 
 pub(crate) fn patch<S: Read>(source: &mut S, read_map: bool) -> Result<Patch, errors::Error> {
     let map = if read_map {

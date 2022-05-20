@@ -1,5 +1,5 @@
+use crate::common::traits::TryFromOptional;
 use crate::formats::pro::object::item::key::Patch;
-use crate::formats::pro::traits::TryFromOptional;
 
 use super::super::super::*;
 

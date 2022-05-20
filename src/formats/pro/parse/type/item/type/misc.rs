@@ -1,5 +1,6 @@
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
-use super::super::super::traits::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::misc::Instance, errors::Error> {
     let mut item_pid_bytes = [0u8; 4];

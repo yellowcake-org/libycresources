@@ -2,12 +2,12 @@ use std::io::Read;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
+use crate::common::traits::TryFromOptional;
 use crate::common::types::errors;
 use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
 use crate::formats::pro::object::common::map::{Destination, Map};
 use crate::formats::pro::object::misc::exit::Instance;
 use crate::formats::pro::object::misc::Patch;
-use crate::formats::pro::traits::TryFromOptional;
 
 pub(crate) fn patch<S: Read>(source: &mut S, id: &u16) ->
 Result<Patch, errors::Error> {

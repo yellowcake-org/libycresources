@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
+use crate::common::traits::TryFromOptional;
+
 use super::super::*;
-use super::super::traits::TryFromOptional;
 
 mod r#type;
 

@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 pub mod parse;
-mod traits;
 
 #[derive(Debug)]
 pub struct Map {

@@ -1,4 +1,4 @@
-use crate::formats::pro::traits::TryFromOptional;
+use crate::common::traits::TryFromOptional;
 
 use super::super::super::*;
 

@@ -1,7 +1,8 @@
 use std::io::ErrorKind;
 
+use crate::common::traits::TryFromOptional;
+
 use super::super::*;
-use super::super::super::traits::TryFromOptional;
 
 mod flags;
 mod skills;
