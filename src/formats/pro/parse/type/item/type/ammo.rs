@@ -1,5 +1,6 @@
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
-use super::super::super::traits::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::Instance, errors::Error> {
     let mut caliber_bytes = [0u8; 4];
@@ -54,7 +55,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
         count,
         caliber: match object::common::weapons::Caliber::try_from_optional(caliber_raw, 0) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+            Err(_) => return Err(errors::Error::Format)
         },
         adjustments: object::item::ammo::adjustments::Instance {
             armor: object::item::ammo::adjustments::Armor {

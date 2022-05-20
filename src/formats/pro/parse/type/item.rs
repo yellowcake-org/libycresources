@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
+use crate::common::traits::TryFromOptional;
+
 use super::super::*;
-use super::super::traits::TryFromOptional;
 
 mod r#type;
 
@@ -17,26 +18,26 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
     let actions: HashSet<object::common::actions::Instance> =
         match super::common::actions::extract(flags_bytes[2]) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+            Err(_) => return Err(errors::Error::Format),
         };
 
     // Flags
 
     if (flags_bytes[0] & 0x08) == 0x08 &&
         !flags.insert(object::item::Flag::Hidden) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+        return Err(errors::Error::Format);
     }
 
     // Weapon Flags
 
     if (flags_bytes[2] & 0x01) == 0x01 &&
         !weapon_flags.insert(object::item::weapon::Flag::BigGun) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+        return Err(errors::Error::Format);
     }
 
     if (flags_bytes[2] & 0x02) == 0x02 &&
         !weapon_flags.insert(object::item::weapon::Flag::SecondHand) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+        return Err(errors::Error::Format);
     }
 
     let mut attack_modes_bytes = [0u8; 1];
@@ -47,18 +48,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let attack_modes = u8::from_be_bytes(attack_modes_bytes);
 
-    let mut script_id_bytes = [0u8; 4];
-    match source.read_exact(&mut script_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
     let script =
-        match object::common::script::Reference::
-        try_from_optional(script_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-        };
+        Identifier::try_from_optional(source.read_u32::<BigEndian>()?, 0xFF_FF_FF_FF)?;
 
     let mut type_bytes = [0u8; 4];
     match source.read_exact(&mut type_bytes) {
@@ -100,17 +91,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let cost = u32::from_be_bytes(cost_bytes);
 
-    let mut sprite_id_bytes = [0u8; 4];
-    match source.read_exact(&mut sprite_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let sprite = match object::common::sprite::Reference::
-    try_from_optional(sprite_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-    };
+    let sprite =
+        Identifier::try_from_optional(source.read_u32::<BigEndian>()?, 0xFF_FF_FF_FF)?;
 
     let mut sound_ids_bytes = [0u8; 1];
     match source.read_exact(&mut sound_ids_bytes) {
@@ -132,7 +114,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
         actions,
         material: match object::common::world::Material::try_from(material_id) {
             Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+            Err(_) => return Err(errors::Error::Format)
         },
         size,
         price: cost,

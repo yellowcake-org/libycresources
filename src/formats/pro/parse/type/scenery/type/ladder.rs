@@ -1,4 +1,5 @@
-use crate::formats::pro::traits::TryFromOptional;
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S, direction: object::scenery::ladder::Direction)

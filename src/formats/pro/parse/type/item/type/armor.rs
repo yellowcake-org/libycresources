@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
-use super::super::super::traits::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::Instance, errors::Error> {
     let mut ac_bytes = [0u8; 4];
@@ -132,17 +133,8 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let perk_raw = i32::from_be_bytes(perk_bytes);
 
-    let mut male_fid_bytes = [0u8; 4];
-    match source.read_exact(&mut male_fid_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let mut female_fid_bytes = [0u8; 4];
-    match source.read_exact(&mut female_fid_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
+    let male_sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
+    let female_sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
     Ok(object::item::armor::Instance {
         class: ac,
@@ -167,20 +159,12 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
         perk: match object::common::critter::Perk::try_from_optional(perk_raw, -1) {
             Ok(value) => value,
             Err(_) =>
-                return Err(errors::Error::Format(errors::Format::Data))
+                return Err(errors::Error::Format)
         },
         appearance: object::item::armor::Appearance {
             sprites: HashMap::from([
-                (object::common::critter::Gender::Male,
-                 match object::common::sprite::Reference::try_from(male_fid_bytes) {
-                     Ok(value) => value,
-                     Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-                 }),
-                (object::common::critter::Gender::Female,
-                 match object::common::sprite::Reference::try_from(female_fid_bytes) {
-                     Ok(value) => value,
-                     Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-                 })
+                (object::common::critter::Gender::Male, male_sprite),
+                (object::common::critter::Gender::Female, female_sprite)
             ])
         },
     })

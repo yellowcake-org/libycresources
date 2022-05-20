@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use crate::formats::pro::traits::TryFromOptional;
+use crate::common::traits::TryFromOptional;
 
 use super::super::super::*;
 
@@ -150,7 +150,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic0, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -198,7 +198,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic1, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -246,7 +246,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
                 effects.insert(statistic2, [effect0, effect1, effect2]);
             } else {
-                return Err(errors::Error::Format(errors::Format::Consistency));
+                return Err(errors::Error::Format);
             }
         }
     }
@@ -269,7 +269,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
     let addiction_perk = match object::common::critter::Perk::
     try_from_optional(addiction_perk_raw, -1) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
     };
 
     let mut addiction_delay_bytes = [0u8; 4];
@@ -289,7 +289,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
                 delay: Duration::new(
                     addiction_delay_raw as u64 * 60, 0,
                 ),
-                chance: ScaledValue {
+                chance: Scaled {
                     value: addiction_rate_raw as u8,
                     scale: 0u8..=100u8,
                 },

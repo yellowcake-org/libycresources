@@ -1,6 +1,8 @@
 use std::io::ErrorKind;
+
+use crate::common::traits::TryFromOptional;
+
 use super::super::*;
-use super::super::super::traits::TryFromOptional;
 
 mod flags;
 mod skills;
@@ -13,30 +15,11 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         Ok(value) => value,
     };
 
-    let mut script_id_bytes = [0u8; 4];
-    match source.read_exact(&mut script_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
     let script =
-        match object::common::script::Reference::
-        try_from_optional(script_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
-            Ok(value) => value,
-            Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-        };
+        Identifier::try_from_optional(source.read_u32::<BigEndian>()?, 0xFF_FF_FF_FF)?;
 
-    let mut head_id_bytes = [0u8; 4];
-    match source.read_exact(&mut head_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let head = match object::common::sprite::Reference::
-    try_from_optional(head_id_bytes, [0xFF, 0xFF, 0xFF, 0xFF]) {
-        Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
-    };
+    let head =
+        Identifier::try_from_optional(source.read_u32::<BigEndian>()?, 0xFF_FF_FF_FF)?;
 
     let mut ai_packet_id_bytes = [0u8; 4];
     match source.read_exact(&mut ai_packet_id_bytes) {
@@ -103,7 +86,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
     let kill_type_raw = u32::from_be_bytes(kill_type_bytes);
     let kill_type = match object::critter::murder::Type::try_from(kill_type_raw) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
     };
 
     let mut damage_type = None;
@@ -113,14 +96,14 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         Err(error) => {
             match error.kind() {
                 ErrorKind::UnexpectedEof => {}
-                _ => return Err(errors::Error::Source)
+                _ => return Err(errors::Error::Read(error))
             }
         }
         Ok(_) => {
             let damage_type_raw = u32::from_be_bytes(damage_type_bytes);
             damage_type = Some(match object::common::combat::damage::Type::try_from(damage_type_raw as u8) {
                 Ok(value) => value,
-                Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+                Err(_) => return Err(errors::Error::Format),
             });
         }
     };

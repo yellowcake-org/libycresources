@@ -1,47 +1,23 @@
 use std::io::{Read, Seek, SeekFrom};
 
+use byteorder::{BigEndian, ReadBytesExt};
+
+use crate::common::types::errors;
+use crate::common::types::geometry::Scaled;
+use crate::common::types::models::Identifier;
+use crate::formats::pro::meta::info::Light;
+
 use super::*;
-use super::super::super::common::types::ScaledValue;
 
 mod r#type;
-mod flags;
-pub(crate) mod id;
-pub mod errors;
+pub(crate) mod flags;
 
 pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Error> {
-    if let Err(error) = source.seek(SeekFrom::Start(0)) {
-        return Err(errors::Error::Read(error));
-    }
+    source.seek(SeekFrom::Start(0))?;
 
-    let mut id_bytes = [0u8; 4];
-    match source.read_exact(&mut id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let (type_id, object_id) = match id::instance(id_bytes) {
-        Ok(value) => value,
-        Err(error) => return Err(error)
-    };
-
-    let mut text_id_bytes = [0u8; 4];
-    match source.read_exact(&mut text_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let text_id = u32::from_be_bytes(text_id_bytes);
-
-    let mut sprite_id_bytes = [0u8; 4];
-    match source.read_exact(&mut sprite_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
-        Ok(value) => value,
-    };
-
-    let sprite = match object::common::sprite::Reference::try_from(sprite_id_bytes) {
-        Ok(value) => value,
-        Err(error) => return Err(error)
-    };
+    let identifier = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
+    let text_id = source.read_u32::<BigEndian>()?;
+    let sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
     let mut light_radius_bytes = [0u8; 4];
     match source.read_exact(&mut light_radius_bytes) {
@@ -59,33 +35,24 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     let light_intensity = u32::from_be_bytes(light_intensity_bytes) as u16;
 
-    let flags = match flags::instance(source) {
+    let flags = match flags::common(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
-    let r#type = match r#type::instance(source, type_id) {
+    let r#type = match r#type::instance(source, &identifier.kind) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
 
     Ok(Prototype {
-        id: object_id,
-        meta: meta::Info {
-            light: meta::info::Light {
-                distance: ScaledValue {
-                    value: light_radius,
-                    scale: 0..=7,
-                },
-                intensity: ScaledValue {
-                    value: light_intensity,
-                    scale: 0..=u16::MAX,
-                },
-            },
+        id: identifier.value,
+        meta: meta::Instance {
+            light: Light::try_from((light_radius as u8, light_intensity as u16))?,
             flags,
             sprite,
             connections: meta::info::Connections { description_id: text_id },
         },
-        r#type,
+        object: r#type,
     })
 }

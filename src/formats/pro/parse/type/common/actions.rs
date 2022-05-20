@@ -7,7 +7,7 @@ pub(crate) fn extract(from: u8) -> Result<HashSet<object::common::actions::Insta
 
     if (from & 0x80) == 0x80 &&
         !actions.insert(object::common::actions::Instance::PickUp) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+        return Err(errors::Error::Format);
     }
 
     let can_use = (from & 0x08) == 0x08;
@@ -21,7 +21,7 @@ pub(crate) fn extract(from: u8) -> Result<HashSet<object::common::actions::Insta
 
     if can_use || can_use_on {
         if !actions.insert(object::common::actions::Instance::Usage(usage)) {
-            return Err(errors::Error::Format(errors::Format::Flags));
+            return Err(errors::Error::Format);
         }
     }
 

@@ -1,4 +1,5 @@
-use crate::formats::pro::traits::TryFromOptional;
+use crate::common::traits::TryFromOptional;
+
 use super::super::super::*;
 
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::elevator::Instance, errors::Error> {
@@ -11,7 +12,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::eleva
     let type_raw = i32::from_be_bytes(type_bytes);
     let r#type = match u16::try_from_optional(type_raw, -1) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data))
+        Err(_) => return Err(errors::Error::Format)
     };
 
     let mut floor_bytes = [0u8; 4];

@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
-use crate::common::types::ScaledValue;
+use crate::common::types::geometry::Scaled;
 
 use super::{Font, Glyph, Spacing};
 
@@ -116,7 +116,7 @@ pub fn font<S: Read + Seek>(source: &mut S) -> Result<Font, Error> {
             height,
             dots: bytes
                 .iter()
-                .map(|byte| ScaledValue {
+                .map(|byte| Scaled {
                     value: *byte as usize,
                     scale: 0..10,
                 })

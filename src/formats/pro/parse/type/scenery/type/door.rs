@@ -9,10 +9,10 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::door:
         Ok(value) => value,
     };
 
-    let mut flags: HashSet<object::scenery::door::Flags> = HashSet::new();
+    let mut flags: HashSet<object::scenery::door::Flag> = HashSet::new();
     if (flags_bytes[3] & 0x0F) == 0x0F &&
-        !flags.insert(object::scenery::door::Flags::Passable) {
-        return Err(errors::Error::Format(errors::Format::Flags));
+        !flags.insert(object::scenery::door::Flag::Passable) {
+        return Err(errors::Error::Format);
     }
 
     let mut unknown_bytes = [0u8; 4];

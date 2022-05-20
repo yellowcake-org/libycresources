@@ -9,32 +9,14 @@ mod wall;
 mod tile;
 mod misc;
 
-pub(crate) fn instance<S: Read>(source: &mut S, type_id: u8) -> Result<object::Type, errors::Error> {
-    Ok(match type_id {
-        0 => object::Type::Item(match item::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        1 => object::Type::Critter(match critter::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        2 => object::Type::Scenery(match scenery::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        3 => object::Type::Wall(match wall::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        4 => object::Type::Tile(match tile::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        5 => object::Type::Misc(match misc::instance(source) {
-            Ok(value) => value,
-            Err(error) => return Err(error),
-        }),
-        _ => return Err(errors::Error::Format(errors::Format::Type)),
+pub(crate) fn instance<S: Read>(source: &mut S, r#type: &Type<(), (), (), (), (), ()>) ->
+Result<ObjectInstance, errors::Error> {
+    Ok(match r#type {
+        Type::Item(_) => Type::Item(item::instance(source)?),
+        Type::Critter(_) => Type::Critter(critter::instance(source)?),
+        Type::Scenery(_) => Type::Scenery(scenery::instance(source)?),
+        Type::Wall(_) => Type::Wall(wall::instance(source)?),
+        Type::Tile(_) => Type::Tile(tile::instance(source)?),
+        Type::Misc(_) => Type::Misc(misc::instance(source)?),
     })
 }

@@ -3,7 +3,7 @@ use std::io::{Read, Seek, SeekFrom};
 use std::mem::size_of;
 
 use crate::common::graphics::Pixel;
-use crate::common::types::ScaledValue;
+use crate::common::types::geometry::Scaled;
 
 use super::Palette;
 
@@ -64,15 +64,15 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         |(red, green, blue, is_regular): (usize, usize, usize, bool)| {
             if is_regular {
                 Some(Pixel {
-                    red: ScaledValue {
+                    red: Scaled {
                         value: red,
                         scale: scale.start..scale.end,
                     },
-                    green: ScaledValue {
+                    green: Scaled {
                         value: green,
                         scale: scale.start..scale.end,
                     },
-                    blue: ScaledValue {
+                    blue: Scaled {
                         value: blue,
                         scale: scale.start..scale.end,
                     },

@@ -1,5 +1,5 @@
 use libycresources::formats::pro;
-use libycresources::formats::pro::object::Type;
+use libycresources::formats::pro::Type;
 
 mod item;
 mod critter;
@@ -11,15 +11,15 @@ mod misc;
 pub fn prototype(prototype: &pro::Prototype) {
     println!("Object ID: {:?}", prototype.id);
     println!("Text ID: {:?}", prototype.meta.connections.description_id);
-    println!("Sprite ID: {:?}", prototype.meta.sprite.id);
-    println!("Sprite type: {:?}", prototype.meta.sprite.r#type);
+    println!("Sprite ID: {:?}", prototype.meta.sprite.value);
+    println!("Sprite type: {:?}", prototype.meta.sprite.kind);
     println!("Light radius: {:?}", prototype.meta.light.distance);
     println!("Light intensity: {:?}", prototype.meta.light.intensity);
     println!("Flags: {:?}", prototype.meta.flags);
 
     println!();
 
-    match &prototype.r#type {
+    match &prototype.object {
         Type::Item(item) => { item::item(item) }
         Type::Critter(critter) => { critter::critter(critter) }
         Type::Scenery(scenery) => { scenery::scenery(scenery) }

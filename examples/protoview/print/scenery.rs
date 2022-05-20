@@ -1,4 +1,4 @@
-use libycresources::formats::pro::object::scenery::Type;
+use libycresources::formats::pro::object::scenery::SceneryType;
 
 mod door;
 mod stairs;
@@ -17,11 +17,11 @@ pub(crate) fn scenery(scenery: &libycresources::formats::pro::object::scenery::I
     println!("Sound IDs: 0x{:x}", scenery.connections._sounds_ids);
     println!();
 
-    match &scenery.r#type {
-        Type::Door(door) => { door::door(door) }
-        Type::Stairs(stairs) => { stairs::stairs(stairs) }
-        Type::Elevator(elevator) => { elevator::elevator(elevator) }
-        Type::Ladder(ladder) => { ladder::ladder(ladder) }
-        Type::Generic(generic) => { generic::generic(generic) }
+    match &scenery.body {
+        SceneryType::Door(door) => { door::door(door) }
+        SceneryType::Stairs(stairs) => { stairs::stairs(stairs) }
+        SceneryType::Elevator(elevator) => { elevator::elevator(elevator) }
+        SceneryType::Ladder(ladder) => { ladder::ladder(ladder) }
+        SceneryType::Generic(generic) => { generic::generic(generic) }
     }
 }

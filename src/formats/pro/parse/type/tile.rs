@@ -10,7 +10,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::tile::Instance
     let material = match object::common::world::Material::
     try_from(u32::from_be_bytes(material_id_bytes)) {
         Ok(value) => value,
-        Err(_) => return Err(errors::Error::Format(errors::Format::Data)),
+        Err(_) => return Err(errors::Error::Format),
     };
 
     Ok(object::tile::Instance { material })

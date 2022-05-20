@@ -1,30 +1,68 @@
 pub mod parse;
-mod traits;
+pub(crate) mod traits;
+
+#[derive(Debug, Hash, Eq, PartialEq)]
+pub enum Type<I, C, S, W, T, M> {
+    Item(I),
+    Critter(C),
+    Scenery(S),
+    Wall(W),
+    Tile(T),
+    Misc(M),
+}
+
+pub type ObjectType = Type<(), (), (), (), (), (), >;
+pub type ObjectInstance = Type<
+    object::item::Instance,
+    object::critter::Instance,
+    object::scenery::Instance,
+    object::wall::Instance,
+    object::tile::Instance,
+    object::misc::Instance,
+>;
+pub type ObjectPatch = Type<
+    object::item::Patch,
+    object::critter::Patch,
+    object::scenery::Patch,
+    (),
+    (),
+    object::misc::Patch,
+>;
 
 pub struct Prototype {
     pub id: u16,
-    pub meta: meta::Info,
-    pub r#type: object::Type,
+    pub meta: meta::Instance,
+    pub object: ObjectInstance,
 }
 
 pub mod meta {
     use std::collections::HashSet;
 
-    pub struct Info {
+    use crate::common::types::models;
+    use crate::common::types::models::Identifier;
+
+    pub struct Instance {
         pub light: info::Light,
-        pub flags: HashSet<info::flags::Instance>,
-        pub sprite: super::object::common::sprite::Reference,
+        pub flags: HashSet<info::flags::Root>,
+        pub sprite: Identifier<models::sprite::Kind>,
         pub connections: info::Connections,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Patch {
+        pub light: info::Light,
+        pub flags: HashSet<info::flags::Root>,
     }
 
     pub mod info {
         use std::ops::RangeInclusive;
 
-        use crate::common::types::ScaledValue;
+        use crate::common::types::geometry::Scaled;
 
+        #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Light {
-            pub distance: ScaledValue<u8, RangeInclusive<u8>>,
-            pub intensity: ScaledValue<u16, RangeInclusive<u16>>,
+            pub distance: Scaled<u8, RangeInclusive<u8>>,
+            pub intensity: Scaled<u16, RangeInclusive<u16>>,
         }
 
         pub struct Connections {
@@ -43,7 +81,7 @@ pub mod meta {
             }
 
             #[derive(Debug, PartialEq, Eq, Hash)]
-            pub enum Instance {
+            pub enum Root {
                 Flat,
                 NotBlocking,
                 NotBordered,
@@ -51,6 +89,8 @@ pub mod meta {
                 ShotThrough,
                 LightThrough,
                 Transparency(Option<Transparency>),
+                Locked,
+                Jammed,
             }
         }
     }
@@ -58,42 +98,6 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
-        pub mod sprite {
-            #[derive(Debug)]
-            pub enum Type {
-                Item,
-                Critter,
-                Scenery,
-                Wall,
-                Tile,
-                Background,
-                Interface,
-                Inventory,
-            }
-
-            #[derive(Debug)]
-            pub struct Reference {
-                pub id: u16,
-                pub r#type: Type,
-            }
-        }
-
-        pub mod script {
-            #[derive(Debug)]
-            pub enum Type {
-                Spatial,
-                Item,
-                Scenery,
-                Critter,
-            }
-
-            #[derive(Debug)]
-            pub struct Reference {
-                pub id: u16,
-                pub r#type: Type,
-            }
-        }
-
         pub mod world {
             #[derive(Debug)]
             pub enum Material {
@@ -119,24 +123,18 @@ pub mod object {
         }
 
         pub mod map {
-            #[derive(Debug)]
+            use crate::common::types::geometry::{Coordinate, Elevation};
+
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub enum Map {
                 Local(u32),
                 World,
             }
 
-            #[derive(Debug)]
-            pub enum Floor {
-                Zero,
-                First,
-                Second,
-            }
-
-            #[derive(Debug)]
+            #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Destination {
-                // TODO: Coordinates!
-                pub tile: u32,
-                pub floor: Floor,
+                pub elevation: Elevation,
+                pub position: Coordinate<u8, std::ops::Range<u8>>,
             }
         }
 
@@ -249,7 +247,7 @@ pub mod object {
                 WeaponKnockback,
                 PoweredArmor,
                 CombatArmor,
-                Unknown(u32)
+                Unknown(u32),
             }
 
             #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
@@ -345,31 +343,46 @@ pub mod object {
         }
     }
 
-    pub enum Type {
-        Item(item::Instance),
-        Critter(critter::Instance),
-        Scenery(scenery::Instance),
-        Wall(wall::Instance),
-        Tile(tile::Instance),
-        Misc(misc::Instance),
-    }
-
     pub mod item {
         use std::collections::HashSet;
+
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
 
         #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
             Hidden
         }
 
-        pub enum Type {
-            Armor(armor::Instance),
-            Container(container::Instance),
-            Drug(drug::Instance),
-            Weapon(weapon::Instance),
-            Ammo(ammo::Instance),
-            Misc(misc::Instance),
-            Key(key::Instance),
+        pub type Body = Type<
+            armor::Instance,
+            container::Instance,
+            drug::Instance,
+            weapon::Instance,
+            ammo::Instance,
+            misc::Instance,
+            key::Instance,
+        >;
+
+        pub type Patch = Type<
+            (),
+            (),
+            (),
+            weapon::Patch,
+            ammo::Patch,
+            misc::Patch,
+            key::Patch,
+        >;
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub enum Type<Ar, C, D, W, Am, M, K> {
+            Armor(Ar),
+            Container(C),
+            Drug(D),
+            Weapon(W),
+            Ammo(Am),
+            Misc(M),
+            Key(K),
         }
 
         pub struct Connections {
@@ -377,11 +390,11 @@ pub mod object {
         }
 
         pub struct Instance {
-            pub r#type: Type,
+            pub r#type: Body,
             pub flags: HashSet<Flag>,
 
-            pub sprite: Option<super::common::sprite::Reference>,
-            pub script: Option<super::common::script::Reference>,
+            pub sprite: Option<Identifier<models::sprite::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
 
             pub actions: HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
@@ -396,11 +409,14 @@ pub mod object {
         pub mod armor {
             use std::collections::HashMap;
 
-            use super::super::common::{combat::damage, critter, sprite};
+            use crate::common::types::models;
+            use crate::common::types::models::Identifier;
+
+            use super::super::common::{combat::damage, critter};
 
             #[derive(Debug)]
             pub struct Appearance {
-                pub sprites: HashMap<critter::Gender, sprite::Reference>,
+                pub sprites: HashMap<critter::Gender, Identifier<models::sprite::Kind>>,
             }
 
             pub struct Instance {
@@ -409,7 +425,7 @@ pub mod object {
                 pub threshold: HashMap<damage::Type, u32>,
                 pub resistance: HashMap<damage::Type, u32>,
 
-                pub perk: Option<super::super::common::critter::Perk>,
+                pub perk: Option<critter::Perk>,
                 pub appearance: Appearance,
             }
         }
@@ -433,13 +449,13 @@ pub mod object {
             use std::collections::HashMap;
             use std::ops::RangeInclusive;
 
-            use crate::common::types::ScaledValue;
+            use crate::common::types::geometry::Scaled;
             use crate::formats::pro::object::common::critter::Statistic;
 
             #[derive(Debug)]
             pub enum Amount {
                 Fixed(i32),
-                Random(std::ops::RangeInclusive<i32>),
+                Random(RangeInclusive<i32>),
             }
 
             #[derive(Debug)]
@@ -452,7 +468,7 @@ pub mod object {
             pub struct Addiction {
                 pub perk: super::super::common::critter::Perk,
                 pub delay: std::time::Duration,
-                pub chance: ScaledValue<u8, RangeInclusive<u8>>,
+                pub chance: Scaled<u8, RangeInclusive<u8>>,
             }
 
             #[derive(Debug)]
@@ -549,6 +565,12 @@ pub mod object {
                 pub perk: Option<super::super::common::critter::Perk>,
                 pub connections: Connections,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub rounds: u32,
+                pub ammo_item_id: Option<u16>,
+            }
         }
 
         pub mod ammo {
@@ -574,6 +596,11 @@ pub mod object {
                 pub caliber: Option<super::super::common::weapons::Caliber>,
                 pub adjustments: adjustments::Instance,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub count: u32,
+            }
         }
 
         pub mod misc {
@@ -586,17 +613,28 @@ pub mod object {
                 pub caliber: Option<super::super::common::weapons::Caliber>,
                 pub connections: Connections,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub count: Option<u32>,
+            }
         }
 
         pub mod key {
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub code: Option<u32>,
             }
+
+            pub type Patch = Instance;
         }
     }
 
     pub mod critter {
         use std::collections::{HashMap, HashSet};
+
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
 
         #[derive(Debug, PartialEq, Eq, Hash)]
         pub enum Flag {
@@ -644,11 +682,13 @@ pub mod object {
             }
         }
 
+        #[derive(Debug, Eq, PartialEq)]
         pub struct Statistics {
             pub basic: HashMap<super::common::critter::Statistic, i32>,
             pub bonuses: HashMap<super::common::critter::Statistic, i32>,
         }
 
+        #[derive(Debug, Eq, PartialEq)]
         pub struct Connections {
             pub ai_packet_id: u32,
         }
@@ -660,11 +700,19 @@ pub mod object {
             pub damage: Option<super::common::combat::damage::Type>, // Fallout 2 only
 
             pub body: super::common::critter::body::Type,
-            pub head: Option<super::common::sprite::Reference>,
-            pub script: Option<super::common::script::Reference>,
+            pub head: Option<Identifier<models::sprite::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
 
             pub flags: HashSet<Flag>,
             pub skills: HashMap<super::common::critter::Skill, u32>,
+
+            pub statistics: Statistics,
+            pub connections: Connections,
+        }
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub struct Patch {
+            pub team: u32,
 
             pub statistics: Statistics,
             pub connections: Connections,
@@ -674,26 +722,46 @@ pub mod object {
     pub mod scenery {
         use std::collections::HashSet;
 
-        pub enum Type {
-            Door(door::Instance),
-            Stairs(stairs::Instance),
-            Elevator(elevator::Instance),
-            Ladder(ladder::Instance),
-            Generic(generic::Instance),
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
+        #[derive(Debug, Eq, PartialEq)]
+        pub enum SceneryType<D, S, E, L, G> {
+            Door(D),
+            Stairs(S),
+            Elevator(E),
+            Ladder(L),
+            Generic(G),
         }
+
+        pub type Body = SceneryType<
+            door::Instance,
+            stairs::Instance,
+            elevator::Instance,
+            ladder::Instance,
+            generic::Instance,
+        >;
+
+        pub type Patch = SceneryType<
+            door::Patch,
+            stairs::Patch,
+            elevator::Patch,
+            ladder::Patch,
+            (),
+        >;
 
         pub struct Connections {
             pub _sounds_ids: u8,
         }
 
         pub struct Instance {
-            pub r#type: Type,
+            pub body: Body,
 
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<super::common::script::Reference>,
+            pub script: Option<Identifier<models::script::Type>>,
             pub material: super::common::world::Material,
 
-            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub actions: HashSet<super::common::actions::Instance>,
             pub connections: Connections,
         }
 
@@ -701,33 +769,44 @@ pub mod object {
             use std::collections::HashSet;
 
             #[derive(Debug, PartialEq, Eq, Hash)]
-            pub enum Flags {
+            pub enum Flag {
                 Passable
             }
 
             pub struct Instance {
-                pub flags: HashSet<Flags>,
+                pub flags: HashSet<Flag>,
                 pub _unknown: u32,
+            }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub flags: HashSet<Flag>,
             }
         }
 
         pub mod stairs {
-            #[derive(Debug)]
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Destination {
                 pub map: super::super::common::map::Map,
                 pub target: Option<super::super::common::map::Destination>,
             }
 
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub destination: Destination,
             }
+
+            pub type Patch = Instance;
         }
 
         pub mod elevator {
+            #[derive(Debug, Eq, PartialEq)]
             pub struct Instance {
                 pub floor: i32,
                 pub r#type: Option<u16>,
             }
+
+            pub type Patch = Instance;
         }
 
         pub mod ladder {
@@ -741,6 +820,12 @@ pub mod object {
                 pub direction: Direction,
                 pub destination: Option<super::super::common::map::Destination>,
             }
+
+            #[derive(Debug, Eq, PartialEq)]
+            pub struct Patch {
+                pub map: Option<super::super::common::map::Map>,
+                pub destination: Option<super::super::common::map::Destination>, // Fallout 2 only
+            }
         }
 
         pub mod generic {
@@ -753,12 +838,15 @@ pub mod object {
     pub mod wall {
         use std::collections::HashSet;
 
+        use crate::common::types::models;
+        use crate::common::types::models::Identifier;
+
         pub struct Instance {
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<super::common::script::Reference>,
+            pub script: Option<Identifier<models::script::Type>>,
             pub material: super::common::world::Material,
 
-            pub actions: std::collections::HashSet<super::common::actions::Instance>,
+            pub actions: HashSet<super::common::actions::Instance>,
         }
     }
 
@@ -769,8 +857,26 @@ pub mod object {
     }
 
     pub mod misc {
+        pub mod exit {
+            use crate::common::types::geometry::Orientation;
+            use crate::formats::pro::object::common::map::{Destination, Map};
+
+            #[derive(Debug, Hash, Eq, PartialEq)]
+            pub struct Instance {
+                pub map: Map,
+                pub destination: Destination,
+                pub orientation: Orientation,
+            }
+        }
+
         pub struct Instance {
             pub _unknown: u32,
+        }
+
+        #[derive(Debug, Hash, Eq, PartialEq)]
+        pub enum Patch {
+            None,
+            Exit(exit::Instance),
         }
     }
 }
