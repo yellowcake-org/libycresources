@@ -17,7 +17,7 @@ pub struct Map {
     pub ticks: u32,
     pub darkness: u32,
 
-    pub tiles: [Option<tiles::Instance>; 3],
+    pub tiles: Vec<tiles::Group>,
     pub scripts: Vec<blueprint::script::Instance>,
     pub prototypes: Vec<blueprint::prototype::Instance>,
 }
@@ -55,14 +55,21 @@ pub mod location {
 }
 
 pub mod tiles {
-    const SIDE_SIZE: usize = 100;
+    use std::ops::Range;
 
-    type Surface = [[Option<u16>; SIDE_SIZE]; SIDE_SIZE];
+    use crate::common::types::geometry::{Coordinate, Elevation};
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Instance {
+        pub id: u16,
+        pub position: Coordinate<u8, Range<u8>>,
+    }
 
     #[derive(Debug)]
-    pub struct Instance {
-        pub roof: Surface,
-        pub floor: Surface,
+    pub struct Group {
+        pub floor: Vec<Instance>,
+        pub ceiling: Vec<Instance>,
+        pub elevation: Elevation,
     }
 }
 

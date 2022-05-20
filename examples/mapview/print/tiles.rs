@@ -4,39 +4,12 @@ pub(crate) fn print(map: &map::Map) {
     println!("Tiles");
     println!();
 
-    for (idx, elevation) in map.tiles.iter().enumerate() {
-        match elevation {
-            None => println!("Level {:?} is not presented.", idx),
-            Some(e) => {
-                println!("Level {:?}", idx);
-                println!();
+    for group in map.tiles.iter() {
+        println!("Level {:?}", group.elevation.level.value);
+        println!();
 
-                println!("Floor");
-                for h in e.floor {
-                    for v in h {
-                        match v {
-                            None => print!("."),
-                            Some(_) => print!("0"),
-                        }
-                    }
-
-                    println!();
-                }
-                println!();
-
-                println!("Roof");
-                for h in e.roof {
-                    for v in h {
-                        match v {
-                            None => print!("."),
-                            Some(_) => print!("0"),
-                        }
-                    }
-
-                    println!();
-                }
-                println!();
-            }
-        }
+        println!("Floor: {:?} tiles", group.floor.len());
+        println!("Ceiling: {:?} tiles", group.ceiling.len());
+        println!();
     }
 }
