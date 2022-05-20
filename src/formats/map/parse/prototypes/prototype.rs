@@ -10,6 +10,7 @@ use crate::formats::map::blueprint::prototype;
 use crate::formats::map::blueprint::prototype::Appearance;
 use crate::formats::map::location::{Grid, Screen};
 use crate::formats::map::parse::{errors, PrototypeProvider};
+use crate::formats::pro;
 use crate::formats::pro::meta;
 use crate::formats::pro::meta::info::Light;
 
@@ -40,8 +41,7 @@ Result<prototype::Instance, errors::Error> {
 
     let sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
-    // Any pro::meta::info::flags::Common
-    let flags_patch = source.read_u32::<BigEndian>()?;
+    let mut flags = pro::parse::flags::common(source)?;
     let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
 
     let location = prototype::Location {
@@ -65,8 +65,7 @@ Result<prototype::Instance, errors::Error> {
 
     source.seek(SeekFrom::Current(4))?;
 
-    // Any pro::meta::info::flags::Extended, work for Items & Doors only
-    let flags_extended = source.read_u32::<BigEndian>()?;
+    flags.extend(pro::parse::flags::extended(source)?);
     let patch = patch::instance(source, provider, &identifier, read_ladders_map)?;
 
     let mut inventory = Vec::new();
@@ -90,7 +89,7 @@ Result<prototype::Instance, errors::Error> {
         patch: prototype::Patch {
             meta: meta::Patch {
                 light: Light::try_from((light_radius as u8, light_intensity as u16))?,
-                flags: Default::default(),
+                flags,
             },
             object: patch,
         },

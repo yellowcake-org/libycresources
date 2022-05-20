@@ -10,7 +10,7 @@ use crate::formats::pro::meta::info::Light;
 use super::*;
 
 mod r#type;
-mod flags;
+pub(crate) mod flags;
 
 pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Error> {
     source.seek(SeekFrom::Start(0))?;
@@ -35,7 +35,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     let light_intensity = u32::from_be_bytes(light_intensity_bytes) as u16;
 
-    let flags = match flags::instance(source) {
+    let flags = match flags::common(source) {
         Ok(value) => value,
         Err(error) => return Err(error)
     };
