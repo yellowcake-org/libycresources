@@ -1,9 +1,10 @@
 use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
-use crate::formats::map::blueprint::script::Type::{Critter, Item, Spatial, System, Time};
+use crate::common::types::models;
+use crate::common::types::models::script::Kind::{Critter, Item, Scenery, Spatial, System, Timed};
 
 use super::super::*;
 
-pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<blueprint::script::Instance, errors::Error> {
+pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u8) -> Result<blueprint::script::Instance, errors::Error> {
     source.seek(SeekFrom::Current(2))?;
     let id = source.read_u16::<BigEndian>()?;
 
@@ -64,13 +65,13 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u32) -> Result<bluepri
 
     Ok(blueprint::script::Instance {
         id,
-        r#type: match type_raw {
-            0 => System,
-            1 => Spatial(spatial_inners.ok_or(errors::Error::Format)?),
-            2 => Time(timed_inners.ok_or(errors::Error::Format)?),
-            3 => Item,
-            4 => Critter,
-            _ => return Err(errors::Error::Format)
+        kind: match models::script::Type::try_from(type_raw)? {
+            System(_) => System(()),
+            Spatial(_) => Spatial(spatial_inners.ok_or(errors::Error::Format)?),
+            Timed(_) => Timed(timed_inners.ok_or(errors::Error::Format)?),
+            Item(_) => Item(()),
+            Critter(_) => Critter(()),
+            Scenery(_) => Scenery(())
         },
         variables: if lvars_offset > -1 && lvars_count > 0 {
             Some(blueprint::script::Variables {

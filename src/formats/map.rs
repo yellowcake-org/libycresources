@@ -75,14 +75,16 @@ pub mod tiles {
 
 pub mod blueprint {
     pub mod script {
-        #[derive(Debug, Hash, Eq, PartialEq)]
-        pub enum Type {
-            System,
-            Spatial(spatial::Instance),
-            Time(time::Instance),
-            Item,
-            Critter,
-        }
+        // #[derive(Debug, Hash, Eq, PartialEq)]
+        // pub enum Type {
+        //     System,
+        //     Spatial(spatial::Instance),
+        //     Time(time::Instance),
+        //     Item,
+        //     Critter,
+        // }
+
+        use crate::common::types::models::script::Kind;
 
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Connections {
@@ -99,7 +101,7 @@ pub mod blueprint {
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
             pub id: u16,
-            pub r#type: Type,
+            pub kind: Kind<(), spatial::Instance, time::Instance, (), (), ()>,
             pub variables: Option<Variables>,
             pub connections: Connections,
         }

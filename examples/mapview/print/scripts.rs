@@ -6,7 +6,7 @@ pub(crate) fn print(map: &map::Map) {
 
     for script in &map.scripts {
         println!("ID: {:?}", script.id);
-        println!("Type: {:?}", script.r#type);
+        println!("Type: {:?}", script.kind);
         println!("Variables: {:?}", script.variables);
         println!("Connections: {:?}", script.connections);
         println!();

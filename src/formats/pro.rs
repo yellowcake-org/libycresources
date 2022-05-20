@@ -402,7 +402,7 @@ pub mod object {
             pub flags: HashSet<Flag>,
 
             pub sprite: Option<Identifier<models::sprite::Kind>>,
-            pub script: Option<Identifier<models::script::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
 
             pub actions: HashSet<super::common::actions::Instance>,
             pub material: super::common::world::Material,
@@ -709,7 +709,7 @@ pub mod object {
 
             pub body: super::common::critter::body::Type,
             pub head: Option<Identifier<models::sprite::Kind>>,
-            pub script: Option<Identifier<models::script::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
 
             pub flags: HashSet<Flag>,
             pub skills: HashMap<super::common::critter::Skill, u32>,
@@ -766,7 +766,7 @@ pub mod object {
             pub body: Body,
 
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<Identifier<models::script::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
             pub material: super::common::world::Material,
 
             pub actions: HashSet<super::common::actions::Instance>,
@@ -851,7 +851,7 @@ pub mod object {
 
         pub struct Instance {
             pub light: HashSet<super::common::world::Light>,
-            pub script: Option<Identifier<models::script::Kind>>,
+            pub script: Option<Identifier<models::script::Type>>,
             pub material: super::common::world::Material,
 
             pub actions: HashSet<super::common::actions::Instance>,
