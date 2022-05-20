@@ -43,7 +43,7 @@ pub mod meta {
 
     pub struct Instance {
         pub light: info::Light,
-        pub flags: HashSet<info::flags::Instance>,
+        pub flags: HashSet<info::flags::Common>,
         pub sprite: Identifier<models::sprite::Kind>,
         pub connections: info::Connections,
     }
@@ -51,7 +51,7 @@ pub mod meta {
     #[derive(Debug, Eq, PartialEq)]
     pub struct Patch {
         pub light: info::Light,
-        pub flags: HashSet<info::flags::Instance>,
+        pub flags: HashSet<info::flags::Common>,
     }
 
     pub mod info {
@@ -81,7 +81,7 @@ pub mod meta {
             }
 
             #[derive(Debug, PartialEq, Eq, Hash)]
-            pub enum Instance {
+            pub enum Common {
                 Flat,
                 NotBlocking,
                 NotBordered,
@@ -89,6 +89,12 @@ pub mod meta {
                 ShotThrough,
                 LightThrough,
                 Transparency(Option<Transparency>),
+            }
+
+            #[derive(Debug, PartialEq, Eq, Hash)]
+            pub enum Extended {
+                Locked,
+                Jammed
             }
         }
     }

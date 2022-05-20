@@ -40,7 +40,8 @@ Result<prototype::Instance, errors::Error> {
 
     let sprite = Identifier::try_from(source.read_u32::<BigEndian>()?)?;
 
-    let flags = source.read_u32::<BigEndian>()?;
+    // Any pro::meta::info::flags::Common
+    let flags_patch = source.read_u32::<BigEndian>()?;
     let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;
 
     let location = prototype::Location {
@@ -64,7 +65,8 @@ Result<prototype::Instance, errors::Error> {
 
     source.seek(SeekFrom::Current(4))?;
 
-    let flags_patch = source.read_u32::<BigEndian>()?;
+    // Any pro::meta::info::flags::Extended, work for Items & Doors only
+    let flags_extended = source.read_u32::<BigEndian>()?;
     let patch = patch::instance(source, provider, &identifier, read_ladders_map)?;
 
     let mut inventory = Vec::new();

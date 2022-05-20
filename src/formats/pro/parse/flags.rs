@@ -2,35 +2,35 @@ use std::collections::HashSet;
 
 use super::*;
 
-pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::flags::Instance>, errors::Error> {
+pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::flags::Common>, errors::Error> {
     let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
         Err(error) => return Err(errors::Error::Read(error)),
         Ok(value) => value,
     };
 
-    let mut flags: HashSet<meta::info::flags::Instance> = HashSet::new();
+    let mut flags: HashSet<meta::info::flags::Common> = HashSet::new();
 
     if (flags_bytes[3] & 0x08) == 0x08 {
-        if !flags.insert(meta::info::flags::Instance::Flat) {
+        if !flags.insert(meta::info::flags::Common::Flat) {
             return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[3] & 0x10) == 0x10 {
-        if !flags.insert(meta::info::flags::Instance::NotBlocking) {
+        if !flags.insert(meta::info::flags::Common::NotBlocking) {
             return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[2] & 0x08) == 0x08 {
-        if !flags.insert(meta::info::flags::Instance::MultiHex) {
+        if !flags.insert(meta::info::flags::Common::MultiHex) {
             return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[2] & 0x10) == 0x10 {
-        if !flags.insert(meta::info::flags::Instance::NotBordered) {
+        if !flags.insert(meta::info::flags::Common::NotBordered) {
             return Err(errors::Error::Format);
         }
     }
@@ -50,19 +50,19 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<meta::info::fl
     } else if (flags_bytes[0] & 0x10) == 0x10 {
         Some(Some(meta::info::flags::Transparency::End))
     } else { None } {
-        if !flags.insert(meta::info::flags::Instance::Transparency(transparency)) {
+        if !flags.insert(meta::info::flags::Common::Transparency(transparency)) {
             return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[0] & 0x20) == 0x20 {
-        if !flags.insert(meta::info::flags::Instance::LightThrough) {
+        if !flags.insert(meta::info::flags::Common::LightThrough) {
             return Err(errors::Error::Format);
         }
     }
 
     if (flags_bytes[0] & 0x80) == 0x80 {
-        if !flags.insert(meta::info::flags::Instance::ShotThrough) {
+        if !flags.insert(meta::info::flags::Common::ShotThrough) {
             return Err(errors::Error::Format);
         }
     }
