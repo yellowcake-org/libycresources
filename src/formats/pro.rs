@@ -96,16 +96,6 @@ pub mod meta {
 
 pub mod object {
     pub mod common {
-        pub mod script {
-            #[derive(Debug)]
-            pub enum Type {
-                Spatial,
-                Item,
-                Scenery,
-                Critter,
-            }
-        }
-
         pub mod world {
             #[derive(Debug)]
             pub enum Material {
@@ -433,7 +423,7 @@ pub mod object {
                 pub threshold: HashMap<damage::Type, u32>,
                 pub resistance: HashMap<damage::Type, u32>,
 
-                pub perk: Option<super::super::common::critter::Perk>,
+                pub perk: Option<critter::Perk>,
                 pub appearance: Appearance,
             }
         }
@@ -463,7 +453,7 @@ pub mod object {
             #[derive(Debug)]
             pub enum Amount {
                 Fixed(i32),
-                Random(std::ops::RangeInclusive<i32>),
+                Random(RangeInclusive<i32>),
             }
 
             #[derive(Debug)]
