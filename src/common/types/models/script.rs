@@ -1,12 +1,11 @@
-pub type Type = Kind<(), (), (), (), (), ()>;
+pub type Type = Kind<(), (), (), (), ()>;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
-pub enum Kind<Sys, Sp, T, I, Sc, C> {
+pub enum Kind<Sys, Sp, T, I, C> {
     System(Sys),
     Spatial(Sp),
     Timed(T),
     Item(I),
-    Scenery(Sc),
     Critter(C),
 }
 
@@ -19,7 +18,7 @@ impl TryFrom<u8> for Type {
             1 => Self::Spatial(()),
             2 => Self::Timed(()),
             3 => Self::Item(()),
-            4 => Self::Scenery(()),
+            4 => Self::Critter(()),
             _ => return Err(Self::Error::Format)
         })
     }

@@ -1,6 +1,6 @@
 use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
 use crate::common::types::models;
-use crate::common::types::models::script::Kind::{Critter, Item, Scenery, Spatial, System, Timed};
+use crate::common::types::models::script::Kind::{Critter, Item, Spatial, System, Timed};
 
 use super::super::*;
 
@@ -71,7 +71,6 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u8) -> Result<blueprin
             Timed(_) => Timed(timed_inners.ok_or(errors::Error::Format)?),
             Item(_) => Item(()),
             Critter(_) => Critter(()),
-            Scenery(_) => Scenery(())
         },
         variables: if lvars_offset > -1 && lvars_count > 0 {
             Some(blueprint::script::Variables {

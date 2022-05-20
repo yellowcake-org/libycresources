@@ -101,7 +101,7 @@ pub mod blueprint {
         #[derive(Debug, Hash, Eq, PartialEq)]
         pub struct Instance {
             pub id: u16,
-            pub kind: Kind<(), spatial::Instance, time::Instance, (), (), ()>,
+            pub kind: Kind<(), spatial::Instance, time::Instance, (), ()>,
             pub variables: Option<Variables>,
             pub connections: Connections,
         }
