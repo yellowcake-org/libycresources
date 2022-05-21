@@ -74,15 +74,6 @@ pub mod tiles {
 
 pub mod blueprint {
     pub mod script {
-        // #[derive(Debug, Hash, Eq, PartialEq)]
-        // pub enum Type {
-        //     System,
-        //     Spatial(spatial::Instance),
-        //     Time(time::Instance),
-        //     Item,
-        //     Critter,
-        // }
-
         use crate::common::types::models::script::Kind;
 
         #[derive(Debug, Hash, Eq, PartialEq)]
