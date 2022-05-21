@@ -22,15 +22,13 @@ pub struct Map {
 }
 
 pub mod common {
-    use std::collections::HashSet;
-
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
 
     #[derive(Debug)]
     pub struct Variables {
-        pub local: HashSet<i32>,
-        pub global: HashSet<i32>,
+        pub local: Vec<i32>,
+        pub global: Vec<i32>,
     }
 }
 
