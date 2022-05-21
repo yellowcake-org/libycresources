@@ -49,7 +49,7 @@ fn main() {
 
     let sprite = match frm::parse::sprite(&mut reader) {
         Err(error) => {
-            eprintln!("Error occured: {:?}", error);
+            eprintln!("Error occurred: {:?}", error);
             return;
         }
         Ok(value) => value,
@@ -108,7 +108,7 @@ fn main() {
 
             let palette = match pal::parse::palette(&mut reader) {
                 Err(error) => {
-                    eprintln!("Error occured: {:?}", error);
+                    eprintln!("Error occurred: {:?}", error);
                     return;
                 }
                 Ok(value) => value,

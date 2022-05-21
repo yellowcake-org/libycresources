@@ -45,7 +45,7 @@ fn main() {
 
     let palette = match pal::parse::palette(&mut reader) {
         Err(error) => {
-            eprintln!("Error occured: {:?}", error);
+            eprintln!("Error occurred: {:?}", error);
             return;
         }
         Ok(value) => value,
@@ -53,7 +53,7 @@ fn main() {
 
     match options.action {
         Action::Info => {
-            let flatten_colors: Vec<graphics::Pixel> =
+            let flatten_colors: Vec<graphics::Pixel<u8>> =
                 palette.colors.into_iter().flatten().collect();
 
             println!("Palette contains {:} valid colors.", flatten_colors.len());

@@ -49,8 +49,8 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u8) -> Result<blueprin
 
     let object_id = source.read_i32::<BigEndian>()?;
 
-    let lvars_offset = source.read_i32::<BigEndian>()?;
-    let lvars_count = source.read_i32::<BigEndian>()?;
+    let local_vars_offset = source.read_i32::<BigEndian>()?;
+    let local_vars_count = source.read_i32::<BigEndian>()?;
 
     let _return_value = source.read_i32::<BigEndian>()?;
     let _actions = source.read_i32::<BigEndian>()?;
@@ -73,10 +73,10 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u8) -> Result<blueprin
             Item(_) => Item(()),
             Critter(_) => Critter(()),
         },
-        variables: if lvars_offset > -1 && lvars_count > 0 {
+        variables: if local_vars_offset > -1 && local_vars_count > 0 {
             Some(blueprint::script::Variables {
-                offset: lvars_offset as u32,
-                count: lvars_count as u32,
+                offset: local_vars_offset as u32,
+                count: local_vars_count as u32,
             })
         } else { None },
         connections: blueprint::script::Connections {

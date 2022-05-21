@@ -82,7 +82,7 @@ Result<prototype::Instance, errors::Error> {
         for _ in usize::MIN..overhead { inventory.push(None) }
 
         // Now this operation is safe from panic
-        inventory[index] = Some(self::instance(source, provider, read_ladders_map)?);
+        inventory[index] = Some(instance(source, provider, read_ladders_map)?);
     }
 
     Ok(prototype::Instance {
