@@ -27,6 +27,7 @@ pub fn file<S: Read + Seek, O: Write>(source: &mut S, file: &File, output: &mut 
 
                 while processed < end && written < plain as usize {
                     let byte = source.read_u8()?;
+
                     processed += 1;
                     written += output.write(&[byte])?;
                 }

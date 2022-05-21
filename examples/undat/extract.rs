@@ -4,8 +4,7 @@ use std::path::PathBuf;
 use libycresources::common::types::errors::Error;
 use libycresources::formats::dat;
 
-pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error>
-    where R: Read + Seek {
+pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error> where R: Read + Seek {
     let mut path = PathBuf::new();
 
     for (depth, _, directory) in tree.iter() {
