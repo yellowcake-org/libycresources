@@ -3,9 +3,10 @@ use std::ops::RangeInclusive;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
+use crate::common::types::geometry::{Coordinate, Orientation, Scaled};
 use crate::common::types::models;
 use crate::common::types::models::Identifier;
+use crate::common::types::space::Elevation;
 use crate::formats::map::blueprint::prototype;
 use crate::formats::map::blueprint::prototype::Appearance;
 use crate::formats::map::location::{Grid, Screen};
@@ -81,7 +82,7 @@ Result<prototype::Instance, errors::Error> {
         for _ in usize::MIN..overhead { inventory.push(None) }
 
         // Now this operation is safe from panic
-        inventory[index] = Some(self::instance(source, provider, read_ladders_map)?);
+        inventory[index] = Some(instance(source, provider, read_ladders_map)?);
     }
 
     Ok(prototype::Instance {

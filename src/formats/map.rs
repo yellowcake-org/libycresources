@@ -22,22 +22,21 @@ pub struct Map {
 }
 
 pub mod common {
-    use std::collections::HashSet;
-
     #[derive(Debug, PartialEq, Eq, Hash)]
     pub enum Flag { Save }
 
     #[derive(Debug)]
     pub struct Variables {
-        pub local: HashSet<i32>,
-        pub global: HashSet<i32>,
+        pub local: Vec<i32>,
+        pub global: Vec<i32>,
     }
 }
 
 pub mod location {
     use std::ops::{Range, RangeInclusive};
 
-    use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
+    use crate::common::types::geometry::{Coordinate, Orientation};
+    use crate::common::types::space::Elevation;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Grid {
@@ -56,7 +55,8 @@ pub mod location {
 pub mod tiles {
     use std::ops::Range;
 
-    use crate::common::types::geometry::{Coordinate, Elevation};
+    use crate::common::types::geometry::Coordinate;
+    use crate::common::types::space::Elevation;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Instance {
@@ -74,15 +74,6 @@ pub mod tiles {
 
 pub mod blueprint {
     pub mod script {
-        // #[derive(Debug, Hash, Eq, PartialEq)]
-        // pub enum Type {
-        //     System,
-        //     Spatial(spatial::Instance),
-        //     Time(time::Instance),
-        //     Item,
-        //     Critter,
-        // }
-
         use crate::common::types::models::script::Kind;
 
         #[derive(Debug, Hash, Eq, PartialEq)]
@@ -106,7 +97,8 @@ pub mod blueprint {
         }
 
         pub mod spatial {
-            use crate::common::types::geometry::{Coordinate, Elevation};
+            use crate::common::types::geometry::Coordinate;
+            use crate::common::types::space::Elevation;
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {

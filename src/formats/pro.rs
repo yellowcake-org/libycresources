@@ -123,11 +123,13 @@ pub mod object {
         }
 
         pub mod map {
-            use crate::common::types::geometry::{Coordinate, Elevation};
+            use crate::common::types::geometry::Coordinate;
+            use crate::common::types::space::Elevation;
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub enum Map {
                 Local(u32),
+                Current,
                 World,
             }
 
@@ -386,7 +388,7 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub _sounds_ids: u8, // TODO: It represents multiple sounds, no info
+            pub _sounds_ids: u8,
         }
 
         pub struct Instance {
@@ -697,7 +699,7 @@ pub mod object {
             pub team: u32,
 
             pub murder: murder::Result,
-            pub damage: Option<super::common::combat::damage::Type>, // Fallout 2 only
+            pub damage: Option<super::common::combat::damage::Type>, // Fallout™ 2 only
 
             pub body: super::common::critter::body::Type,
             pub head: Option<Identifier<models::sprite::Kind>>,
@@ -824,7 +826,7 @@ pub mod object {
             #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
                 pub map: Option<super::super::common::map::Map>,
-                pub destination: Option<super::super::common::map::Destination>, // Fallout 2 only
+                pub destination: Option<super::super::common::map::Destination>, // Fallout™ 2 only
             }
         }
 

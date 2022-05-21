@@ -14,7 +14,7 @@ pub(crate) fn scenery(scenery: &libycresources::formats::pro::object::scenery::I
     println!("Script: {:?}", scenery.script);
     println!("Actions: {:?}", scenery.actions);
     println!("Material: {:?}", scenery.material);
-    println!("Sound IDs: 0x{:x}", scenery.connections._sounds_ids);
+    println!("Sound IDs: {:#x}", scenery.connections._sounds_ids);
     println!();
 
     match &scenery.body {

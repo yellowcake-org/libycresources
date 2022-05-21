@@ -2,7 +2,8 @@ use std::io::Read;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
+use crate::common::types::geometry::{Coordinate, Orientation};
+use crate::common::types::space::Elevation;
 use crate::formats::map::location;
 use crate::formats::map::parse::errors;
 

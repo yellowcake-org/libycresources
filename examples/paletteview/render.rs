@@ -1,6 +1,6 @@
 use libycresources::common::graphics::Pixel;
 
-pub fn image(pixels: &[Option<Pixel>], width: usize) -> bmp::Image {
+pub fn image(pixels: &[Option<Pixel<u8>>], width: usize) -> bmp::Image {
     let height = pixels.len() / width;
 
     let pixels: Vec<bmp::Pixel> = pixels
@@ -8,15 +8,9 @@ pub fn image(pixels: &[Option<Pixel>], width: usize) -> bmp::Image {
         .map(|color| match color {
             None => bmp::Pixel::new(0, 0, 0),
             Some(color) => {
-                let red = ((color.red.value * (u8::MAX as usize + 1))
-                    / ((color.red.scale.end - color.red.scale.start) as usize))
-                    as u8;
-                let green = ((color.green.value * (u8::MAX as usize + 1))
-                    / ((color.green.scale.end - color.green.scale.start) as usize))
-                    as u8;
-                let blue = ((color.blue.value * (u8::MAX as usize + 1))
-                    / ((color.blue.scale.end - color.blue.scale.start) as usize))
-                    as u8;
+                let red = ((color.red.value as usize * (u8::MAX as usize + 1)) / color.red.scale.len()) as u8;
+                let green = ((color.green.value as usize * (u8::MAX as usize + 1)) / color.green.scale.len()) as u8;
+                let blue = ((color.blue.value as usize * (u8::MAX as usize + 1)) / color.blue.scale.len()) as u8;
 
                 bmp::Pixel::new(red, green, blue)
             }

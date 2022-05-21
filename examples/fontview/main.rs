@@ -44,7 +44,7 @@ fn main() {
 
     let font = match aaf::parse::font(&mut reader) {
         Err(error) => {
-            eprintln!("Error occured: {:?}", error);
+            eprintln!("Error occurred: {:?}", error);
             return;
         }
         Ok(value) => value,

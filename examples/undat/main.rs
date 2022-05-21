@@ -10,7 +10,7 @@ pub(crate) mod print;
 #[derive(Parser)]
 #[clap(name = "undat", version)]
 struct Options {
-    /// Path to the input arhive file (.dat)
+    /// Path to the input archive file (.dat)
     #[clap(short, long)]
     input: String,
     #[clap(subcommand)]
@@ -19,7 +19,7 @@ struct Options {
 
 #[derive(Parser)]
 enum Action {
-    /// Prints arhive contents
+    /// Prints archive contents
     Tree,
     /// Extracts all archive contents to specified directory
     Extract(Extract),
@@ -45,7 +45,7 @@ fn main() {
 
     if let Some(tree) = match dat::parse::tree(&mut reader) {
         Err(error) => {
-            eprintln!("Error occured: {:?}", error);
+            eprintln!("Error occurred: {:?}", error);
             return;
         }
         Ok(value) => value,
@@ -58,7 +58,7 @@ fn main() {
                 let result = extract::tree(&mut reader, &tree, &arguments.output);
 
                 if let Err(error) = result {
-                    eprintln!("Error occured: {:?}", error);
+                    eprintln!("Error occurred: {:?}", error);
                 }
             }
         }

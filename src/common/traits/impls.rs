@@ -1,52 +1,67 @@
-use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Elevation, Orientation, Scaled};
+use std::ops::Range;
 
-impl TryFrom<i32> for Coordinate<u8, std::ops::Range<u8>> {
-    type Error = errors::Error;
+use errors::Error;
+
+use crate::common::types::errors;
+use crate::common::types::geometry::{Coordinate, Orientation, Scaled};
+use crate::common::types::space::Elevation;
+
+impl TryFrom<i32> for Coordinate<u8, Range<u8>> {
+    type Error = Error;
     fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Self::try_from(u32::try_from(value).map_err(|_| errors::Error::Format)?)
+        Self::try_from(u32::try_from(value).map_err(|_| Error::Format)?)
     }
 }
 
-impl TryFrom<u32> for Coordinate<u8, std::ops::Range<u8>> {
-    type Error = errors::Error;
+impl TryFrom<u32> for Coordinate<u8, Range<u8>> {
+    type Error = Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        const SCALE: std::ops::Range<u8> = 0u8..200;
-        if (0..(SCALE.end as u32).pow(2)).contains(&value) {
-            let x = value / SCALE.end as u32;
-            let y = value - (x * SCALE.end as u32);
+        const SCALE: Range<u32> = u32::MIN..200;
+
+        if (u32::MIN..SCALE.end.pow(2)).contains(&value) {
+            let x = value / SCALE.end;
+            let y = value - (x * SCALE.end);
+
+            let x = u8::try_from(x).map_err(|_| Error::Format)?;
+            let y = u8::try_from(y).map_err(|_| Error::Format)?;
 
             Ok(Self {
-                x: Scaled { value: x as u8, scale: SCALE },
-                y: Scaled { value: y as u8, scale: SCALE },
+                x: Scaled { value: x, scale: u8::MIN..(SCALE.end as u8) },
+                y: Scaled { value: y, scale: u8::MIN..(SCALE.end as u8) },
             })
         } else {
-            return Err(errors::Error::Format);
+            return Err(Error::Format);
         }
     }
 }
 
 impl TryFrom<u32> for Elevation {
-    type Error = errors::Error;
+    type Error = Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        if (0..3).contains(&value) {
-            Ok(Self { level: Scaled { value: value as u8, scale: u8::MIN..3 } })
+        const SCALE: Range<u8> = u8::MIN..3;
+        let value = u8::try_from(value).map_err(|_| Error::Format)?;
+
+        if SCALE.contains(&value) {
+            Ok(Self { level: Scaled { value, scale: SCALE } })
         } else {
-            return Err(errors::Error::Format);
+            return Err(Error::Format);
         }
     }
 }
 
 impl TryFrom<u32> for Orientation {
-    type Error = errors::Error;
+    type Error = Error;
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
-        if (0..6).contains(&value) {
-            Ok(Self { value: Scaled { value: value as u8, scale: 0u8..6 } })
+        const SCALE: Range<u8> = u8::MIN..6;
+        let value = u8::try_from(value).map_err(|_| Error::Format)?;
+
+        if SCALE.contains(&value) {
+            Ok(Self { value: Scaled { value, scale: SCALE } })
         } else {
-            return Err(errors::Error::Format);
+            return Err(Error::Format);
         }
     }
 }

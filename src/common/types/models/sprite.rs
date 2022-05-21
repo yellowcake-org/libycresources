@@ -5,9 +5,12 @@ pub enum Kind {
     Scenery,
     Wall,
     Tile,
+    Misc,
     Background,
     Interface,
     Inventory,
+    Head,
+    Skilldex,
 }
 
 impl TryFrom<u8> for Kind {
@@ -20,9 +23,12 @@ impl TryFrom<u8> for Kind {
             2 => Self::Scenery,
             3 => Self::Wall,
             4 => Self::Tile,
-            5 => Self::Background,
+            5 => Self::Misc,
             6 => Self::Interface,
             7 => Self::Inventory,
+            8 => Self::Head,
+            9 => Self::Background,
+            10 => Self::Skilldex,
             _ => return Err(Self::Error::Format)
         })
     }

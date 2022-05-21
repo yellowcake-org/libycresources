@@ -1,5 +1,8 @@
+use std::ops::Range;
+
 use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
+use crate::common::types::geometry::{Coordinate, Scaled};
+use crate::common::types::space::Elevation;
 use crate::formats::pro::meta::info::Light;
 
 use super::super::object;
@@ -52,7 +55,7 @@ impl TryFrom<u32> for object::critter::murder::Type {
             15 => Ok(Self::Geckos),
             16 => Ok(Self::Aliens),
             17 => Ok(Self::GiantAnts),
-            18 => Ok(Self::GiantAnts),
+            18 => Ok(Self::BigBadBoss),
             _ => Err(errors::Error::Format)
         }
     }
@@ -281,10 +284,12 @@ impl TryFrom<&[u8; 4]> for object::common::map::Destination {
     type Error = errors::Error;
 
     fn try_from(value: &[u8; 4]) -> Result<Self, Self::Error> {
+        const SCALE: Range<u8> = u8::MIN..3;
+
         let floor: Elevation = match value[0] & 0xFF {
-            0x00 => Elevation { level: Scaled { value: 0, scale: u8::MIN..3 } },
-            0x02 => Elevation { level: Scaled { value: 1, scale: u8::MIN..3 } },
-            0x04 => Elevation { level: Scaled { value: 2, scale: u8::MIN..3 } },
+            0x00 => Elevation { level: Scaled { value: 0, scale: SCALE } },
+            0x02 => Elevation { level: Scaled { value: 1, scale: SCALE } },
+            0x04 => Elevation { level: Scaled { value: 2, scale: SCALE } },
             _ => return Err(errors::Error::Format),
         };
 
@@ -300,12 +305,10 @@ impl TryFrom<i32> for object::common::map::Map {
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
+            -2 => Ok(Self::Current),
             -1 => Ok(Self::World),
             value => Ok(
-                Self::Local(match u32::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) => return Err(errors::Error::Format)
-                })
+                Self::Local(u32::try_from(value).map_err(|_| errors::Error::Format)?)
             )
         }
     }
