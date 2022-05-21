@@ -4,12 +4,12 @@ use crate::common::types::geometry::Scaled;
 impl AnimatedPixel {
     #[inline]
     pub fn alarm() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let mut values = Vec::new();
         let duration = std::time::Duration::from_millis(33);
 
-        let mapper = |index: usize| Pixel {
+        let mapper = |index: u8| Pixel {
             red: Scaled {
                 value: index * 4,
                 scale: scale.clone(),
@@ -37,7 +37,7 @@ impl AnimatedPixel {
 
     #[inline]
     pub fn slime() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let values = vec![
             Pixel {
@@ -106,7 +106,7 @@ impl AnimatedPixel {
 
     #[inline]
     pub fn shore() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let values = vec![
             Pixel {
@@ -203,7 +203,7 @@ impl AnimatedPixel {
 
     #[inline]
     pub fn screen() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let values = vec![
             Pixel {
@@ -286,7 +286,7 @@ impl AnimatedPixel {
 
     #[inline]
     pub fn fire_slow() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let values = vec![
             Pixel {
@@ -369,7 +369,7 @@ impl AnimatedPixel {
 
     #[inline]
     pub fn fire_fast() -> Self {
-        let scale = 0..256;
+        let scale = u8::MIN..=u8::MAX;
 
         let values = vec![
             Pixel {
