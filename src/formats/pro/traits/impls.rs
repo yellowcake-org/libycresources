@@ -305,12 +305,10 @@ impl TryFrom<i32> for object::common::map::Map {
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
+            -2 => Ok(Self::Current),
             -1 => Ok(Self::World),
             value => Ok(
-                Self::Local(match u32::try_from(value) {
-                    Ok(value) => value,
-                    Err(_) => return Err(errors::Error::Format)
-                })
+                Self::Local(u32::try_from(value).map_err(|_|errors::Error::Format)?)
             )
         }
     }

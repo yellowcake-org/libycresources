@@ -129,6 +129,7 @@ pub mod object {
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub enum Map {
                 Local(u32),
+                Current,
                 World,
             }
 

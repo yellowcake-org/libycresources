@@ -7,7 +7,6 @@ use crate::common::types::errors;
 use crate::formats::pro::object::common::critter::Statistic;
 use crate::formats::pro::object::critter::{Connections, Patch, Statistics};
 
-// TODO: Use combat data: flags, stats, etc...
 pub(crate) fn patch<S: Read>(source: &mut S) -> Result<Patch, errors::Error> {
     let _damage_last_turn = source.read_u32::<BigEndian>()?;
     let _combat_state = source.read_u32::<BigEndian>()?;
