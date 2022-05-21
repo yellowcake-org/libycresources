@@ -27,7 +27,7 @@ pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) 
         }
     }
 
-    println!("Sound IDs: 0x{:x}", item.connections._sounds_ids);
+    println!("Sound IDs: {:#x}", item.connections._sounds_ids);
     println!();
 
     match &item.r#type {

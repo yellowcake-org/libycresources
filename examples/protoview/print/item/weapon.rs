@@ -17,5 +17,5 @@ pub(crate) fn weapon(weapon: &libycresources::formats::pro::object::item::weapon
     println!("Ammo ID: {:?}", weapon.connections.ammo_item_id);
     println!("Failure ID: {:?}", weapon.connections.failure_list_id);
     println!("Projectile ID: {:?}", weapon.connections.projectile_misc_id);
-    println!("Sound IDs: 0x{:x}", weapon.connections._sounds_ids);
+    println!("Sound IDs: {:#x}", weapon.connections._sounds_ids);
 }
