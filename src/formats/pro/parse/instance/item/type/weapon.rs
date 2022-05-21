@@ -26,7 +26,6 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let dmg_range_max1 = source.read_u32::<BigEndian>()?;
     let dmg_range_max2 = source.read_u32::<BigEndian>()?;
 
-
     let projectile_header = source.read_u16::<BigEndian>()?;
     let projectile_idx = source.read_u16::<BigEndian>()?;
 
@@ -37,25 +36,20 @@ pub(crate) fn instance<S: Read>(source: &mut S,
     let cost1 = source.read_u32::<BigEndian>()?;
     let cost2 = source.read_u32::<BigEndian>()?;
 
-    let attack1 = attack::Mode::try_from_optional(attack1_mode_raw, 0)
-        .map_err(|_| errors::Error::Format)?
-        .map_or(None, |mode| {
-            Some(attack::Instance {
-                cost: cost1,
-                mode,
-                range: 0..=dmg_range_max1,
-            })
-        });
+    fn attack(cost: u32, rng: u32, mode: u8) -> Result<Option<attack::Instance>, errors::Error> {
+        Ok(attack::Mode::try_from_optional(mode, 0)
+            .map_err(|_| errors::Error::Format)?
+            .map_or(None, |mode| {
+                Some(attack::Instance {
+                    cost,
+                    mode,
+                    range: 0..=rng,
+                })
+            }))
+    }
 
-    let attack2 = attack::Mode::try_from_optional(attack2_mode_raw, 0)
-        .map_err(|_| errors::Error::Format)?
-        .map_or(None, |mode| {
-            Some(attack::Instance {
-                cost: cost2,
-                mode,
-                range: 0..=dmg_range_max2,
-            })
-        });
+    let attack1 = attack(cost1, dmg_range_max1, attack1_mode_raw)?;
+    let attack2 = attack(cost2, dmg_range_max2, attack2_mode_raw)?;
 
     let crit_list_idx = u16::try_from_optional(source.read_i32::<BigEndian>()?, -1)
         .map_err(|_| errors::Error::Format)?;
