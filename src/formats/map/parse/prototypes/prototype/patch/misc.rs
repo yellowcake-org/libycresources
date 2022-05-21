@@ -4,7 +4,8 @@ use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::traits::TryFromOptional;
 use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
+use crate::common::types::geometry::{Coordinate, Orientation};
+use crate::common::types::space::Elevation;
 use crate::formats::pro::object::common::map::{Destination, Map};
 use crate::formats::pro::object::misc::exit::Instance;
 use crate::formats::pro::object::misc::Patch;

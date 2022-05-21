@@ -1,6 +1,7 @@
-use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
+use crate::common::types::geometry::{Coordinate, Scaled};
 use crate::common::types::models;
 use crate::common::types::models::script::Kind::{Critter, Item, Spatial, System, Timed};
+use crate::common::types::space::Elevation;
 
 use super::super::*;
 

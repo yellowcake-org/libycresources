@@ -37,7 +37,8 @@ pub mod common {
 pub mod location {
     use std::ops::{Range, RangeInclusive};
 
-    use crate::common::types::geometry::{Coordinate, Elevation, Orientation};
+    use crate::common::types::geometry::{Coordinate, Orientation};
+    use crate::common::types::space::Elevation;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Grid {
@@ -56,7 +57,8 @@ pub mod location {
 pub mod tiles {
     use std::ops::Range;
 
-    use crate::common::types::geometry::{Coordinate, Elevation};
+    use crate::common::types::geometry::Coordinate;
+    use crate::common::types::space::Elevation;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Instance {
@@ -106,7 +108,8 @@ pub mod blueprint {
         }
 
         pub mod spatial {
-            use crate::common::types::geometry::{Coordinate, Elevation};
+            use crate::common::types::geometry::Coordinate;
+            use crate::common::types::space::Elevation;
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub struct Instance {

@@ -123,7 +123,8 @@ pub mod object {
         }
 
         pub mod map {
-            use crate::common::types::geometry::{Coordinate, Elevation};
+            use crate::common::types::geometry::Coordinate;
+            use crate::common::types::space::Elevation;
 
             #[derive(Debug, Hash, Eq, PartialEq)]
             pub enum Map {

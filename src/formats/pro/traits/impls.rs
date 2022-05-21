@@ -1,5 +1,6 @@
 use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
+use crate::common::types::geometry::{Coordinate, Scaled};
+use crate::common::types::space::Elevation;
 use crate::formats::pro::meta::info::Light;
 
 use super::super::object;

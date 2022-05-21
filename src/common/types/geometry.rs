@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Scaled<V, S> {
     pub value: V,
@@ -12,11 +14,5 @@ pub struct Coordinate<V, S> {
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Orientation {
-    pub value: Scaled<u8, std::ops::Range<u8>>,
-}
-
-// TODO: Consider moving it somewhere?
-#[derive(Debug, Hash, Eq, PartialEq)]
-pub struct Elevation {
-    pub level: Scaled<u8, std::ops::Range<u8>>,
+    pub value: Scaled<u8, Range<u8>>,
 }

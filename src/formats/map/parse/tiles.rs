@@ -3,7 +3,8 @@ use std::io::Read;
 use byteorder::{BigEndian, ReadBytesExt};
 
 use crate::common::types::errors;
-use crate::common::types::geometry::{Coordinate, Elevation, Scaled};
+use crate::common::types::geometry::{Coordinate, Scaled};
+use crate::common::types::space::Elevation;
 use crate::formats::map::tiles;
 
 pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec<tiles::Group>, errors::Error> {
