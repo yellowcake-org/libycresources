@@ -387,7 +387,7 @@ pub mod object {
         }
 
         pub struct Connections {
-            pub _sounds_ids: u8, // TODO: It represents multiple sounds, no info
+            pub _sounds_ids: u8,
         }
 
         pub struct Instance {
