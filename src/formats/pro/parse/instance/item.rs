@@ -1,9 +1,10 @@
 use std::collections::HashSet;
+
 use object::item::Instance;
 
 use crate::common::traits::TryFromOptional;
-use super::common::actions;
 
+use super::common::actions;
 use super::super::*;
 
 mod r#type;

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::time::Duration;
+
 use object::common::critter::{Perk, Statistic};
 use object::item::drug::Instance;
 

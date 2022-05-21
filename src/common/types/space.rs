@@ -1,4 +1,5 @@
 use std::ops::Range;
+
 use crate::common::types::geometry::Scaled;
 
 #[derive(Debug, Hash, Eq, PartialEq)]

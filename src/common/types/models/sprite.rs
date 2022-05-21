@@ -10,7 +10,7 @@ pub enum Kind {
     Interface,
     Inventory,
     Head,
-    Skilldex
+    Skilldex,
 }
 
 impl TryFrom<u8> for Kind {

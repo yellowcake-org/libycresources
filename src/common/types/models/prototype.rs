@@ -1,4 +1,5 @@
 use crate::formats::pro;
+
 use super::super::errors::Error;
 
 impl TryFrom<u8> for pro::ObjectType {
