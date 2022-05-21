@@ -698,7 +698,7 @@ pub mod object {
             pub team: u32,
 
             pub murder: murder::Result,
-            pub damage: Option<super::common::combat::damage::Type>, // Fallout 2 only
+            pub damage: Option<super::common::combat::damage::Type>, // Fallout™ 2 only
 
             pub body: super::common::critter::body::Type,
             pub head: Option<Identifier<models::sprite::Kind>>,
@@ -825,7 +825,7 @@ pub mod object {
             #[derive(Debug, Eq, PartialEq)]
             pub struct Patch {
                 pub map: Option<super::super::common::map::Map>,
-                pub destination: Option<super::super::common::map::Destination>, // Fallout 2 only
+                pub destination: Option<super::super::common::map::Destination>, // Fallout™ 2 only
             }
         }
 

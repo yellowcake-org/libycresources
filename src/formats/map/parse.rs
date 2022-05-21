@@ -23,7 +23,7 @@ pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -
     source.seek(SeekFrom::Start(0))?;
 
     let version = source.read_u32::<BigEndian>()?;
-    let read_ladders_map = version == 20; // Fallout 2 maps
+    let read_ladders_map = version == 20; // Fallout™ 2 maps
 
     let mut filename_bytes = [0u8; 16];
     source.read_exact(&mut filename_bytes)?;
