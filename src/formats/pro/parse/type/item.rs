@@ -9,7 +9,7 @@ mod r#type;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance, errors::Error> {
     let mut flags_bytes = [0u8; 3];
     match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -42,7 +42,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut attack_modes_bytes = [0u8; 1];
     match source.read_exact(&mut attack_modes_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -53,7 +53,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut type_bytes = [0u8; 4];
     match source.read_exact(&mut type_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -61,7 +61,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut material_id_bytes = [0u8; 4];
     match source.read_exact(&mut material_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -69,7 +69,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut size_bytes = [0u8; 4];
     match source.read_exact(&mut size_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -77,7 +77,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut weight_bytes = [0u8; 4];
     match source.read_exact(&mut weight_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -85,7 +85,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut cost_bytes = [0u8; 4];
     match source.read_exact(&mut cost_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -96,7 +96,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::Instance
 
     let mut sound_ids_bytes = [0u8; 1];
     match source.read_exact(&mut sound_ids_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

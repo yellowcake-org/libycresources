@@ -31,7 +31,7 @@ impl PrototypeProvider for Provider<'_> {
                 .lines()
                 .nth(identifier.value as usize - 1)
                 .ok_or(Error::Format)?
-                .map_err(|e| Error::Read(e));
+                .map_err(|e| Error::IO(e));
         })()?);
 
         let file = File::open(&path)?;

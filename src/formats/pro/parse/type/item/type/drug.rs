@@ -8,7 +8,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::Instance, errors::Error> {
     let mut stat0_bytes = [0u8; 4];
     match source.read_exact(&mut stat0_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -16,7 +16,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut stat1_bytes = [0u8; 4];
     match source.read_exact(&mut stat1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -24,7 +24,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut stat2_bytes = [0u8; 4];
     match source.read_exact(&mut stat2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -32,7 +32,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect0_amount0_bytes = [0u8; 4];
     match source.read_exact(&mut effect0_amount0_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -40,7 +40,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect0_amount1_bytes = [0u8; 4];
     match source.read_exact(&mut effect0_amount1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -48,7 +48,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect0_amount2_bytes = [0u8; 4];
     match source.read_exact(&mut effect0_amount2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -56,7 +56,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect1_duration_bytes = [0u8; 4];
     match source.read_exact(&mut effect1_duration_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -64,7 +64,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect1_amount0_bytes = [0u8; 4];
     match source.read_exact(&mut effect1_amount0_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -72,7 +72,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect1_amount1_bytes = [0u8; 4];
     match source.read_exact(&mut effect1_amount1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -80,7 +80,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect1_amount2_bytes = [0u8; 4];
     match source.read_exact(&mut effect1_amount2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -88,7 +88,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect2_duration_bytes = [0u8; 4];
     match source.read_exact(&mut effect2_duration_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -96,7 +96,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect2_amount0_bytes = [0u8; 4];
     match source.read_exact(&mut effect2_amount0_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -104,7 +104,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect2_amount1_bytes = [0u8; 4];
     match source.read_exact(&mut effect2_amount1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -112,7 +112,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut effect2_amount2_bytes = [0u8; 4];
     match source.read_exact(&mut effect2_amount2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -253,7 +253,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut addiction_rate_bytes = [0u8; 4];
     match source.read_exact(&mut addiction_rate_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -261,7 +261,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut addiction_perk_bytes = [0u8; 4];
     match source.read_exact(&mut addiction_perk_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -274,7 +274,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::drug::In
 
     let mut addiction_delay_bytes = [0u8; 4];
     match source.read_exact(&mut addiction_delay_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

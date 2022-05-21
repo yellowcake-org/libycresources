@@ -5,13 +5,13 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::stairs::Instance, errors::Error> {
     let mut destination_bytes = [0u8; 4];
     match source.read_exact(&mut destination_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
     let mut map_bytes = [0u8; 4];
     match source.read_exact(&mut map_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

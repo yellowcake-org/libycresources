@@ -7,7 +7,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::Instance, errors::Error> {
     let mut ac_bytes = [0u8; 4];
     match source.read_exact(&mut ac_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -15,7 +15,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_normal_bytes = [0u8; 4];
     match source.read_exact(&mut dr_normal_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -23,7 +23,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_laser_bytes = [0u8; 4];
     match source.read_exact(&mut dr_laser_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -31,7 +31,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_fire_bytes = [0u8; 4];
     match source.read_exact(&mut dr_fire_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -39,7 +39,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_plasma_bytes = [0u8; 4];
     match source.read_exact(&mut dr_plasma_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -47,7 +47,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_electrical_bytes = [0u8; 4];
     match source.read_exact(&mut dr_electrical_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -55,7 +55,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_emp_bytes = [0u8; 4];
     match source.read_exact(&mut dr_emp_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -63,7 +63,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dr_explosive_bytes = [0u8; 4];
     match source.read_exact(&mut dr_explosive_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -71,7 +71,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_normal_bytes = [0u8; 4];
     match source.read_exact(&mut dt_normal_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -79,7 +79,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_laser_bytes = [0u8; 4];
     match source.read_exact(&mut dt_laser_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -87,7 +87,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_fire_bytes = [0u8; 4];
     match source.read_exact(&mut dt_fire_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -95,7 +95,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_plasma_bytes = [0u8; 4];
     match source.read_exact(&mut dt_plasma_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -103,7 +103,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_electrical_bytes = [0u8; 4];
     match source.read_exact(&mut dt_electrical_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -111,7 +111,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_emp_bytes = [0u8; 4];
     match source.read_exact(&mut dt_emp_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -119,7 +119,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut dt_explosive_bytes = [0u8; 4];
     match source.read_exact(&mut dt_explosive_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -127,7 +127,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::armor::I
 
     let mut perk_bytes = [0u8; 4];
     match source.read_exact(&mut perk_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

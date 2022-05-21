@@ -5,7 +5,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<HashSet<object::critter::Flag>, errors::Error> {
     let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

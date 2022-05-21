@@ -12,7 +12,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut animation_bytes = [0u8; 4];
     match source.read_exact(&mut animation_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -28,7 +28,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut min_dmg_bytes = [0u8; 4];
     match source.read_exact(&mut min_dmg_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -36,7 +36,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut max_dmg_bytes = [0u8; 4];
     match source.read_exact(&mut max_dmg_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -44,7 +44,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut dmg_type_bytes = [0u8; 4];
     match source.read_exact(&mut dmg_type_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -63,7 +63,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut dmg_range_max1_bytes = [0u8; 4];
     match source.read_exact(&mut dmg_range_max1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -71,7 +71,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut dmg_range_max2_bytes = [0u8; 4];
     match source.read_exact(&mut dmg_range_max2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -79,7 +79,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut projectile_header_bytes = [0u8; 2];
     match source.read_exact(&mut projectile_header_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -87,7 +87,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut projectile_idx_bytes = [0u8; 2];
     match source.read_exact(&mut projectile_idx_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -99,7 +99,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut min_strength_bytes = [0u8; 4];
     match source.read_exact(&mut min_strength_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -107,7 +107,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut cost1_bytes = [0u8; 4];
     match source.read_exact(&mut cost1_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -115,7 +115,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut cost2_bytes = [0u8; 4];
     match source.read_exact(&mut cost2_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -147,7 +147,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut crit_list_idx_bytes = [0u8; 4];
     match source.read_exact(&mut crit_list_idx_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -159,7 +159,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut perk_bytes = [0u8; 4];
     match source.read_exact(&mut perk_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -172,7 +172,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut burst_bytes = [0u8; 4];
     match source.read_exact(&mut burst_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -180,7 +180,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut caliber_bytes = [0u8; 4];
     match source.read_exact(&mut caliber_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -192,7 +192,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut ammo_pid_bytes = [0u8; 4];
     match source.read_exact(&mut ammo_pid_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -204,7 +204,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut capacity_bytes = [0u8; 4];
     match source.read_exact(&mut capacity_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -212,7 +212,7 @@ pub(crate) fn instance<S: Read>(source: &mut S,
 
     let mut sound_ids_bytes = [0u8; 1];
     match source.read_exact(&mut sound_ids_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

@@ -13,7 +13,7 @@ pub(crate) fn map<S: Read>(source: &mut S) -> Result<HashMap<Skill, u32>, errors
                         Result<(), errors::Error> {
         let mut value_bytes = [0u8; 4];
         match source.read_exact(&mut value_bytes) {
-            Err(error) => return Err(errors::Error::Read(error)),
+            Err(error) => return Err(errors::Error::IO(error)),
             Ok(value) => value,
         };
 

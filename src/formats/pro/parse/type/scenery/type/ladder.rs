@@ -6,7 +6,7 @@ pub(crate) fn instance<S: Read>(source: &mut S, direction: object::scenery::ladd
                                 -> Result<object::scenery::ladder::Instance, errors::Error> {
     let mut destination_bytes = [0u8; 4];
     match source.read_exact(&mut destination_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

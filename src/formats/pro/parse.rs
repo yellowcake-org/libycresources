@@ -21,7 +21,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     let mut light_radius_bytes = [0u8; 4];
     match source.read_exact(&mut light_radius_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -29,7 +29,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
 
     let mut light_intensity_bytes = [0u8; 4];
     match source.read_exact(&mut light_intensity_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

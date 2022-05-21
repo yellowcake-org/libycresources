@@ -9,7 +9,7 @@ mod r#type;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Instance, errors::Error> {
     let mut light_bytes = [0u8; 2];
     match source.read_exact(&mut light_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -20,7 +20,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
 
     let mut actions_bytes = [0u8; 2];
     match source.read_exact(&mut actions_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -35,7 +35,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
 
     let mut type_id_bytes = [0u8; 4];
     match source.read_exact(&mut type_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -43,7 +43,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
 
     let mut material_id_bytes = [0u8; 4];
     match source.read_exact(&mut material_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -55,7 +55,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::scenery::Insta
 
     let mut sound_ids_bytes = [0u8; 1];
     match source.read_exact(&mut sound_ids_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

@@ -5,7 +5,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::Instance, errors::Error> {
     let mut caliber_bytes = [0u8; 4];
     match source.read_exact(&mut caliber_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -13,7 +13,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     let mut count_bytes = [0u8; 4];
     match source.read_exact(&mut count_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -21,7 +21,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     let mut ac_modifier_bytes = [0u8; 4];
     match source.read_exact(&mut ac_modifier_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -29,7 +29,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     let mut dr_modifier_bytes = [0u8; 4];
     match source.read_exact(&mut dr_modifier_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -37,7 +37,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     let mut dmg_multiplier_bytes = [0u8; 4];
     match source.read_exact(&mut dmg_multiplier_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -45,7 +45,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::ammo::In
 
     let mut dmg_divider_bytes = [0u8; 4];
     match source.read_exact(&mut dmg_divider_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

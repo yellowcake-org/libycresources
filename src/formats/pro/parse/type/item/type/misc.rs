@@ -5,7 +5,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::misc::Instance, errors::Error> {
     let mut item_pid_bytes = [0u8; 4];
     match source.read_exact(&mut item_pid_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -20,7 +20,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::misc::In
 
     let mut caliber_bytes = [0u8; 4];
     match source.read_exact(&mut caliber_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -33,7 +33,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::misc::In
 
     let mut count_bytes = [0u8; 4];
     match source.read_exact(&mut count_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 

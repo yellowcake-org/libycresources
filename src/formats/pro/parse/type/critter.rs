@@ -11,7 +11,7 @@ mod statistics;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Instance, errors::Error> {
     let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -23,7 +23,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let mut ai_packet_id_bytes = [0u8; 4];
     match source.read_exact(&mut ai_packet_id_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -31,7 +31,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let mut team_bytes = [0u8; 4];
     match source.read_exact(&mut team_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -59,7 +59,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let mut body_bytes = [0u8; 4];
     match source.read_exact(&mut body_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -71,7 +71,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let mut kill_reward_bytes = [0u8; 4];
     match source.read_exact(&mut kill_reward_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -79,7 +79,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
 
     let mut kill_type_bytes = [0u8; 4];
     match source.read_exact(&mut kill_type_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -96,7 +96,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::critter::Insta
         Err(error) => {
             match error.kind() {
                 ErrorKind::UnexpectedEof => {}
-                _ => return Err(errors::Error::Read(error))
+                _ => return Err(errors::Error::IO(error))
             }
         }
         Ok(_) => {

@@ -5,7 +5,7 @@ use super::super::super::*;
 pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::container::Instance, errors::Error> {
     let mut size_bytes = [0u8; 4];
     match source.read_exact(&mut size_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
@@ -13,7 +13,7 @@ pub(crate) fn instance<S: Read>(source: &mut S) -> Result<object::item::containe
 
     let mut flags_bytes = [0u8; 4];
     match source.read_exact(&mut flags_bytes) {
-        Err(error) => return Err(errors::Error::Read(error)),
+        Err(error) => return Err(errors::Error::IO(error)),
         Ok(value) => value,
     };
 
