@@ -8,6 +8,7 @@ use libycresources::formats::map;
 use crate::provider::Provider;
 
 mod print;
+mod export;
 mod provider;
 
 #[derive(Parser)]
@@ -16,9 +17,10 @@ struct Options {
     /// Path to the input map file (.map)
     #[clap(short, long)]
     input: String,
-    /// Path to the 'PROTO' directory
+    /// Path to the root resources directory
     #[clap(short, long)]
-    protos: String,
+    resources: String,
+    /// Action to perform on provided map file
     #[clap(subcommand)]
     action: Action,
 }
@@ -27,31 +29,39 @@ struct Options {
 enum Action {
     /// Prints out all available info about map
     Dump,
+    /// Renders the map into .bmp file
+    Export,
 }
 
 fn main() {
     let options = Options::parse();
 
+    let resources = Path::new(&options.resources);
+    let protos = resources.join("PROTO");
+    let arts = resources.join("ART");
+
+    let protos = Provider { directory: protos.as_path() };
+    let arts = Provider { directory: arts.as_path() };
+
     let file = match File::open(&options.input) {
+        Ok(value) => value,
         Err(error) => {
             eprintln!("Couldn't open input file: {:?}", error);
             return;
         }
-        Ok(value) => value,
     };
 
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
-    let provider = Provider { directory: Path::new(&options.protos) };
-
-    let map = match map::parse::map(&mut reader, &provider) {
+    let map = match map::parse::map(&mut reader, &protos) {
         Ok(value) => value,
         Err(error) => {
-            eprintln!("Error occurred: {:?}", error);
+            eprintln!("Couldn't parse map file: {:?}", error);
             return;
         }
     };
 
     match options.action {
         Action::Dump => { print::map(&map) }
+        Action::Export => { export::export(&map) }
     }
 }
