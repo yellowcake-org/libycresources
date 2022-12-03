@@ -20,7 +20,6 @@ struct Options {
     /// Path to the root resources directory
     #[clap(short, long)]
     resources: PathBuf,
-    /// Action to perform on provided map file
     #[clap(subcommand)]
     action: Action,
 }
@@ -30,7 +29,22 @@ enum Action {
     /// Prints out all available info about map
     Dump,
     /// Renders the map into .bmp file
-    Export(Layers),
+    Export(Export),
+}
+
+#[derive(Parser)]
+struct Export {
+    /// Path to the output image file (.bmp)
+    #[clap(short, long)]
+    output: PathBuf,
+    #[clap(subcommand)]
+    filter: Option<Filter>,
+}
+
+#[derive(Parser)]
+enum Filter {
+    /// Optional filter for which layers to render
+    Include(Layers)
 }
 
 #[derive(Parser)]
@@ -67,6 +81,14 @@ fn main() {
 
     match options.action {
         Action::Dump => { print::map(&map) }
-        Action::Export(layers) => { export::export(&map, &layers) }
+        Action::Export(export) => {
+            let filter = export.filter
+                .map_or(
+                    Layers { background: false, tiles: false, walls: false, scenery: false },
+                    |f| { match f { Filter::Include(layers) => layers } },
+                );
+
+            export::export(&map, &filter)
+        }
     }
 }
