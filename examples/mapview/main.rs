@@ -8,7 +8,7 @@ use libycresources::formats::map;
 use crate::provider::Provider;
 
 mod print;
-mod export;
+mod render;
 mod provider;
 
 #[derive(Parser)]
@@ -88,7 +88,31 @@ fn main() {
                     |f| { match f { Filter::Include(layers) => layers } },
                 );
 
-            export::export(&map, &filter)
+            if !export.output.exists() {
+                eprintln!("Output path does not exist. Aborting.");
+                return;
+            }
+
+            if !export.output.is_dir() {
+                eprintln!("Output path is not a directory. Aborting.");
+                return;
+            }
+
+            let stem = match options.input.file_stem() {
+                Some(value) => value,
+                None => {
+                    eprintln!("Couldn't determine frame output filename.");
+                    return;
+                }
+            };
+
+            let path = export.output.join(stem);
+            let file = path.with_extension("bmp");
+
+            if let Err(error) = render::map(&map, &filter).save(file) {
+                eprintln!("Couldn't write output file: {:}", error);
+                return;
+            }
         }
     }
 }
