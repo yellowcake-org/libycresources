@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::Path;
+use std::path::{PathBuf};
 
 use clap::Parser;
 
@@ -16,10 +16,10 @@ mod provider;
 struct Options {
     /// Path to the input map file (.map)
     #[clap(short, long)]
-    input: String,
+    input: PathBuf,
     /// Path to the root resources directory
     #[clap(short, long)]
-    resources: String,
+    resources: PathBuf,
     /// Action to perform on provided map file
     #[clap(subcommand)]
     action: Action,
@@ -30,15 +30,26 @@ enum Action {
     /// Prints out all available info about map
     Dump,
     /// Renders the map into .bmp file
-    Export,
+    Export(Layers),
+}
+
+#[derive(Parser)]
+pub(crate) struct Layers {
+    #[clap(short, long)]
+    background: bool,
+    #[clap(short,long)]
+    tiles: bool,
+    #[clap(short, long)]
+    walls: bool,
+    #[clap(short, long)]
+    scenery: bool,
 }
 
 fn main() {
     let options = Options::parse();
 
-    let resources = Path::new(&options.resources);
-    let protos = resources.join("PROTO");
-    let arts = resources.join("ART");
+    let protos = &options.resources.join("PROTO");
+    let arts = &options.resources.join("ART");
 
     let protos = Provider { directory: protos.as_path() };
     let arts = Provider { directory: arts.as_path() };
@@ -62,6 +73,6 @@ fn main() {
 
     match options.action {
         Action::Dump => { print::map(&map) }
-        Action::Export => { export::export(&map) }
+        Action::Export(layers) => { export::export(&map, &layers) }
     }
 }
