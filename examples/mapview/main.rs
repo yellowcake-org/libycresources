@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 use clap::Parser;
 
@@ -37,7 +37,7 @@ enum Action {
 pub(crate) struct Layers {
     #[clap(short, long)]
     background: bool,
-    #[clap(short,long)]
+    #[clap(short, long)]
     tiles: bool,
     #[clap(short, long)]
     walls: bool,
@@ -56,19 +56,13 @@ fn main() {
 
     let file = match File::open(&options.input) {
         Ok(value) => value,
-        Err(error) => {
-            eprintln!("Couldn't open input file: {:?}", error);
-            return;
-        }
+        Err(error) => { return eprintln!("Couldn't open input file: {:?}", error); }
     };
 
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
     let map = match map::parse::map(&mut reader, &protos) {
         Ok(value) => value,
-        Err(error) => {
-            eprintln!("Couldn't parse map file: {:?}", error);
-            return;
-        }
+        Err(error) => { return eprintln!("Couldn't parse map file: {:?}", error); }
     };
 
     match options.action {
