@@ -59,15 +59,15 @@ pub mod tiles {
     use crate::common::types::space::Elevation;
 
     #[derive(Debug, Eq, PartialEq)]
-    pub struct Instance {
+    pub struct Instance<V, S> {
         pub id: u16,
-        pub position: Coordinate<u8, Range<u8>>,
+        pub position: Coordinate<V, Range<S>>,
     }
 
     #[derive(Debug)]
     pub struct Group {
-        pub floor: Vec<Instance>,
-        pub ceiling: Vec<Instance>,
+        pub floor: Vec<Instance<u8, u8>>,
+        pub ceiling: Vec<Instance<u8, u8>>,
         pub elevation: Elevation,
     }
 }

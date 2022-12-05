@@ -26,27 +26,27 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec
                     }
                 };
 
-                for horizontal in 0..SIDE_LEN {
-                    for vertical in 0..SIDE_LEN {
-                        fn consume<S: Read>(source: &mut S, into: &mut Vec<tiles::Instance>, x: u8, y: u8) ->
-                        Result<(), errors::Error> {
-                            let id = source.read_u16::<BigEndian>()?;
+                fn consume<S: Read>(source: &mut S, into: &mut Vec<tiles::Instance<u8, u8>>, x: u8, y: u8) ->
+                Result<(), errors::Error> {
+                    let id = source.read_u16::<BigEndian>()?;
 
-                            if id > 1 {
-                                into.push(tiles::Instance {
-                                    id,
-                                    position: Coordinate {
-                                        x: Scaled { value: x, scale: u8::MIN..SIDE_LEN },
-                                        y: Scaled { value: y, scale: u8::MIN..SIDE_LEN },
-                                    },
-                                })
-                            }
+                    if id > 1 {
+                        into.push(tiles::Instance {
+                            id,
+                            position: Coordinate {
+                                x: Scaled { value: x, scale: u8::MIN..SIDE_LEN },
+                                y: Scaled { value: y, scale: u8::MIN..SIDE_LEN },
+                            },
+                        })
+                    }
 
-                            Ok(())
-                        }
+                    Ok(())
+                }
 
-                        consume(source, &mut ceiling, horizontal, vertical)?;
-                        consume(source, &mut floor, horizontal, vertical)?;
+                for vertical in 0..SIDE_LEN {
+                    for horizontal in 0..SIDE_LEN {
+                        consume(source, &mut ceiling, SIDE_LEN - horizontal - 1, vertical)?;
+                        consume(source, &mut floor, SIDE_LEN - horizontal - 1, vertical)?;
                     }
                 }
 

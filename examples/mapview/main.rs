@@ -96,7 +96,7 @@ fn main() {
 
             let directory = &options.resources.join("ART");
             let provider = Provider { directory: directory.as_path() };
-            
+
             let image = match render::map(&map, &filter, &provider, &options.resources) {
                 Err(error) => { return eprintln!("Couldn't render map file: {:}", error); }
                 Ok(value) => value,

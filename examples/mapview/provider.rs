@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use libycresources::common::types::errors::Error;
 use libycresources::common::types::models::Identifier;
@@ -69,20 +69,29 @@ impl RenderProvider for Provider<'_> {
             // TODO: Investigate how to read proper .FRM for critters and some other sprites.
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
-                .nth(identifier.value as usize - 1)
+                .nth(identifier.value as usize)
                 .ok_or(Error::Format)?
                 .map_err(|e| Error::IO(e));
         })()?);
+
+        path = path.to_str()
+            .map(|s| s.trim())
+            .map(|s| { PathBuf::from(s) })
+            .map_or(Err(Error::Format), |p| { Ok(p) })?;
 
         let file = File::open(&path)?;
         let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
         let sprite = frm::parse::sprite(&mut reader)?;
 
         path.set_extension("pal");
-        let file = File::open(&path)?;
-        let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
-        let palette = pal::parse::palette(&mut reader)?;
+        let file = File::open(&path).ok();
+        let palette = file
+            .map(|f| {
+                let mut reader = BufReader::with_capacity(1 * 1024 * 1024, f);
+                pal::parse::palette(&mut reader)
+            })
+            .map_or(Ok(None), |r| { r.map(|p| { Some(p) }) })?;
 
-        Ok((sprite, Some(palette)))
+        Ok((sprite, palette))
     }
 }

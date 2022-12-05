@@ -4,7 +4,7 @@ pub fn frame(frame: &frm::Frame, palette: &pal::Palette) -> bmp::Image {
     let mut image = bmp::Image::new(frame.size.width as u32, frame.size.height as u32);
 
     for (x, y) in image.coordinates() {
-        let index = frame.pixels[(frame.size.width as u32 * y + x) as usize];
+        let index = frame.indexes[(frame.size.width as u32 * y + x) as usize];
         let pixel = &palette.colors[index as usize];
 
         image.set_pixel(
