@@ -1,15 +1,12 @@
 use std::ops::Range;
 use std::path::PathBuf;
 
-use libycresources::common;
-use libycresources::common::graphics;
 use libycresources::common::types::errors::Error;
 use libycresources::common::types::geometry::Coordinate;
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
-use libycresources::formats::{frm, map};
-use libycresources::formats::frm::parse::sprite;
 use libycresources::formats::frm::Sprite;
+use libycresources::formats::map;
 use libycresources::formats::map::tiles::Instance;
 use libycresources::formats::pal::Palette;
 
@@ -17,6 +14,7 @@ use crate::Layers;
 use crate::traits::RenderProvider;
 
 mod fetch;
+mod frame;
 
 pub(crate) fn map<P: RenderProvider>(
     map: &map::Map,
@@ -30,9 +28,7 @@ pub(crate) fn map<P: RenderProvider>(
     println!("Loading COLOR.PAL...");
     let palette = fetch::palette(&resources.join("COLOR.PAL"))?;
 
-    // TODO: Implement rendering all available elevations.
     let level = 0;
-
     let tiles = map.tiles
         .iter()
         .find(|e| { e.elevation.level.value == level })
@@ -60,15 +56,14 @@ pub(crate) fn map<P: RenderProvider>(
     let floors: Vec<Tile> = convert(&tiles.floor, provider)?;
     let ceilings: Vec<Tile> = convert(&tiles.ceiling, provider)?;
 
-    let (tw, th) = floors.first()
-        .map(|t| { t.sprite.animations.first() }).flatten()
-        .map(|a| { a.frames.first() }).flatten()
-        .map(|f| { (f.size.width + f.shift.x, f.size.height + f.shift.y) })
-        .map(|t| { (t.0 as u64, t.1 as u64) })
+    let (tw, th, scale) = floors.first()
+        .map(|t| { t.sprite.animations.first().map(|a| { (a, t.position) }) }).flatten()
+        .map(|a| { a.0.frames.first().map(|f| { (f, a.1) }) }).flatten()
+        .map(|f| { (f.0.size.width + f.0.shift.x, f.0.size.height + f.0.shift.y, f.1) })
+        .map(|t| { (t.0 as usize, t.1 as usize, t.2.x.scale.len() as usize) })
         .ok_or(Error::Format)?;
 
-    const ISOMETRIC_SIDE: u64 = 100;
-    let (w, h) = (tw as u64 * ISOMETRIC_SIDE, th as u64 * ISOMETRIC_SIDE);
+    let (w, h) = (tw * scale, th * scale);
     let mut image = bmp::Image::new(w as u32, h as u32);
 
     for tile in floors.iter() {
@@ -81,8 +76,8 @@ pub(crate) fn map<P: RenderProvider>(
             .frames.first().ok_or(Error::Format)?;
 
         let (tx, ty) = (
-            tile.position.x.value as u64 * (ISOMETRIC_SIDE / tile.position.x.scale.len() as u64),
-            tile.position.y.value as u64 * (ISOMETRIC_SIDE / tile.position.y.scale.len() as u64)
+            tile.position.x.value as usize * (scale / tile.position.x.scale.len()),
+            tile.position.y.value as usize * (scale / tile.position.y.scale.len())
         );
 
         let (x, y) = (
@@ -92,7 +87,7 @@ pub(crate) fn map<P: RenderProvider>(
 
         let (x, y) = (
             x + (ty * (tw - 48)),
-            y + ((ISOMETRIC_SIDE - tx) * (th - 24))
+            y + ((scale - tx) * (th - 24))
         );
 
         let (x, y) = (
@@ -101,34 +96,11 @@ pub(crate) fn map<P: RenderProvider>(
         );
 
         let (x, y) = (
-            x + (tx * frame.shift.x as u64),
-            y + (ty * frame.shift.y as u64)
+            x + (tx * frame.shift.x as usize),
+            y + (ty * frame.shift.y as usize)
         );
 
-        for (number, &index) in frame.indexes.iter().enumerate() {
-            // TODO: Extract this to a method / trait / etc.
-            let color = &palette.colors[index as usize];
-            let pixel = match color {
-                None => None,
-                Some(c) => {
-                    let red = ((c.red.value as usize * (u8::MAX as usize + 1)) / c.red.scale.len()) as u8;
-                    let green = ((c.green.value as usize * (u8::MAX as usize + 1)) / c.green.scale.len()) as u8;
-                    let blue = ((c.blue.value as usize * (u8::MAX as usize + 1)) / c.blue.scale.len()) as u8;
-
-                    Some(bmp::Pixel::new(red, green, blue))
-                }
-            };
-
-            let (rx, ry) = (
-                number as u64 % frame.size.width as u64,
-                number as u64 / frame.size.width as u64
-            );
-
-            let (x, y) = (x + rx, y + ry);
-            if let Some(pixel) = pixel {
-                image.set_pixel(x as u32, y as u32, pixel);
-            }
-        }
+        frame::imprint(frame, palette, (x, y), &mut image);
     }
 
     Ok(image)
