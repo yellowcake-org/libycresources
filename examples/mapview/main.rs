@@ -51,9 +51,9 @@ enum Filter {
 #[derive(Parser)]
 pub(crate) struct Layers {
     #[clap(short, long)]
-    background: bool,
+    floor: bool,
     #[clap(short, long)]
-    tiles: bool,
+    roof: bool,
     #[clap(short, long)]
     walls: bool,
     #[clap(short, long)]
@@ -90,7 +90,7 @@ fn main() {
 
             let filter = export.filter
                 .map_or(
-                    Layers { background: false, tiles: false, walls: false, scenery: false },
+                    Layers { floor: false, roof: false, walls: false, scenery: false },
                     |f| { match f { Filter::Include(layers) => layers } },
                 );
 

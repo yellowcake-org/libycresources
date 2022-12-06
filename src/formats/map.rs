@@ -146,8 +146,8 @@ pub mod blueprint {
 
         #[derive(Debug, Eq, PartialEq)]
         pub struct Appearance {
-            pub frame: Option<FrameIndex>,
             pub sprite: Identifier<models::sprite::Kind>,
+            pub current: Option<FrameIndex>,
         }
 
         pub mod inventory {

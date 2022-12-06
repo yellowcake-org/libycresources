@@ -10,6 +10,7 @@ use crate::traits::RenderProvider;
 mod fetch;
 mod frame;
 mod tiles;
+mod hexes;
 
 pub(crate) fn map<P: RenderProvider>(
     map: &map::Map,
@@ -17,7 +18,7 @@ pub(crate) fn map<P: RenderProvider>(
     provider: &P,
     resources: &PathBuf,
 ) -> Result<bmp::Image, Error> {
-    let no_filter = !(filter.background ^ filter.tiles ^ filter.scenery ^ filter.walls);
+    let no_filter = !(filter.floor ^ filter.roof ^ filter.scenery ^ filter.walls);
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
     println!("Loading COLOR.PAL...");
@@ -43,6 +44,7 @@ pub(crate) fn map<P: RenderProvider>(
     let mut image = bmp::Image::new(w as u32, h as u32);
 
     tiles::imprint(&floors, &palette, scale, &mut image)?;
+    hexes::overlay(&mut image)?;
     tiles::imprint(&ceilings, &palette, scale, &mut image)?;
 
     Ok(image)

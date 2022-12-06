@@ -11,7 +11,7 @@ pub enum Type<I, C, S, W, T, M> {
     Misc(M),
 }
 
-pub type ObjectType = Type<(), (), (), (), (), (), >;
+pub type ObjectType = Type<(), (), (), (), (), ()>;
 pub type ObjectInstance = Type<
     object::item::Instance,
     object::critter::Instance,
