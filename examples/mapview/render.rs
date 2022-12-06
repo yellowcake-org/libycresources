@@ -18,7 +18,10 @@ pub(crate) fn map<P: RenderProvider>(
     provider: &P,
     resources: &PathBuf,
 ) -> Result<bmp::Image, Error> {
-    let no_filter = !(filter.floor ^ filter.roof ^ filter.scenery ^ filter.walls);
+    let no_filter = !(
+        filter.floor ^ filter.overlay ^ filter.roof ^ filter.scenery ^ filter.walls ^ filter.creatures
+    );
+
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
     println!("Loading COLOR.PAL...");
