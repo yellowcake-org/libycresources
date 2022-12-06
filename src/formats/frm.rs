@@ -16,7 +16,7 @@ pub type ColorIndex = u8;
 pub struct Frame {
     pub size: Size,
     pub shift: Shift,
-    pub pixels: Vec<ColorIndex>,
+    pub indexes: Vec<ColorIndex>,
 }
 
 pub struct Animation {

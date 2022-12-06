@@ -28,21 +28,21 @@ pub(crate) fn common<S: Read>(source: &mut S) -> Result<HashSet<Root>, Error> {
     }
 
     if let Some(transparency) =
-    if (flags_bytes[2] & 0x80) == 0x80 {
-        Some(None)
-    } else if (flags_bytes[2] & 0x40) == 0x40 {
-        Some(Some(meta::info::flags::Transparency::Red))
-    } else if (flags_bytes[1] & 0x01) == 0x01 {
-        Some(Some(meta::info::flags::Transparency::Wall))
-    } else if (flags_bytes[1] & 0x02) == 0x02 {
-        Some(Some(meta::info::flags::Transparency::Glass))
-    } else if (flags_bytes[1] & 0x04) == 0x04 {
-        Some(Some(meta::info::flags::Transparency::Steam))
-    } else if (flags_bytes[1] & 0x08) == 0x08 {
-        Some(Some(meta::info::flags::Transparency::Energy))
-    } else if (flags_bytes[0] & 0x10) == 0x10 {
-        Some(Some(meta::info::flags::Transparency::End))
-    } else { None } {
+        if (flags_bytes[2] & 0x80) == 0x80 {
+            Some(None)
+        } else if (flags_bytes[2] & 0x40) == 0x40 {
+            Some(Some(meta::info::flags::Transparency::Red))
+        } else if (flags_bytes[1] & 0x01) == 0x01 {
+            Some(Some(meta::info::flags::Transparency::Wall))
+        } else if (flags_bytes[1] & 0x02) == 0x02 {
+            Some(Some(meta::info::flags::Transparency::Glass))
+        } else if (flags_bytes[1] & 0x04) == 0x04 {
+            Some(Some(meta::info::flags::Transparency::Steam))
+        } else if (flags_bytes[1] & 0x08) == 0x08 {
+            Some(Some(meta::info::flags::Transparency::Energy))
+        } else if (flags_bytes[0] & 0x10) == 0x10 {
+            Some(Some(meta::info::flags::Transparency::End))
+        } else { None } {
         if !flags.insert(Root::Transparency(transparency)) { return Err(Error::Format); }
     }
 

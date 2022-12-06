@@ -4,7 +4,7 @@ mod tiles;
 mod scripts;
 mod prototypes;
 
-pub fn map(map: &map::Map) {
+pub(crate) fn map(map: &map::Map) {
     println!("Map ID: {:?}", map.id);
     println!("Version: {:?}", map.version);
     println!("Name: {:?}", map.filename);
