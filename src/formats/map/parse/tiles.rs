@@ -45,8 +45,8 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec
 
                 for vertical in 0..SIDE_LEN {
                     for horizontal in 0..SIDE_LEN {
-                        consume(source, &mut ceiling, SIDE_LEN - horizontal - 1, vertical)?;
-                        consume(source, &mut floor, SIDE_LEN - horizontal - 1, vertical)?;
+                        consume(source, &mut ceiling, SIDE_LEN - horizontal, vertical)?;
+                        consume(source, &mut floor, SIDE_LEN - horizontal, vertical)?;
                     }
                 }
 
