@@ -66,7 +66,6 @@ impl RenderProvider for Provider<'_> {
         let mut path = directory.join((|| -> Result<String, Error> {
             let lst = &directory.join(kind.to_owned() + ".LST");
 
-            // TODO: Investigate how to read proper .FRM for critters and some other sprites.
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
                 .nth(identifier.value as usize)

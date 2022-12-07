@@ -96,7 +96,7 @@ Result<prototype::Instance, errors::Error> {
         },
         location,
         appearance: Appearance {
-            frame: if frame_idx > 0 {
+            current: if frame_idx > 0 {
                 Some(u16::try_from(frame_idx).map_err(|_| errors::Error::Format)?)
             } else { None },
             sprite,
