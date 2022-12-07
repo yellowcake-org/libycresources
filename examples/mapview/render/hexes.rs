@@ -1,6 +1,6 @@
 use std::cmp::min;
 
-use bmp::{Image, Pixel};
+use bmp::{Image};
 
 use libycresources::common::types::errors::Error;
 
@@ -10,27 +10,22 @@ pub(crate) fn overlay(
     let (tw, th, sh) = (32usize, 16usize, 8usize);
 
     let (gw, gh) = (image.get_width() as usize / tw, image.get_height() as usize / th);
-    let (gw, gh) = (gw, gh + ((gh / 2) * (sh / 2)));
+
+    let diff = ((0..gh).reduce(|a, i| {
+        a + (i * (th - sh / 2)) / gh
+    }).unwrap_or(0) as usize - (th - sh / 2)) / th - 1;
+    let (gw, gh) = (gw, gh + diff);
 
     for gy in 0..gh {
         for gx in 0..gw {
+            if gy == gh - 1 { continue; }
+            if gy % 2 == 0 && (gx == gw - 1) { continue; }
+
             let is_darker_one = (gy + gx) % 2 == 0;
 
-            let (ox, oy) = ((gx * tw + if gy % 2 == 0 { tw / 2 } else { 0 }) as isize, (gy * th) as isize);
-            let (ox, oy) = (ox, oy - (gy as isize * sh as isize / 2));
-            let (ox, oy) = (ox, oy + (sh as isize / 2));
-
-            if ox < 0 || oy < 0 { continue; }
-            let (ox, oy) = (ox as usize, oy as usize);
-
-            fn reddify(x: usize, y: usize, image: &mut Image, darker: bool) {
-                if x >= 8000 || y >= 3600 { return; }
-
-                let mut pixel = image.get_pixel(x as u32, y as u32);
-                pixel.r += min(u8::MAX - pixel.r, 255 / (if darker { 4 } else { 2 }));
-
-                image.set_pixel(x as u32, y as u32, pixel);
-            }
+            let (ox, oy) = ((gx * tw + if gy % 2 == 0 { tw / 2 } else { 0 }) as usize, (gy * th) as usize);
+            let (ox, oy) = (ox, oy - (gy as usize * sh as usize / 2));
+            let (ox, oy) = (ox, oy + (sh as usize) / 2);
 
             fn line(x0: isize, y0: isize, x1: isize, y1: isize, image: &mut Image, darker: bool) {
                 let (mut x0, mut y0) = (x0, y0);
@@ -42,6 +37,13 @@ pub(crate) fn overlay(
                 let sy = if y0 < y1 { 1 } else { -1 };
 
                 let mut error = dx + dy;
+
+                fn reddify(x: usize, y: usize, image: &mut Image, darker: bool) {
+                    let mut pixel = image.get_pixel(x as u32, y as u32);
+                    pixel.r += min(u8::MAX - pixel.r, 255 / (if darker { 8 } else { 4 }));
+
+                    image.set_pixel(x as u32, y as u32, pixel);
+                }
 
                 loop {
                     reddify(x0 as usize, y0 as usize, image, darker);
@@ -65,11 +67,11 @@ pub(crate) fn overlay(
             }
 
             let (vx0, vy0) = (ox + tw / 2, oy);
-            let (vx1, vy1) = (ox + tw, oy + (th - sh) / 2);
-            let (vx2, vy2) = (ox + tw, oy + th - sh / 2);
-            let (vx3, vy3) = (ox + tw / 2, oy + th);
-            let (vx4, vy4) = (ox, oy + th - sh / 2);
-            let (vx5, vy5) = (ox, oy + (th - sh) / 2);
+            let (vx1, vy1) = (ox + tw - 1, oy + (th - sh) / 2 - 1);
+            let (vx2, vy2) = (ox + tw - 1, oy + th - sh / 2 - 1);
+            let (vx3, vy3) = (ox + tw / 2, oy + th - 1);
+            let (vx4, vy4) = (ox, oy + th - sh / 2 - 1);
+            let (vx5, vy5) = (ox, oy + (th - sh) / 2 - 1);
 
             line(vx0 as isize, vy0 as isize, vx1 as isize, vy1 as isize, image, is_darker_one);
             line(vx1 as isize, vy1 as isize, vx2 as isize, vy2 as isize, image, is_darker_one);
