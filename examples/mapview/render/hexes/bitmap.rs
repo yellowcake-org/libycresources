@@ -14,6 +14,7 @@ pub(crate) fn line(start: (usize, usize), end: (usize, usize), image: &mut Image
     let sy: isize = if current.1 < end.1 { 1 } else { -1 };
 
     let mut error = dx + dy;
+
     loop {
         fn reddify(x: usize, y: usize, image: &mut Image) {
             let mut pixel = image.get_pixel(x as u32, y as u32);
@@ -22,19 +23,19 @@ pub(crate) fn line(start: (usize, usize), end: (usize, usize), image: &mut Image
             image.set_pixel(x as u32, y as u32, pixel);
         }
 
-        reddify(start.0, start.0, image);
-        if start.0 == end.0 && start.1 == end.1 { break; };
+        reddify(current.0 as usize, current.1 as usize, image);
+        if current.0 == end.0 && current.1 == end.1 { break; };
 
         let error_doubled = 2 * error;
         if error_doubled >= dy {
-            if start.0 == end.0 { break; }
+            if current.0 == end.0 { break; }
 
             error = error + dy;
             current.0 = (current.0 as isize + sx) as usize
         }
 
         if error_doubled <= dx {
-            if start.1 == end.1 { break; }
+            if current.1 == end.1 { break; }
 
             error = error + dx;
             current.1 = (current.1 as isize + sy) as usize

@@ -100,7 +100,7 @@ fn main() {
                         roof: false,
                         walls: false,
                         scenery: false,
-                        creatures: false
+                        creatures: false,
                     },
                     |f| { match f { Filter::Include(layers) => layers } },
                 );

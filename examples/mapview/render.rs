@@ -1,13 +1,13 @@
+use std::fs::File;
 use std::path::PathBuf;
 
 use libycresources::common::types::errors::Error;
-use libycresources::formats::map;
+use libycresources::formats::{map, pal};
 
 use crate::Layers;
 use crate::render::tiles::RenderTile;
 use crate::traits::RenderProvider;
 
-mod fetch;
 mod frame;
 mod tiles;
 mod hexes;
@@ -25,7 +25,10 @@ pub(crate) fn map<P: RenderProvider>(
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
     println!("Loading COLOR.PAL...");
-    let palette = fetch::palette(&resources.join("COLOR.PAL"))?;
+    let file = File::open(&resources.join("COLOR.PAL"))?;
+    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
+
+    let palette = pal::parse::palette(&mut reader)?;
 
     let level = 0;
     let tiles = map.tiles
@@ -36,7 +39,6 @@ pub(crate) fn map<P: RenderProvider>(
     let floors: Vec<RenderTile> = tiles::convert(&tiles.floor, provider)?;
     let ceilings: Vec<RenderTile> = tiles::convert(&tiles.ceiling, provider)?;
 
-    // TODO: Figure out better way to know output parameters, or check if all tiles are consistent between each other.
     let (tw, th, scale) = floors.first()
         .map(|t| { t.sprite.animations.first().map(|a| { (a, t.position) }) }).flatten()
         .map(|a| { a.0.frames.first().map(|f| { (f, a.1) }) }).flatten()
@@ -46,9 +48,9 @@ pub(crate) fn map<P: RenderProvider>(
     let (w, h) = (tw * scale, th * scale);
     let mut image = bmp::Image::new(w as u32, h as u32);
 
-    tiles::imprint(&floors, &palette, scale, &mut image)?;
-    hexes::overlay(&mut image)?;
-    tiles::imprint(&ceilings, &palette, scale, &mut image)?;
+    if filter.floor { tiles::imprint(&floors, &palette, scale, &mut image)?; }
+    if filter.overlay { hexes::overlay(&mut image)?; }
+    if filter.roof { tiles::imprint(&ceilings, &palette, scale, &mut image)?; }
 
     Ok(image)
 }
