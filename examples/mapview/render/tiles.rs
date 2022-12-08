@@ -13,7 +13,7 @@ use crate::traits::render::Provider;
 pub(crate) fn imprint(
     tiles: &Vec<Instance>,
     palette: &Palette,
-    scale: usize,
+    side: usize,
     image: &mut Image,
 ) -> Result<(), Error> {
     for tile in tiles.iter() {
@@ -25,12 +25,12 @@ pub(crate) fn imprint(
 
         let (tw, th) = (frame.size.width as usize, frame.size.height as usize);
         let (tx, ty) = (
-            tile.position.x.value as usize * (scale / tile.position.x.scale.len()),
-            tile.position.y.value as usize * (scale / tile.position.y.scale.len())
+            tile.position.x.value as usize * (side / tile.position.x.scale.len()),
+            tile.position.y.value as usize * (side / tile.position.y.scale.len())
         );
 
         let (x, y) = (tw * tx, th * ty);
-        let (x, y) = (x + (ty * (tw - 48)), y + ((scale - tx) * (th - 24)));
+        let (x, y) = (x + (ty * (tw - 48)), y + ((side - tx) * (th - 24)));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
         let (x, y) = (x + (tx * frame.shift.x as usize), y + (ty * frame.shift.y as usize));
 

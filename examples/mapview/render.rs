@@ -51,6 +51,9 @@ pub(crate) fn map<P: Provider>(
 
     if filter.floor { tiles::imprint(&floors, &palette, scale, &mut image)?; }
     if filter.overlay { hexes::overlay(&mut image)?; }
+
+    protos::imprint(&map.prototypes, &palette, &filter, &mut image)?;
+
     if filter.roof { tiles::imprint(&ceilings, &palette, scale, &mut image)?; }
 
     Ok(image)
