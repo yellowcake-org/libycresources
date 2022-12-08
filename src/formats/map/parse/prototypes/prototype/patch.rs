@@ -7,7 +7,7 @@ mod critter;
 mod scenery;
 mod misc;
 
-pub(crate) fn instance<S: Read, P: PrototypeProvider>
+pub(crate) fn instance<S: Read, P: Provider>
 (source: &mut S, provider: &P, identifier: &Identifier<ObjectType>, read_ladders_map: bool) -> Result<ObjectPatch, errors::Error> {
     let prototype = provider.provide(&identifier)?;
 

@@ -7,46 +7,17 @@ use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::{frm, pal, pro};
 use libycresources::formats::frm::Sprite;
-use libycresources::formats::map::parse::PrototypeProvider;
+use libycresources::formats::map::parse;
 use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::{ObjectType, Prototype};
 
-use crate::traits::RenderProvider;
+use crate::traits::render;
 
-pub struct Provider<'a> {
+pub struct CommonProvider<'a> {
     pub directory: &'a Path,
 }
 
-impl PrototypeProvider for Provider<'_> {
-    fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<Prototype, Error> {
-        let kind = match identifier.kind {
-            ObjectType::Item(_) => "ITEMS",
-            ObjectType::Critter(_) => "CRITTERS",
-            ObjectType::Scenery(_) => "SCENERY",
-            ObjectType::Wall(_) => "WALLS",
-            ObjectType::Tile(_) => "TILES",
-            ObjectType::Misc(_) => "MISC",
-        };
-
-        let directory = &self.directory.join(kind);
-        let path = directory.join((|| -> Result<String, Error> {
-            let lst = &directory.join(kind.to_owned() + ".LST");
-
-            return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
-                .lines()
-                .nth(identifier.value as usize - 1)
-                .ok_or(Error::Format)?
-                .map_err(|e| Error::IO(e));
-        })()?);
-
-        let file = File::open(&path)?;
-        let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
-
-        Ok(pro::parse::prototype(&mut reader)?)
-    }
-}
-
-impl RenderProvider for Provider<'_> {
+impl render::Provider for CommonProvider<'_> {
     fn provide(&self, identifier: &Identifier<Kind>) -> Result<(Sprite, Option<Palette>), Error> {
         let kind = match identifier.kind {
             Kind::Item => "ITEMS",
@@ -92,5 +63,34 @@ impl RenderProvider for Provider<'_> {
             .map_or(Ok(None), |r| { r.map(|p| { Some(p) }) })?;
 
         Ok((sprite, palette))
+    }
+}
+
+impl parse::Provider for CommonProvider<'_> {
+    fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<Prototype, Error> {
+        let kind = match identifier.kind {
+            ObjectType::Item(_) => "ITEMS",
+            ObjectType::Critter(_) => "CRITTERS",
+            ObjectType::Scenery(_) => "SCENERY",
+            ObjectType::Wall(_) => "WALLS",
+            ObjectType::Tile(_) => "TILES",
+            ObjectType::Misc(_) => "MISC",
+        };
+
+        let directory = &self.directory.join(kind);
+        let path = directory.join((|| -> Result<String, Error> {
+            let lst = &directory.join(kind.to_owned() + ".LST");
+
+            return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
+                .lines()
+                .nth(identifier.value as usize - 1)
+                .ok_or(Error::Format)?
+                .map_err(|e| Error::IO(e));
+        })()?);
+
+        let file = File::open(&path)?;
+        let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
+
+        Ok(pro::parse::prototype(&mut reader)?)
     }
 }

@@ -2,7 +2,7 @@ use super::*;
 
 mod prototype;
 
-pub fn list<S: Read + Seek, P: PrototypeProvider>
+pub fn list<S: Read + Seek, P: Provider>
 (source: &mut S, provider: &P, elevations: &[Option<()>], read_ladders_map: bool) ->
 Result<Vec<blueprint::prototype::Instance>, errors::Error> {
     let mut list = Vec::new();

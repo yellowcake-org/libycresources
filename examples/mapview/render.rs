@@ -1,18 +1,20 @@
 use std::fs::File;
 use std::path::PathBuf;
 
+use item::Instance;
 use libycresources::common::types::errors::Error;
 use libycresources::formats::{map, pal};
 
 use crate::Layers;
-use crate::render::tiles::RenderTile;
-use crate::traits::RenderProvider;
+use crate::traits::render::Provider;
 
 mod frame;
 mod tiles;
 mod hexes;
+mod protos;
+mod item;
 
-pub(crate) fn map<P: RenderProvider>(
+pub(crate) fn map<P: Provider>(
     map: &map::Map,
     filter: &Layers,
     provider: &P,
@@ -24,7 +26,6 @@ pub(crate) fn map<P: RenderProvider>(
 
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
-    println!("Loading COLOR.PAL...");
     let file = File::open(&resources.join("COLOR.PAL"))?;
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
 
@@ -36,8 +37,8 @@ pub(crate) fn map<P: RenderProvider>(
         .find(|e| { e.elevation.level.value == level })
         .ok_or(Error::Format)?;
 
-    let floors: Vec<RenderTile> = tiles::convert(&tiles.floor, provider)?;
-    let ceilings: Vec<RenderTile> = tiles::convert(&tiles.ceiling, provider)?;
+    let floors: Vec<Instance> = tiles::convert(&tiles.floor, provider)?;
+    let ceilings: Vec<Instance> = tiles::convert(&tiles.ceiling, provider)?;
 
     let (tw, th, scale) = floors.first()
         .map(|t| { t.sprite.animations.first().map(|a| { (a, t.position) }) }).flatten()

@@ -4,6 +4,8 @@ use libycresources::formats::frm::Frame;
 use libycresources::formats::pal::Palette;
 
 pub(crate) fn imprint(frame: &Frame, palette: &Palette, origin: (usize, usize), destination: &mut Image) {
+    let origin = (origin.0 + frame.shift.x as usize, origin.1 + frame.shift.y as usize);
+
     for (number, &index) in frame.indexes.iter().enumerate() {
         let color = &palette.colors[index as usize];
         let pixel = match color {
