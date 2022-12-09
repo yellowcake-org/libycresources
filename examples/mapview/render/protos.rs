@@ -55,15 +55,19 @@ pub(crate) fn imprint<P: Provider>(
 
                 let (tx, ty) = (tx, ty);
                 let (ox, oy) = ((tx * tw) as usize, (ty * th) as usize);
-
                 let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() - tx) * 12));
                 let (ox, oy) = (ox - (tx * 32), oy - (ty * 12));
                 let (ox, oy) = (ox / 2, oy / 2);
 
-                // let (ox, oy) = (
-                //     ox - (frame.size.width as i16 + frame.shift.x) as usize / 2,
-                //     oy - (frame.size.height as i16 + frame.shift.y) as usize / 2
-                // );
+                let (ox, oy) = (
+                    ox - (frame.size.width as i16 + frame.shift.x) as usize / 2 + tw / 2,
+                    oy - (frame.size.height as i16 + frame.shift.y) as usize + th / 2
+                );
+
+                let (ox, oy) = (
+                    ox - if tx % 2 != 0 { 8 } else { 0 },
+                    oy - if tx % 2 != 0 { 6 } else { 0 }
+                );
 
                 let (ox, oy) = (
                     ox + correction.x.value as usize,
