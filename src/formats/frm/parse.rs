@@ -17,14 +17,14 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
     let keyframe_idx = source.read_u16::<BigEndian>()?;
     let fpo = source.read_u16::<BigEndian>()?;
 
-    let mut animation_shifts_x = [u16::MIN; ORIENTATIONS_COUNT];
+    let mut animation_shifts_x = [i16::MIN; ORIENTATIONS_COUNT];
     for shift_x in &mut animation_shifts_x {
-        *shift_x = source.read_u16::<BigEndian>()?;
+        *shift_x = source.read_i16::<BigEndian>()?;
     }
 
-    let mut animation_shifts_y = [u16::MIN; ORIENTATIONS_COUNT];
+    let mut animation_shifts_y = [i16::MIN; ORIENTATIONS_COUNT];
     for shift_y in &mut animation_shifts_y {
-        *shift_y = source.read_u16::<BigEndian>()?;
+        *shift_y = source.read_i16::<BigEndian>()?;
     }
 
     let mut frame_offsets = [u32::MIN; ORIENTATIONS_COUNT];
@@ -64,7 +64,10 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
 
                     frames.push(Frame {
                         size: Size { width, height },
-                        shift: Shift { x, y },
+                        shift: Shift {
+                            x: i16::try_from(x).map_err(|_| { Error::Format })?,
+                            y: i16::try_from(y).map_err(|_| { Error::Format })?
+                        },
                         indexes: pixels,
                     });
                 }

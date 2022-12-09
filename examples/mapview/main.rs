@@ -59,6 +59,10 @@ pub(crate) struct Layers {
     #[clap(short, long)]
     walls: bool,
     #[clap(short, long)]
+    items: bool,
+    #[clap(short, long)]
+    misc: bool,
+    #[clap(short, long)]
     scenery: bool,
     #[clap(short, long)]
     creatures: bool,
@@ -99,6 +103,8 @@ fn main() {
                         overlay: false,
                         roof: false,
                         walls: false,
+                        items: false,
+                        misc: false,
                         scenery: false,
                         creatures: false,
                     },

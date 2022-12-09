@@ -14,5 +14,5 @@ pub struct Coordinate<V, S> {
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Orientation {
-    pub value: Scaled<u8, Range<u8>>,
+    pub scaled: Scaled<u8, Range<u8>>,
 }

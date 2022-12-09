@@ -30,9 +30,8 @@ pub(crate) fn imprint(
         );
 
         let (x, y) = (tw * tx, th * ty);
-        let (x, y) = (x + (ty * (tw - 48)), y + ((side - tx) * (th - 24)));
+        let (x, y) = (x + (ty * 32), y + ((side - tx) * 12));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
-        let (x, y) = (x + (tx * frame.shift.x as usize), y + (ty * frame.shift.y as usize));
 
         frame::imprint(frame, palette, (x, y), image);
     }

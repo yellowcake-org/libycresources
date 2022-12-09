@@ -20,8 +20,8 @@ impl TryFrom<u32> for Coordinate<u8, Range<u8>> {
         const SCALE: Range<u32> = u32::MIN..200;
 
         if (u32::MIN..SCALE.end.pow(2)).contains(&value) {
-            let x = value / SCALE.end;
-            let y = value - (x * SCALE.end);
+            let x = SCALE.end - value % SCALE.end;
+            let y = value / SCALE.end;
 
             let x = u8::try_from(x).map_err(|_| Error::Format)?;
             let y = u8::try_from(y).map_err(|_| Error::Format)?;
@@ -59,7 +59,7 @@ impl TryFrom<u32> for Orientation {
         let value = u8::try_from(value).map_err(|_| Error::Format)?;
 
         if SCALE.contains(&value) {
-            Ok(Self { value: Scaled { value, scale: SCALE } })
+            Ok(Self { scaled: Scaled { value, scale: SCALE } })
         } else {
             return Err(Error::Format);
         }
