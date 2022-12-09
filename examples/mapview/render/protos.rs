@@ -16,8 +16,6 @@ pub(crate) fn imprint<P: Provider>(
     filter: &Layers,
     image: &mut bmp::Image,
 ) -> Result<(), Error> {
-    let (w, h) = (image.get_width() as usize, image.get_height() as usize);
-
     for proto in protos.iter() {
         if proto.id.kind == Item(()) && !filter.items { continue; };
         if proto.id.kind == Critter(()) { continue; };
@@ -48,7 +46,7 @@ pub(crate) fn imprint<P: Provider>(
                 .flatten();
 
             if let Some((frame, shift)) = fetched {
-                let (tw, th, sh) = (80usize, 36usize, 8usize);
+                let (tw, th) = (80usize, 36usize);
 
                 let (tx, ty) = (
                     location.position.x.value as usize,
@@ -56,15 +54,16 @@ pub(crate) fn imprint<P: Provider>(
                 );
 
                 let (tx, ty) = (tx, ty);
-                let (ox, oy) = ((tx * tw) as usize / 2, (ty * th) as usize / 2);
+                let (ox, oy) = ((tx * tw) as usize, (ty * th) as usize);
 
-                let (ox, oy) = (
-                    ox + tw / 2 - (frame.size.width as i16 + frame.shift.x) as usize / 2,
-                    oy + th / 2 - (frame.size.height as i16 + frame.shift.y) as usize / 2
-                );
+                let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() - tx) * 12));
+                let (ox, oy) = (ox - (tx * 32), oy - (ty * 12));
+                let (ox, oy) = (ox / 2, oy / 2);
 
-                let (ox, oy) = (ox + (ty * 16), oy + ((location.position.x.scale.len() - tx) * 6));
-                let (ox, oy) = (ox - (tx * 16), oy - (ty * 6));
+                // let (ox, oy) = (
+                //     ox - (frame.size.width as i16 + frame.shift.x) as usize / 2,
+                //     oy - (frame.size.height as i16 + frame.shift.y) as usize / 2
+                // );
 
                 let (ox, oy) = (
                     ox + correction.x.value as usize,
@@ -76,7 +75,8 @@ pub(crate) fn imprint<P: Provider>(
                     oy as isize + shift.y as isize
                 );
 
-                frame::imprint(frame, palette, (ox as usize, oy as usize), image);
+                let (ox, oy) = (ox as usize, oy as usize);
+                frame::imprint(frame, palette, (ox, oy), image);
             }
         }
     }
