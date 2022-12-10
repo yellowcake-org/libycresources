@@ -20,8 +20,8 @@ impl TryFrom<u32> for Coordinate<u8, Range<u8>> {
         const SCALE: Range<u32> = u32::MIN..200;
 
         if (u32::MIN..SCALE.end.pow(2)).contains(&value) {
-            let x = SCALE.end - value % SCALE.end;
-            let y = value / SCALE.end;
+            let x = SCALE.len() as u32 - value % SCALE.len() as u32;
+            let y = value / SCALE.len() as u32;
 
             let x = u8::try_from(x).map_err(|_| Error::Format)?;
             let y = u8::try_from(y).map_err(|_| Error::Format)?;

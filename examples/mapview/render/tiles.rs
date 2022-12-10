@@ -22,18 +22,17 @@ pub(crate) fn imprint(
         let animation = tile.sprite.animations.first().ok_or(Error::Format)?;
         let frame = animation.frames.first().ok_or(Error::Format)?;
 
-        let (tw, th) = (frame.size.width as usize, frame.size.height as usize);
+        let (tw, th) = (frame.size.width as isize, frame.size.height as isize);
         let (tx, ty) = (
-            tile.position.x.value as usize * (side / tile.position.x.scale.len()),
-            tile.position.y.value as usize * (side / tile.position.y.scale.len())
+            tile.position.x.value as isize * (side as isize / tile.position.x.scale.len() as isize),
+            tile.position.y.value as isize * (side as isize / tile.position.y.scale.len() as isize)
         );
 
         let (x, y) = (tw * tx, th * ty);
-        let (x, y) = (x + (ty * 32), y + ((side - tx) * 12));
+        let (x, y) = (x + (ty * 32), y + ((side as isize - tx) * 12));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
 
-        let (x, y) = (x as i16 + animation.shift.x, y as i16 + animation.shift.y);
-        let (x, y) = (x as usize, y as usize);
+        let (x, y) = (x + animation.shift.x as isize, y + animation.shift.y as isize);
 
         frame::imprint(frame, palette, (x, y), image);
     }
