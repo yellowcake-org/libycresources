@@ -19,9 +19,8 @@ pub(crate) fn imprint(
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);
 
-        let frame = tile.sprite
-            .animations.first().ok_or(Error::Format)?
-            .frames.first().ok_or(Error::Format)?;
+        let animation = tile.sprite.animations.first().ok_or(Error::Format)?;
+        let frame = animation.frames.first().ok_or(Error::Format)?;
 
         let (tw, th) = (frame.size.width as usize, frame.size.height as usize);
         let (tx, ty) = (
@@ -32,6 +31,9 @@ pub(crate) fn imprint(
         let (x, y) = (tw * tx, th * ty);
         let (x, y) = (x + (ty * 32), y + ((side - tx) * 12));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
+
+        let (x, y) = (x as i16 + animation.shift.x, y as i16 + animation.shift.y);
+        let (x, y) = (x as usize, y as usize);
 
         frame::imprint(frame, palette, (x, y), image);
     }
