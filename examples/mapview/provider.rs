@@ -41,7 +41,17 @@ impl render::Provider for CommonProvider<'_> {
                 .lines()
                 .nth(identifier.value as usize)
                 .ok_or(Error::Format)?
-                .map_err(|e| Error::IO(e));
+                .map_err(|e| Error::IO(e))
+                .map(|s| {
+                    let s = s.splitn(2, |c| c == ' ' || c == ';' || c == '\t')
+                        .next()
+                        .unwrap_or(&s);
+
+                    let mut fields: Vec<String> = s.split(',').map(|s| { s.to_string() }).collect();
+
+                    if fields.is_empty() { return Err(Error::Format) }
+                    Ok(fields.remove(0))
+                })?;
         })()?);
 
         path = path.to_str()
