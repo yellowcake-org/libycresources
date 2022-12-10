@@ -48,7 +48,7 @@ pub(crate) fn imprint<P: Provider>(
             if let Some((frame, shift)) = fetched {
                 let (tw, th) = (80isize, 36isize);
                 let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize, );
-                
+
                 let (ox, oy) = ((tx * tw) as isize, (ty * th) as isize);
                 let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() as isize - tx) * 12));
                 let (ox, oy) = (ox - (tx * 32), oy - (ty * 12));
@@ -59,9 +59,10 @@ pub(crate) fn imprint<P: Provider>(
                     oy - (frame.size.height as i16 + frame.shift.y) as isize + th / 2
                 );
 
+                // Aligning with the hex grid from tiles' one.
                 let (ox, oy) = (
-                    ox - if tx % 2 != 0 { 8 } else { 0 },
-                    oy - if tx % 2 != 0 { 6 } else { 0 }
+                    ox + (16 + 8) - if tx % 2 != 0 { 8 } else { 0 },
+                    oy - (8) - if tx % 2 != 0 { 6 } else { 0 }
                 );
 
                 let (ox, oy) = (
@@ -69,12 +70,9 @@ pub(crate) fn imprint<P: Provider>(
                     oy + correction.y.value as isize
                 );
 
-                let (ox, oy) = (
-                    ox as isize + shift.x as isize,
-                    oy as isize + shift.y as isize
-                );
-
+                let (ox, oy) = (ox + shift.x as isize, oy + shift.y as isize);
                 let (ox, oy) = (ox as usize, oy as usize);
+
                 frame::imprint(frame, palette, (ox, oy), image);
             }
         }

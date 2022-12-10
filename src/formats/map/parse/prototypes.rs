@@ -14,9 +14,7 @@ Result<Vec<blueprint::prototype::Instance>, errors::Error> {
         }
     }
 
-    if list.len() != count as usize {
-        return Err(errors::Error::Format);
-    }
+    if list.len() != count as usize { return Err(errors::Error::Format); }
 
     Ok(list)
 }
