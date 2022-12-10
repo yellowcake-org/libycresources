@@ -38,9 +38,15 @@ pub(crate) fn imprint<P: Provider>(
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
             let orientation_idx = location.orientation.scaled.value;
-            let frame_idx = proto.appearance.current.unwrap_or(0);
+            let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
 
-            let animation = sprite.animations.get(orientation_idx as usize).ok_or(Error::Format)?;
+            let animation_idx = *sprite.orientations.get(orientation_idx as usize)
+                .ok_or(Error::Format)?;
+
+            let animation = sprite.animations
+                .get(animation_idx as usize)
+                .ok_or(Error::Format)?;
+
             let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
 
             let (tw, th) = (80isize, 36isize);
