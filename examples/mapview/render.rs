@@ -24,11 +24,6 @@ pub(crate) fn map<P: Provider>(
     let no_filter = !(f.floor ^ f.overlay ^ f.roof ^ f.scenery ^ f.items ^ f.misc ^ f.walls ^ f.creatures);
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
-    let file = File::open(&resources.join("COLOR.PAL"))?;
-    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
-
-    let palette = pal::parse::palette(&mut reader)?;
-
     let elevation = Elevation::try_from(0)?;
     let tiles = map.tiles
         .iter()
@@ -46,6 +41,10 @@ pub(crate) fn map<P: Provider>(
 
     let (w, h) = (tw * scale, th * scale);
     let mut image = bmp::Image::new(w as u32, h as u32);
+
+    let file = File::open(&resources.join("COLOR.PAL"))?;
+    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
+    let palette = pal::parse::palette(&mut reader)?;
 
     if f.floor { tiles::imprint(&floors, &palette, scale, &mut image)?; }
     if f.overlay { hexes::overlay(&mut image)?; }

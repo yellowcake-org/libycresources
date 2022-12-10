@@ -46,22 +46,17 @@ pub(crate) fn imprint<P: Provider>(
                 .flatten();
 
             if let Some((frame, shift)) = fetched {
-                let (tw, th) = (80usize, 36usize);
-
-                let (tx, ty) = (
-                    location.position.x.value as usize,
-                    location.position.y.value as usize,
-                );
-
-                let (tx, ty) = (tx, ty);
-                let (ox, oy) = ((tx * tw) as usize, (ty * th) as usize);
-                let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() - tx) * 12));
+                let (tw, th) = (80isize, 36isize);
+                let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize, );
+                
+                let (ox, oy) = ((tx * tw) as isize, (ty * th) as isize);
+                let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() as isize - tx) * 12));
                 let (ox, oy) = (ox - (tx * 32), oy - (ty * 12));
                 let (ox, oy) = (ox / 2, oy / 2);
 
                 let (ox, oy) = (
-                    ox - (frame.size.width as i16 + frame.shift.x) as usize / 2 + tw / 2,
-                    oy - (frame.size.height as i16 + frame.shift.y) as usize + th / 2
+                    ox - (frame.size.width as i16 + frame.shift.x) as isize / 2 + tw / 2,
+                    oy - (frame.size.height as i16 + frame.shift.y) as isize + th / 2
                 );
 
                 let (ox, oy) = (
@@ -70,8 +65,8 @@ pub(crate) fn imprint<P: Provider>(
                 );
 
                 let (ox, oy) = (
-                    ox + correction.x.value as usize,
-                    oy + correction.y.value as usize
+                    ox + correction.x.value as isize,
+                    oy + correction.y.value as isize
                 );
 
                 let (ox, oy) = (

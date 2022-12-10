@@ -65,8 +65,8 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
                     frames.push(Frame {
                         size: Size { width, height },
                         shift: Shift {
-                            x: i16::try_from(x).map_err(|_| { Error::Format })?,
-                            y: i16::try_from(y).map_err(|_| { Error::Format })?
+                            x: x as i16,
+                            y: y as i16
                         },
                         indexes: pixels,
                     });
