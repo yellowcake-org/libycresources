@@ -27,7 +27,6 @@ pub(crate) fn imprint(frame: &Frame, palette: &Palette, origin: (isize, isize), 
         let (x, y) = origin;
         let (x, y) = (x + rx, y + ry);
 
-        if x < 0 || y < 0 { continue; } // some maps contain erroneous items out of bounds
         if let Some(pixel) = pixel { destination.set_pixel(x as u32, y as u32, pixel); }
     }
 }
