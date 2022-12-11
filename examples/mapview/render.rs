@@ -46,12 +46,12 @@ pub(crate) fn map<P: Provider>(
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
     let palette = pal::parse::palette(&mut reader)?;
 
-    if f.floor { tiles::imprint(&floors, &palette, scale, &mut image)?; }
+    if f.floor { tiles::imprint(&floors, false, &palette, scale, &mut image)?; }
     if f.overlay { hexes::overlay(&mut image)?; }
 
     protos::imprint(&map.prototypes, provider, &elevation, &palette, &f, &mut image)?;
 
-    if f.roof { tiles::imprint(&ceilings, &palette, scale, &mut image)?; }
+    if f.roof { tiles::imprint(&ceilings, true, &palette, scale, &mut image)?; }
 
     Ok(image)
 }
