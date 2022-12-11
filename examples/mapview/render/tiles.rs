@@ -56,7 +56,7 @@ pub(crate) fn convert<'a, P: Provider>(
 ) -> Result<Vec<Instance<'a>>, Error> {
     raw.iter()
         .map(|e| {
-            let identifier = Identifier { kind: Kind::Tile, value: e.id };
+            let identifier = Identifier { raw: e.index as u32, kind: Kind::Tile, index: e.index };
 
             let (sprite, palette) = provider.provide(&identifier)?;
             let position = &e.position;

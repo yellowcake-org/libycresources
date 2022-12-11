@@ -65,7 +65,7 @@ pub(crate) struct Layers {
     #[clap(short, long)]
     scenery: bool,
     #[clap(short, long)]
-    creatures: bool,
+    critters: bool,
 }
 
 fn main() {
@@ -106,7 +106,7 @@ fn main() {
                         items: false,
                         misc: false,
                         scenery: false,
-                        creatures: false,
+                        critters: false,
                     },
                     |f| { match f { Filter::Include(layers) => layers } },
                 );

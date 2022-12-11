@@ -66,7 +66,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
                         size: Size { width, height },
                         shift: Shift {
                             x: x as i16,
-                            y: y as i16
+                            y: y as i16,
                         },
                         indexes: pixels,
                     });

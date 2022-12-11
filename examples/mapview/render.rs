@@ -21,7 +21,7 @@ pub(crate) fn map<P: Provider>(
     provider: &P,
     resources: &PathBuf,
 ) -> Result<bmp::Image, Error> {
-    let no_filter = !(f.floor ^ f.overlay ^ f.roof ^ f.scenery ^ f.items ^ f.misc ^ f.walls ^ f.creatures);
+    let no_filter = !(f.floor ^ f.overlay ^ f.roof ^ f.scenery ^ f.items ^ f.misc ^ f.walls ^ f.critters);
     if no_filter { println!("Filter has not been applied, rendering all layers.") }
 
     let elevation = Elevation::try_from(0)?;

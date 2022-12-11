@@ -39,17 +39,19 @@ impl render::Provider for CommonProvider<'_> {
 
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
-                .nth(identifier.value as usize)
+                .nth(identifier.index as usize)
                 .ok_or(Error::Format)?
                 .map_err(|e| Error::IO(e))
                 .map(|s| {
-                    let s = s.splitn(2, |c| c == ' ' || c == ';' || c == '\t')
+                    let s = s
+                        .splitn(2, |c| c == ' ' || c == ';' || c == '\t')
                         .next()
                         .unwrap_or(&s);
 
-                    let mut fields: Vec<String> = s.split(',').map(|s| { s.to_string() }).collect();
+                    let mut fields: Vec<String> = s
+                        .split(',')
+                        .map(|s| { s.to_string() }).collect();
 
-                    if fields.is_empty() { return Err(Error::Format) }
                     Ok(fields.remove(0))
                 })?;
         })()?);
@@ -59,6 +61,7 @@ impl render::Provider for CommonProvider<'_> {
             .map(|s| { PathBuf::from(s) })
             .map_or(Err(Error::Format), |p| { Ok(p) })?;
 
+        println!("opening {:?}", path);
         let file = File::open(&path)?;
         let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
         let sprite = frm::parse::sprite(&mut reader)?;
@@ -93,7 +96,7 @@ impl parse::Provider for CommonProvider<'_> {
 
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
-                .nth(identifier.value as usize - 1)
+                .nth(identifier.index as usize - 1)
                 .ok_or(Error::Format)?
                 .map_err(|e| Error::IO(e));
         })()?);

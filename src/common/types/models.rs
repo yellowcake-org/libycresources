@@ -6,8 +6,10 @@ pub mod prototype;
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Identifier<Kind> {
+    pub raw: u32,
+    pub index: u16,
+
     pub kind: Kind,
-    pub value: u16,
 }
 
 impl<Kind> TryFrom<u32> for Identifier<Kind> where Kind: TryFrom<u8> {
@@ -15,8 +17,9 @@ impl<Kind> TryFrom<u32> for Identifier<Kind> where Kind: TryFrom<u8> {
 
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Ok(Self {
+            raw: value,
+            index: (value & 0b1111_1111_1111) as u16,
             kind: Kind::try_from((value >> u8::BITS * 3) as u8).map_err(|_| Error::Format)?,
-            value: (value & 0xFFFFFFFF) as u16,
         })
     }
 }

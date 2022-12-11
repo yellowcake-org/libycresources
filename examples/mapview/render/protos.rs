@@ -18,7 +18,7 @@ pub(crate) fn imprint<P: Provider>(
 ) -> Result<(), Error> {
     for proto in protos.iter() {
         if proto.id.kind == Item(()) && !filter.items { continue; };
-        if proto.id.kind == Critter(()) { continue; };
+        if proto.id.kind == Critter(()) && !filter.critters { continue; };
         if proto.id.kind == Scenery(()) && !filter.scenery { continue; };
         if proto.id.kind == Wall(()) && !filter.walls { continue; };
         if proto.id.kind == Misc(()) && !filter.misc { continue; };
@@ -38,16 +38,22 @@ pub(crate) fn imprint<P: Provider>(
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
             let orientation_idx = location.orientation.scaled.value;
+            // println!("orientation index == {:?}", orientation_idx);
+
             let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
+            // println!("frame index == {:?}", frame_idx);
 
             let animation_idx = *sprite.orientations.get(orientation_idx as usize)
                 .ok_or(Error::Format)?;
+            // println!("animation index == {:?}", animation_idx);
 
             let animation = sprite.animations
                 .get(animation_idx as usize)
                 .ok_or(Error::Format)?;
+            // println!("animation exists");
 
             let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
+            // println!("frame exists");
 
             let (tw, th) = (80isize, 36isize);
             let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize);
