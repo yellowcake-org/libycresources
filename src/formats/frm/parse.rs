@@ -17,20 +17,14 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
     let keyframe_idx = source.read_u16::<BigEndian>()?;
     let fpo = source.read_u16::<BigEndian>()?;
 
-    let mut animation_shifts_x = [u16::MIN; ORIENTATIONS_COUNT];
-    for shift_x in &mut animation_shifts_x {
-        *shift_x = source.read_u16::<BigEndian>()?;
-    }
+    let mut animation_shifts_x = [i16::MIN; ORIENTATIONS_COUNT];
+    for shift_x in &mut animation_shifts_x { *shift_x = source.read_i16::<BigEndian>()?; }
 
-    let mut animation_shifts_y = [u16::MIN; ORIENTATIONS_COUNT];
-    for shift_y in &mut animation_shifts_y {
-        *shift_y = source.read_u16::<BigEndian>()?;
-    }
+    let mut animation_shifts_y = [i16::MIN; ORIENTATIONS_COUNT];
+    for shift_y in &mut animation_shifts_y { *shift_y = source.read_i16::<BigEndian>()?; }
 
     let mut frame_offsets = [u32::MIN; ORIENTATIONS_COUNT];
-    for frame_offset in &mut frame_offsets {
-        *frame_offset = source.read_u32::<BigEndian>()?;
-    }
+    for frame_offset in &mut frame_offsets { *frame_offset = source.read_u32::<BigEndian>()?; }
 
     source.seek(SeekFrom::Current(4))?;
 
@@ -42,9 +36,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
         let offset = &frame_offsets[orientation_idx];
 
         match map.get(offset) {
-            Some(animation_index) => {
-                orientations[orientation_idx] = *animation_index;
-            }
+            Some(animation_index) => { orientations[orientation_idx] = *animation_index; }
             None => {
                 let mut frames: Vec<Frame> = Vec::new();
 
@@ -64,7 +56,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
 
                     frames.push(Frame {
                         size: Size { width, height },
-                        shift: Shift { x, y },
+                        shift: Shift { x: x as i16, y: y as i16 },
                         indexes: pixels,
                     });
                 }
@@ -79,6 +71,7 @@ pub fn sprite<S: Read + Seek>(source: &mut S) -> Result<Sprite, Error> {
 
                 animations.push(animation);
                 map.insert(*offset, (animations.len() - 1) as AnimationIndex);
+                orientations[orientation_idx] = (animations.len() - 1) as u8;
             }
         }
     }

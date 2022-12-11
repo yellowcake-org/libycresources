@@ -17,11 +17,11 @@ mod tiles;
 mod prototypes;
 mod scripts;
 
-pub trait PrototypeProvider {
+pub trait Provider {
     fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<pro::Prototype, errors::Error>;
 }
 
-pub fn map<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P) -> Result<Map, errors::Error> {
+pub fn map<S: Read + Seek, P: Provider>(source: &mut S, provider: &P) -> Result<Map, errors::Error> {
     source.seek(SeekFrom::Start(0))?;
 
     let version = source.read_u32::<BigEndian>()?;

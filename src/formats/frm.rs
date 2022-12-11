@@ -7,8 +7,8 @@ pub struct Size {
 }
 
 pub struct Shift {
-    pub x: u16,
-    pub y: u16,
+    pub x: i16,
+    pub y: i16,
 }
 
 pub type ColorIndex = u8;

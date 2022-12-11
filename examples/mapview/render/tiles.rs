@@ -1,52 +1,41 @@
-use std::ops::Range;
-
 use bmp::Image;
 
 use libycresources::common::types::errors::Error;
-use libycresources::common::types::geometry::Coordinate;
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
-use libycresources::formats::frm::Sprite;
 use libycresources::formats::map;
 use libycresources::formats::pal::Palette;
 
 use crate::render::frame;
-use crate::traits::RenderProvider;
-
-pub(crate) struct RenderTile<'a> {
-    pub(crate) sprite: Sprite,
-    pub(crate) palette: Option<Palette>,
-    pub(crate) position: &'a Coordinate<u8, Range<u8>>,
-}
+use crate::render::item::Instance;
+use crate::traits::render::Provider;
 
 pub(crate) fn imprint(
-    tiles: &Vec<RenderTile>,
+    tiles: &Vec<Instance>,
+    is_roof: bool,
     palette: &Palette,
-    scale: usize,
+    side: usize,
     image: &mut Image,
 ) -> Result<(), Error> {
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);
+        let frame_idx = tile.sprite.keyframe;
 
-        let frame = tile.sprite
-            .animations.first().ok_or(Error::Format)?
-            .frames.first().ok_or(Error::Format)?;
+        let animation = tile.sprite.animations.first().ok_or(Error::Format)?;
+        let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
 
-        let (tw, th) = (
-            frame.size.width + frame.shift.x,
-            frame.size.height + frame.shift.y,
-        );
-
-        let (tw, th) = (tw as usize, th as usize);
+        let (tw, th) = (frame.size.width as isize, frame.size.height as isize);
         let (tx, ty) = (
-            tile.position.x.value as usize * (scale / tile.position.x.scale.len()),
-            tile.position.y.value as usize * (scale / tile.position.y.scale.len())
+            tile.position.x.value as isize * (side as isize / tile.position.x.scale.len() as isize),
+            tile.position.y.value as isize * (side as isize / tile.position.y.scale.len() as isize)
         );
 
         let (x, y) = (tw * tx, th * ty);
-        let (x, y) = (x + (ty * (tw - 48)), y + ((scale - tx) * (th - 24)));
+        let (x, y) = (x + (ty * 32), y + ((side as isize - tx) * 12));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
-        let (x, y) = (x + (tx * frame.shift.x as usize), y + (ty * frame.shift.y as usize));
+
+        let (x, y) = (x, y - if is_roof { 96 } else { 0 } );
+        let (x, y) = (x + animation.shift.x as isize, y + animation.shift.y as isize);
 
         frame::imprint(frame, palette, (x, y), image);
     }
@@ -54,18 +43,18 @@ pub(crate) fn imprint(
     Ok(())
 }
 
-pub(crate) fn convert<'a, P: RenderProvider>(
+// TODO: Move to 'from' trait implementation?
+pub(crate) fn convert<'a, P: Provider>(
     raw: &'a Vec<map::tiles::Instance<u8, u8>>,
     provider: &P,
-) -> Result<Vec<RenderTile<'a>>, Error> {
+) -> Result<Vec<Instance<'a>>, Error> {
     raw.iter()
         .map(|e| {
-            let identifier = Identifier { kind: Kind::Tile, value: e.id };
+            let position = &e.position;
+            let identifier = Identifier { raw: e.index as u32, kind: Kind::Tile, index: e.index };
 
             let (sprite, palette) = provider.provide(&identifier)?;
-            let position = &e.position;
-
-            Ok(RenderTile { sprite, palette, position })
+            Ok(Instance { sprite, palette, position })
         })
         .collect()
 }

@@ -10,9 +10,8 @@ use crate::formats::pro::object::common::map::{Destination, Map};
 use crate::formats::pro::object::misc::exit::Instance;
 use crate::formats::pro::object::misc::Patch;
 
-pub(crate) fn patch<S: Read>(source: &mut S, id: &u16) ->
-Result<Patch, errors::Error> {
-    Ok(if (0x0010..=0x0017).contains(id) {
+pub(crate) fn patch<S: Read>(source: &mut S, index: &u16) -> Result<Patch, errors::Error> {
+    Ok(if (0x0010..=0x0017).contains(index) {
         let map = Map::try_from(source.read_i32::<BigEndian>()?)?;
         let position = Coordinate::try_from_optional(source.read_i32::<BigEndian>()?, -1)?;
         let elevation = Elevation::try_from(source.read_u32::<BigEndian>()?)?;

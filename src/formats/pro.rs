@@ -30,7 +30,7 @@ pub type ObjectPatch = Type<
 >;
 
 pub struct Prototype {
-    pub id: u16,
+    pub index: u16,
     pub meta: meta::Instance,
     pub object: ObjectInstance,
 }

@@ -25,7 +25,7 @@ pub fn prototype<S: Read + Seek>(source: &mut S) -> Result<Prototype, errors::Er
     let object = instance::instance(source, &identifier.kind)?;
 
     Ok(Prototype {
-        id: identifier.value,
+        index: identifier.index,
         meta: meta::Instance {
             light: Light::try_from((light_radius, light_intensity))?,
             flags,

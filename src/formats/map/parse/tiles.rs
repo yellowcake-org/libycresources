@@ -32,7 +32,7 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec
 
                     if id > 1 {
                         into.push(tiles::Instance {
-                            id,
+                            index: id,
                             position: Coordinate {
                                 x: Scaled { value: x, scale: u8::MIN..SIDE_LEN },
                                 y: Scaled { value: y, scale: u8::MIN..SIDE_LEN },
@@ -45,8 +45,8 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec
 
                 for vertical in 0..SIDE_LEN {
                     for horizontal in 0..SIDE_LEN {
-                        consume(source, &mut ceiling, SIDE_LEN - horizontal, vertical)?;
-                        consume(source, &mut floor, SIDE_LEN - horizontal, vertical)?;
+                        consume(source, &mut ceiling, SIDE_LEN - 1 - horizontal, vertical)?;
+                        consume(source, &mut floor, SIDE_LEN - 1 - horizontal, vertical)?;
                     }
                 }
 

@@ -7,7 +7,7 @@ mod critter;
 mod scenery;
 mod misc;
 
-pub(crate) fn instance<S: Read, P: PrototypeProvider>
+pub(crate) fn instance<S: Read, P: Provider>
 (source: &mut S, provider: &P, identifier: &Identifier<ObjectType>, read_ladders_map: bool) -> Result<ObjectPatch, errors::Error> {
     let prototype = provider.provide(&identifier)?;
 
@@ -17,6 +17,6 @@ pub(crate) fn instance<S: Read, P: PrototypeProvider>
         ObjectInstance::Scenery(scenery) => { ObjectPatch::Scenery(scenery::patch(source, scenery, read_ladders_map)?) }
         ObjectInstance::Wall(_) => { ObjectPatch::Wall(()) }
         ObjectInstance::Tile(_) => { ObjectPatch::Tile(()) }
-        ObjectInstance::Misc(_) => { ObjectPatch::Misc(misc::patch(source, &identifier.value)?) }
+        ObjectInstance::Misc(_) => { ObjectPatch::Misc(misc::patch(source, &identifier.index)?) }
     })
 }

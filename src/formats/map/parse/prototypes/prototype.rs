@@ -10,14 +10,14 @@ use crate::common::types::space::Elevation;
 use crate::formats::map::blueprint::prototype;
 use crate::formats::map::blueprint::prototype::Appearance;
 use crate::formats::map::location::{Grid, Screen};
-use crate::formats::map::parse::{errors, PrototypeProvider};
+use crate::formats::map::parse::{errors, Provider};
 use crate::formats::pro;
 use crate::formats::pro::meta;
 use crate::formats::pro::meta::info::Light;
 
 mod patch;
 
-pub fn instance<S: Read + Seek, P: PrototypeProvider>(source: &mut S, provider: &P, read_ladders_map: bool) ->
+pub fn instance<S: Read + Seek, P: Provider>(source: &mut S, provider: &P, read_ladders_map: bool) ->
 Result<prototype::Instance, errors::Error> {
     let _entry_id = source.read_u32::<BigEndian>()?;
 

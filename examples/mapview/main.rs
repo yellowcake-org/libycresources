@@ -5,7 +5,7 @@ use clap::Parser;
 
 use libycresources::formats::map;
 
-use crate::provider::Provider;
+use crate::provider::CommonProvider;
 
 mod print;
 mod render;
@@ -59,16 +59,20 @@ pub(crate) struct Layers {
     #[clap(short, long)]
     walls: bool,
     #[clap(short, long)]
+    items: bool,
+    #[clap(short, long)]
+    misc: bool,
+    #[clap(short, long)]
     scenery: bool,
     #[clap(short, long)]
-    creatures: bool,
+    critters: bool,
 }
 
 fn main() {
     let options = Options::parse();
 
     let directory = &options.resources.join("PROTO");
-    let provider = Provider { directory: directory.as_path() };
+    let provider = CommonProvider { directory: directory.as_path() };
 
     let map = match File::open(&options.input) {
         Err(error) => { return eprintln!("Couldn't open input file: {:?}", error); }
@@ -99,14 +103,16 @@ fn main() {
                         overlay: false,
                         roof: false,
                         walls: false,
+                        items: false,
+                        misc: false,
                         scenery: false,
-                        creatures: false,
+                        critters: false,
                     },
                     |f| { match f { Filter::Include(layers) => layers } },
                 );
 
             let directory = &options.resources.join("ART");
-            let provider = Provider { directory: directory.as_path() };
+            let provider = CommonProvider { directory: directory.as_path() };
 
             let image = match render::map(&map, &filter, &provider, &options.resources) {
                 Err(error) => { return eprintln!("Couldn't render map file: {:}", error); }
