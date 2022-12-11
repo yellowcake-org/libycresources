@@ -13,13 +13,15 @@ use libycresources::formats::pro::{ObjectType, Prototype};
 
 use crate::traits::render;
 
+mod suffix;
+
 pub struct CommonProvider<'a> {
     pub directory: &'a Path,
 }
 
 impl render::Provider for CommonProvider<'_> {
     fn provide(&self, identifier: &Identifier<Kind>) -> Result<(Sprite, Option<Palette>), Error> {
-        let kind = match identifier.kind {
+        let subdirectory = match identifier.kind {
             Kind::Item => "ITEMS",
             Kind::Critter => "CRITTERS",
             Kind::Scenery => "SCENERY",
@@ -33,9 +35,9 @@ impl render::Provider for CommonProvider<'_> {
             Kind::Skilldex => "SKILLDEX",
         };
 
-        let directory = &self.directory.join(kind);
+        let directory = &self.directory.join(subdirectory);
         let mut path = directory.join((|| -> Result<String, Error> {
-            let lst = &directory.join(kind.to_owned() + ".LST");
+            let lst = &directory.join(subdirectory.to_owned() + ".LST");
 
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
@@ -61,7 +63,26 @@ impl render::Provider for CommonProvider<'_> {
             .map(|s| { PathBuf::from(s) })
             .map_or(Err(Error::Format), |p| { Ok(p) })?;
 
-        println!("opening {:?}", path);
+        if identifier.kind == Kind::Critter {
+            let direction = (identifier.raw >> 28) as u8 & 0b111;
+
+            let weapon = (identifier.raw >> 12) as u8 & 0b1111;
+            let animation = (identifier.raw >> 16) as u8;
+
+            let suffix = suffix::detect(weapon, animation).ok_or(Error::Format)?;
+            path = path.to_str()
+                .map(|s| {
+                    s.to_owned() + format!("{}{}", suffix.0, suffix.1).as_str()
+                })
+                .map(|s| { PathBuf::from(s) })
+                .map_or(Err(Error::Format), |p| { Ok(p) })?;
+
+
+            if direction == 0 { path.set_extension("frm"); } else {
+                path.set_extension("fr".to_owned() + (direction - 1).to_string().as_str());
+            }
+        }
+
         let file = File::open(&path)?;
         let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
         let sprite = frm::parse::sprite(&mut reader)?;

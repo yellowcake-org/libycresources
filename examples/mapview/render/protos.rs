@@ -32,28 +32,24 @@ pub(crate) fn imprint<P: Provider>(
         ) {
             if &location.elevation != elevation { continue; }
 
-            let item = provider.provide(&proto.appearance.sprite)?;
-            let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
+            let identifier = &proto.appearance.sprite;
+            let orientation_idx = location.orientation.scaled.value;
 
+            let item = provider.provide(&identifier)?;
+            let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
-            let orientation_idx = location.orientation.scaled.value;
-            // println!("orientation index == {:?}", orientation_idx);
-
-            let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
-            // println!("frame index == {:?}", frame_idx);
-
-            let animation_idx = *sprite.orientations.get(orientation_idx as usize)
+            let frame_idx = proto.appearance.current
+                .unwrap_or(sprite.keyframe);
+            let animation_idx = *sprite.orientations
+                .get(orientation_idx as usize)
                 .ok_or(Error::Format)?;
-            // println!("animation index == {:?}", animation_idx);
 
             let animation = sprite.animations
                 .get(animation_idx as usize)
                 .ok_or(Error::Format)?;
-            // println!("animation exists");
 
             let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
-            // println!("frame exists");
 
             let (tw, th) = (80isize, 36isize);
             let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize);

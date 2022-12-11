@@ -1,6 +1,7 @@
 use bmp::Image;
 
 use libycresources::common::types::errors::Error;
+use libycresources::common::types::geometry::{Orientation, Scaled};
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::map;
@@ -56,11 +57,10 @@ pub(crate) fn convert<'a, P: Provider>(
 ) -> Result<Vec<Instance<'a>>, Error> {
     raw.iter()
         .map(|e| {
+            let position = &e.position;
             let identifier = Identifier { raw: e.index as u32, kind: Kind::Tile, index: e.index };
 
             let (sprite, palette) = provider.provide(&identifier)?;
-            let position = &e.position;
-
             Ok(Instance { sprite, palette, position })
         })
         .collect()
