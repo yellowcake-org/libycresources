@@ -33,22 +33,18 @@ pub(crate) fn imprint<P: Provider>(
             if &location.elevation != elevation { continue; }
 
             let identifier = &proto.appearance.sprite;
-            let orientation_idx = location.orientation.scaled.value;
-
             let item = provider.provide(&identifier)?;
+
             let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
-            let frame_idx = proto.appearance.current
-                .unwrap_or(sprite.keyframe);
-            let animation_idx = *sprite.orientations
-                .get(orientation_idx as usize)
-                .ok_or(Error::Format)?;
-
+            let orientation_idx = location.orientation.scaled.value;
             let animation = sprite.animations
-                .get(animation_idx as usize)
+                .get(orientation_idx as usize)
+                .or(sprite.animations.first())
                 .ok_or(Error::Format)?;
 
+            let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
             let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
 
             let (tw, th) = (80isize, 36isize);

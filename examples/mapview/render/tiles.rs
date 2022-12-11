@@ -1,7 +1,6 @@
 use bmp::Image;
 
 use libycresources::common::types::errors::Error;
-use libycresources::common::types::geometry::{Orientation, Scaled};
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::map;
@@ -19,17 +18,9 @@ pub(crate) fn imprint(
 ) -> Result<(), Error> {
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);
-
-        let orientation_idx = 0;
         let frame_idx = tile.sprite.keyframe;
 
-        let animation_idx = *tile.sprite.orientations.get(orientation_idx as usize)
-            .ok_or(Error::Format)?;
-
-        let animation = tile.sprite.animations
-            .get(animation_idx as usize)
-            .ok_or(Error::Format)?;
-
+        let animation = tile.sprite.animations.first().ok_or(Error::Format)?;
         let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
 
         let (tw, th) = (frame.size.width as isize, frame.size.height as isize);

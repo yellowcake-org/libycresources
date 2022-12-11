@@ -63,7 +63,14 @@ impl render::Provider for CommonProvider<'_> {
             .map(|s| { PathBuf::from(s) })
             .map_or(Err(Error::Format), |p| { Ok(p) })?;
 
-        if identifier.kind == Kind::Critter {
+        fn sprite(path: &PathBuf) -> Result<Sprite, Error> {
+            let file = File::open(&path)?;
+            let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
+
+            Ok(frm::parse::sprite(&mut reader)?)
+        }
+
+        let sprite = if identifier.kind != Kind::Critter { sprite(&path) } else {
             let direction = (identifier.raw >> 28) as u8 & 0b111;
 
             let weapon = (identifier.raw >> 12) as u8 & 0b1111;
@@ -77,15 +84,20 @@ impl render::Provider for CommonProvider<'_> {
                 .map(|s| { PathBuf::from(s) })
                 .map_or(Err(Error::Format), |p| { Ok(p) })?;
 
+            if direction == 0 {
+                path.set_extension("frm");
+                sprite(&path)
+            } else {
+                let mut sprites: [Option<Sprite>; 6] = [None, None, None, None, None, None];
 
-            if direction == 0 { path.set_extension("frm"); } else {
-                path.set_extension("fr".to_owned() + (direction - 1).to_string().as_str());
+                for i in 0..6 {
+                    path.set_extension("fr".to_owned() + i.to_string().as_str());
+                    sprites[i] = Some(sprite(&path)?);
+                }
+
+                Ok(frm::merge::sprites(sprites.map(|o| o.unwrap())).map_err(|_| { Error::Format })?)
             }
-        }
-
-        let file = File::open(&path)?;
-        let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
-        let sprite = frm::parse::sprite(&mut reader)?;
+        }?;
 
         path.set_extension("pal");
         let file = File::open(&path).ok();
