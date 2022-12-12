@@ -13,6 +13,7 @@ pub(crate) fn imprint<P: Provider>(
     provider: &P,
     elevation: &Elevation,
     palette: &pal::Palette,
+    darkness: u8,
     layers: &Layers,
     image: &mut bmp::Image,
 ) -> Result<(), Error> {
@@ -73,7 +74,7 @@ pub(crate) fn imprint<P: Provider>(
 
             let (ox, oy) = (ox + animation.shift.x as isize, oy + animation.shift.y as isize);
 
-            frame::imprint(frame, palette, (ox, oy), image);
+            frame::imprint(frame, palette, darkness, (ox, oy), image);
         }
     }
 

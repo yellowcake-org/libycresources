@@ -14,6 +14,7 @@ pub(crate) fn imprint(
     tiles: &Vec<Instance>,
     is_roof: bool,
     palette: &Palette,
+    darkness: u8,
     side: usize,
     image: &mut Image,
 ) -> Result<(), Error> {
@@ -34,10 +35,10 @@ pub(crate) fn imprint(
         let (x, y) = (x + (ty * 32), y + ((side as isize - tx) * 12));
         let (x, y) = (x - (tx * 32), y - (ty * 12));
 
-        let (x, y) = (x, y - if is_roof { 96 } else { 0 } );
+        let (x, y) = (x, y - if is_roof { 96 } else { 0 });
         let (x, y) = (x + animation.shift.x as isize, y + animation.shift.y as isize);
 
-        frame::imprint(frame, palette, (x, y), image);
+        frame::imprint(frame, palette, darkness, (x, y), image);
     }
 
     Ok(())

@@ -23,6 +23,7 @@ pub(crate) fn map<P: Provider>(
 ) -> Result<bmp::Image, Error> {
     if layers.all() { println!("Filter has not been applied, rendering all layers.") }
 
+    let darkness = u8::try_from(map.darkness).map_err(|_| Error::Format)?;
     let elevation = Elevation::try_from(0)?;
     let tiles = map.tiles
         .iter()
@@ -45,12 +46,17 @@ pub(crate) fn map<P: Provider>(
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
     let palette = pal::parse::palette(&mut reader)?;
 
-    if layers.floor || layers.all() { tiles::imprint(&floors, false, &palette, scale, &mut image)?; }
+    if layers.floor || layers.all() {
+        tiles::imprint(&floors, false, &palette, darkness, scale, &mut image)?;
+    }
+
     if layers.overlay || layers.all() { hexes::overlay(&mut image)?; }
 
-    protos::imprint(&map.prototypes, provider, &elevation, &palette, &layers, &mut image)?;
+    protos::imprint(&map.prototypes, provider, &elevation, &palette, darkness, &layers, &mut image)?;
 
-    if layers.roof || layers.all() { tiles::imprint(&ceilings, true, &palette, scale, &mut image)?; }
+    if layers.roof || layers.all() {
+        tiles::imprint(&ceilings, true, &palette, darkness, scale, &mut image)?;
+    }
 
     Ok(image)
 }
