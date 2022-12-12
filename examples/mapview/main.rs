@@ -3,9 +3,10 @@ use std::fs::File;
 use clap::Parser;
 
 use cli::{Action, Options};
+use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
 use libycresources::common::types::geometry::Scaled;
-use libycresources::common::types::space::Elevation;
+use libycresources::common::types::space;
 use libycresources::formats::map;
 use provider::CommonProvider;
 
@@ -44,17 +45,26 @@ fn main() {
             };
 
             let filter = export.filter
-                .map_or(Layers::default(), |f| match f { Filter::Include(layers) => layers });
+                .map_or(Layers::default(), |f| match f { Filter::Layers(layers) => layers });
 
             let directory = &options.resources.join("ART");
             let provider = CommonProvider { directory: directory.as_path() };
 
             const MAX_ELEVATION: u8 = 2;
-            let levels = 0..=MAX_ELEVATION;
+            let levels = export.elevation
+                .map_or(0..=MAX_ELEVATION, |e| {
+                    let level = match e {
+                        elevation::Elevation::First => 0,
+                        elevation::Elevation::Second => 1,
+                        elevation::Elevation::Third => 2
+                    } as u8;
+
+                    level..=level
+                });
 
             for level in levels {
                 let level_readable = level + 1;
-                let elevation = Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
+                let elevation = space::Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
 
                 let result = render::map(
                     &map, &filter,

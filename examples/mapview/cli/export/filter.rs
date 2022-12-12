@@ -3,7 +3,7 @@ use clap::Parser;
 #[derive(Parser)]
 pub(crate) enum Filter {
     /// Optional filter for which layers to render
-    Include(Layers)
+    Layers(Layers)
 }
 
 #[derive(Parser)]
