@@ -4,6 +4,8 @@ use clap::Parser;
 
 use cli::{Action, Options};
 use cli::export::filter::{Filter, Layers};
+use libycresources::common::types::geometry::Scaled;
+use libycresources::common::types::space::Elevation;
 use libycresources::formats::map;
 use provider::CommonProvider;
 
@@ -47,23 +49,46 @@ fn main() {
             let directory = &options.resources.join("ART");
             let provider = CommonProvider { directory: directory.as_path() };
 
-            let result = render::map(
-                &map, &filter,
-                export.darkness.as_ref(),
-                &provider,
-                &options.resources,
-            );
+            const MAX_ELEVATION: u8 = 2;
+            let levels = 0..=MAX_ELEVATION;
 
-            let image = match result {
-                Err(error) => { return eprintln!("Couldn't render map file: {:}", error); }
-                Ok(value) => value,
-            };
+            for level in levels {
+                let level_readable = level + 1;
+                let elevation = Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
 
-            let path = export.output.join(stem);
-            let file = path.with_extension("bmp");
+                let result = render::map(
+                    &map, &filter,
+                    export.darkness.as_ref(),
+                    &elevation,
+                    &provider,
+                    &options.resources,
+                );
 
-            if let Err(error) = image.save(file) {
-                return eprintln!("Couldn't save output file: {:}", error);
+                let image = match result {
+                    Ok(Some(value)) => {
+                        println!("Succeeded rendering elevation {:?}.", level_readable);
+                        value
+                    }
+                    Err(error) => {
+                        eprintln!("Failed to render elevation {:?}. Error: {:?}", level_readable, error);
+                        continue;
+                    }
+                    Ok(None) => {
+                        println!("Elevation {:?} is not present in the file, skipping...", level_readable);
+                        continue;
+                    }
+                };
+
+                let filename = stem.to_str().map(|s|
+                    s.to_string()).unwrap() + &format!("-{:?}", level_readable
+                );
+
+                let path = export.output.join(filename);
+                let file = path.with_extension("bmp");
+
+                if let Err(error) = image.save(file) {
+                    return eprintln!("Couldn't save output file: {:}.", error);
+                }
             }
         }
     }

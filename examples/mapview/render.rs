@@ -21,9 +21,10 @@ pub(crate) fn map<P: Provider>(
     map: &map::Map,
     layers: &Layers,
     darkness: Option<&Darkness>,
+    elevation: &Elevation,
     provider: &P,
     resources: &PathBuf,
-) -> Result<bmp::Image, Error> {
+) -> Result<Option<bmp::Image>, Error> {
     if layers.all() { println!("Filter has not been applied, rendering all layers.") }
 
     let darkness = darkness
@@ -36,11 +37,14 @@ pub(crate) fn map<P: Provider>(
             }
         });
 
-    let elevation = Elevation::try_from(0)?;
     let tiles = map.tiles
         .iter()
-        .find(|e| { &e.elevation == &elevation })
-        .ok_or(Error::Format)?;
+        .find(|e| { &e.elevation == elevation });
+
+    let tiles = match tiles {
+        None => return Ok(None),
+        Some(value) => value
+    };
 
     let floors: Vec<Instance> = tiles::convert(&tiles.floor, provider)?;
     let ceilings: Vec<Instance> = tiles::convert(&tiles.ceiling, provider)?;
@@ -70,5 +74,5 @@ pub(crate) fn map<P: Provider>(
         tiles::imprint(&ceilings, true, &palette, darkness, scale, &mut image)?;
     }
 
-    Ok(image)
+    Ok(Some(image))
 }
