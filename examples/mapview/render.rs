@@ -6,7 +6,7 @@ use libycresources::common::types::errors::Error;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::{map, pal};
 
-use crate::Layers;
+use crate::cli::Layers;
 use crate::traits::render::Provider;
 
 mod frame;
@@ -17,12 +17,11 @@ mod item;
 
 pub(crate) fn map<P: Provider>(
     map: &map::Map,
-    f: &Layers,
+    layers: &Layers,
     provider: &P,
     resources: &PathBuf,
 ) -> Result<bmp::Image, Error> {
-    let no_filter = !(f.floor ^ f.overlay ^ f.roof ^ f.scenery ^ f.items ^ f.misc ^ f.walls ^ f.critters);
-    if no_filter { println!("Filter has not been applied, rendering all layers.") }
+    if layers.all() { println!("Filter has not been applied, rendering all layers.") }
 
     let elevation = Elevation::try_from(0)?;
     let tiles = map.tiles
@@ -46,12 +45,12 @@ pub(crate) fn map<P: Provider>(
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
     let palette = pal::parse::palette(&mut reader)?;
 
-    if f.floor { tiles::imprint(&floors, false, &palette, scale, &mut image)?; }
-    if f.overlay { hexes::overlay(&mut image)?; }
+    if layers.floor || layers.all() { tiles::imprint(&floors, false, &palette, scale, &mut image)?; }
+    if layers.overlay || layers.all() { hexes::overlay(&mut image)?; }
 
-    protos::imprint(&map.prototypes, provider, &elevation, &palette, &f, &mut image)?;
+    protos::imprint(&map.prototypes, provider, &elevation, &palette, &layers, &mut image)?;
 
-    if f.roof { tiles::imprint(&ceilings, true, &palette, scale, &mut image)?; }
+    if layers.roof || layers.all() { tiles::imprint(&ceilings, true, &palette, scale, &mut image)?; }
 
     Ok(image)
 }

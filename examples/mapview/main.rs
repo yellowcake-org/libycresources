@@ -1,8 +1,7 @@
 use std::fs::File;
-use std::path::PathBuf;
-
 use clap::Parser;
 
+use cli::{Action, Filter, Layers, Options};
 use libycresources::formats::map;
 
 use crate::provider::CommonProvider;
@@ -11,62 +10,7 @@ mod print;
 mod render;
 mod provider;
 mod traits;
-
-#[derive(Parser)]
-#[clap(name = "mapview", version)]
-struct Options {
-    /// Path to the input map file (.map)
-    #[clap(short, long)]
-    input: PathBuf,
-    /// Path to the root resources directory
-    #[clap(short, long)]
-    resources: PathBuf,
-    #[clap(subcommand)]
-    action: Action,
-}
-
-#[derive(Parser)]
-enum Action {
-    /// Prints out all available info about map
-    Dump,
-    /// Renders the map into .bmp file
-    Export(Export),
-}
-
-#[derive(Parser)]
-struct Export {
-    /// Path to the output image file (.bmp)
-    #[clap(short, long)]
-    output: PathBuf,
-    #[clap(subcommand)]
-    filter: Option<Filter>,
-}
-
-#[derive(Parser)]
-enum Filter {
-    /// Optional filter for which layers to render
-    Include(Layers)
-}
-
-#[derive(Parser)]
-pub(crate) struct Layers {
-    #[clap(short, long)]
-    floor: bool,
-    #[clap(short, long)]
-    overlay: bool,
-    #[clap(short, long)]
-    roof: bool,
-    #[clap(short, long)]
-    walls: bool,
-    #[clap(short, long)]
-    items: bool,
-    #[clap(short, long)]
-    misc: bool,
-    #[clap(short, long)]
-    scenery: bool,
-    #[clap(short, long)]
-    critters: bool,
-}
+mod cli;
 
 fn main() {
     let options = Options::parse();
@@ -97,19 +41,7 @@ fn main() {
             };
 
             let filter = export.filter
-                .map_or(
-                    Layers {
-                        floor: false,
-                        overlay: false,
-                        roof: false,
-                        walls: false,
-                        items: false,
-                        misc: false,
-                        scenery: false,
-                        critters: false,
-                    },
-                    |f| { match f { Filter::Include(layers) => layers } },
-                );
+                .map_or(Layers::default(), |f| match f { Filter::Include(layers) => layers });
 
             let directory = &options.resources.join("ART");
             let provider = CommonProvider { directory: directory.as_path() };

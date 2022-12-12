@@ -4,7 +4,7 @@ use libycresources::formats::map::blueprint;
 use libycresources::formats::pal;
 use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
 
-use crate::Layers;
+use crate::cli::Layers;
 use crate::render::frame;
 use crate::traits::render::Provider;
 
@@ -13,15 +13,15 @@ pub(crate) fn imprint<P: Provider>(
     provider: &P,
     elevation: &Elevation,
     palette: &pal::Palette,
-    filter: &Layers,
+    layers: &Layers,
     image: &mut bmp::Image,
 ) -> Result<(), Error> {
     for proto in protos.iter() {
-        if proto.id.kind == Item(()) && !filter.items { continue; };
-        if proto.id.kind == Critter(()) && !filter.critters { continue; };
-        if proto.id.kind == Scenery(()) && !filter.scenery { continue; };
-        if proto.id.kind == Wall(()) && !filter.walls { continue; };
-        if proto.id.kind == Misc(()) && !filter.misc { continue; };
+        if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
+        if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };
+        if proto.id.kind == Scenery(()) && !(layers.scenery || layers.all()) { continue; };
+        if proto.id.kind == Wall(()) && !(layers.walls || layers.all()) { continue; };
+        if proto.id.kind == Misc(()) && !(layers.misc || layers.all()) { continue; };
 
         if let (
             Some(location),
