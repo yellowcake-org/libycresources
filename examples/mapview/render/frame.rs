@@ -15,13 +15,16 @@ pub(crate) fn imprint(frame: &Frame, palette: &Palette, darkness: u8, origin: (i
             None => None,
             Some(pixel) => {
                 fn adjusted(color: &Scaled<u8, RangeInclusive<u8>>, darkness: u8) -> u8 {
-                    let max = ((0..u8::MAX).len() / color.scale.len()) as u8;
+                    let max = ((0..u8::MAX).len() / color.scale.len() + 1) as u8;
                     let min = 1;
+
+                    debug_assert!(darkness >= min);
+                    debug_assert!(darkness <= max);
 
                     let effective = std::cmp::min(max, darkness);
                     let effective = std::cmp::max(min, effective);
 
-                    color.value * if effective == 1 { max } else { effective }
+                    color.value * effective
                 }
 
                 let red = adjusted(&pixel.red, darkness);

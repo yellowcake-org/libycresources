@@ -6,7 +6,8 @@ use libycresources::common::types::errors::Error;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::{map, pal};
 
-use crate::cli::Layers;
+use crate::cli::export::darkness::Darkness;
+use crate::cli::export::filter::Layers;
 use crate::traits::render::Provider;
 
 mod frame;
@@ -18,12 +19,22 @@ mod item;
 pub(crate) fn map<P: Provider>(
     map: &map::Map,
     layers: &Layers,
+    darkness: Option<&Darkness>,
     provider: &P,
     resources: &PathBuf,
 ) -> Result<bmp::Image, Error> {
     if layers.all() { println!("Filter has not been applied, rendering all layers.") }
 
-    let darkness = u8::try_from(map.darkness).map_err(|_| Error::Format)?;
+    let darkness = darkness
+        .map_or(u8::try_from(map.darkness).map_err(|_| Error::Format)?, |d| {
+            match d {
+                Darkness::None => 1,
+                Darkness::Night => 2,
+                Darkness::Dusk => 3,
+                Darkness::Day => 4,
+            }
+        });
+
     let elevation = Elevation::try_from(0)?;
     let tiles = map.tiles
         .iter()

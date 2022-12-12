@@ -1,10 +1,11 @@
 use std::fs::File;
+
 use clap::Parser;
 
-use cli::{Action, Filter, Layers, Options};
+use cli::{Action, Options};
+use cli::export::filter::{Filter, Layers};
 use libycresources::formats::map;
-
-use crate::provider::CommonProvider;
+use provider::CommonProvider;
 
 mod print;
 mod render;
@@ -46,7 +47,14 @@ fn main() {
             let directory = &options.resources.join("ART");
             let provider = CommonProvider { directory: directory.as_path() };
 
-            let image = match render::map(&map, &filter, &provider, &options.resources) {
+            let result = render::map(
+                &map, &filter,
+                export.darkness.as_ref(),
+                &provider,
+                &options.resources,
+            );
+
+            let image = match result {
                 Err(error) => { return eprintln!("Couldn't render map file: {:}", error); }
                 Ok(value) => value,
             };
