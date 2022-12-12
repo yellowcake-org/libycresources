@@ -1,12 +1,13 @@
 use bmp::Image;
 
 use libycresources::common::types::errors::Error;
+use libycresources::common::types::geometry::{Orientation, Scaled};
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::map;
 use libycresources::formats::pal::Palette;
 
-use crate::render::frame;
+use crate::render::{frame, sprite};
 use crate::render::item::Instance;
 use crate::traits::render::Provider;
 
@@ -20,10 +21,9 @@ pub(crate) fn imprint(
 ) -> Result<(), Error> {
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);
-        let frame_idx = tile.sprite.keyframe;
-
-        let animation = tile.sprite.animations.first().ok_or(Error::Format)?;
-        let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
+        let (frame, shift) = sprite::frame(
+            &tile.sprite, &Orientation { scaled: Scaled { value: 0, scale: 0..6 } }, None,
+        )?;
 
         let (tw, th) = (frame.size.width as isize, frame.size.height as isize);
         let (tx, ty) = (
@@ -36,7 +36,7 @@ pub(crate) fn imprint(
         let (x, y) = (x - (tx * 32), y - (ty * 12));
 
         let (x, y) = (x, y - if is_roof { 96 } else { 0 });
-        let (x, y) = (x + animation.shift.x as isize, y + animation.shift.y as isize);
+        let (x, y) = (x + shift.x as isize, y + shift.y as isize);
 
         frame::imprint(frame, palette, darkness, (x, y), image);
     }

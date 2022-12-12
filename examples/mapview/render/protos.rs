@@ -5,7 +5,7 @@ use libycresources::formats::pal;
 use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
 
 use crate::cli::export::filter::Layers;
-use crate::render::frame;
+use crate::render::{frame, sprite};
 use crate::traits::render::Provider;
 
 pub(crate) fn imprint<P: Provider>(
@@ -39,14 +39,9 @@ pub(crate) fn imprint<P: Provider>(
             let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
-            let orientation_idx = location.orientation.scaled.value;
-            let animation_idx = sprite.orientations[orientation_idx as usize];
-            let animation = sprite.animations
-                .get(animation_idx as usize)
-                .ok_or(Error::Format)?;
-
-            let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
-            let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
+            let (frame, shift) = sprite::frame(
+                &sprite, &location.orientation, proto.appearance.current,
+            )?;
 
             let (tw, th) = (80isize, 36isize);
             let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize);
@@ -72,7 +67,10 @@ pub(crate) fn imprint<P: Provider>(
                 oy + correction.y.value as isize
             );
 
-            let (ox, oy) = (ox + animation.shift.x as isize, oy + animation.shift.y as isize);
+            let (ox, oy) = (
+                ox + shift.x as isize,
+                oy + shift.y as isize
+            );
 
             frame::imprint(frame, palette, darkness, (ox, oy), image);
         }

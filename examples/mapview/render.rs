@@ -15,6 +15,7 @@ mod tiles;
 mod hexes;
 mod protos;
 mod item;
+mod sprite;
 
 pub(crate) fn map<P: Provider>(
     map: &map::Map,
