@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
-use libycresources::common::types::errors::Error;
+use libycresources::common::types::errors;
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::{frm, pal, pro};
@@ -11,6 +11,7 @@ use libycresources::formats::map::parse;
 use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::{ObjectType, Prototype};
 
+use crate::error;
 use crate::traits::render;
 
 mod suffix;
@@ -20,7 +21,7 @@ pub struct CommonProvider<'a> {
 }
 
 impl render::Provider for CommonProvider<'_> {
-    fn provide(&self, identifier: &Identifier<Kind>) -> Result<(Sprite, Option<Palette>), Error> {
+    fn provide<'b>(&self, identifier: &Identifier<Kind>) -> Result<(Sprite, Option<Palette>), error::Error<'b>> {
         let subdirectory = match identifier.kind {
             Kind::Item => "ITEMS",
             Kind::Critter => "CRITTERS",
@@ -36,14 +37,17 @@ impl render::Provider for CommonProvider<'_> {
         };
 
         let directory = &self.directory.join(subdirectory);
-        let mut path = directory.join((|| -> Result<String, Error> {
+        let mut path = directory.join((|| -> Result<String, error::Error> {
             let lst = &directory.join(subdirectory.to_owned() + ".LST");
 
-            return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
+            let reader = File::open(lst)
+                .map_err(|io| error::Error::IO(io, "Failed to open .LST file."))?;
+
+            return BufReader::with_capacity(1 * 1024 * 1024, reader)
                 .lines()
                 .nth(identifier.index as usize)
-                .ok_or(Error::Format)?
-                .map_err(|e| Error::IO(e))
+                .ok_or(error::Error::Corrupted(".LST file doesn't contain expected line."))?
+                .map_err(|io| error::Error::IO(io, ""))
                 .map(|s| {
                     let s = s
                         .splitn(2, |c| c == ' ' || c == ';' || c == '\t')
@@ -61,13 +65,20 @@ impl render::Provider for CommonProvider<'_> {
         path = path.to_str()
             .map(|s| s.trim())
             .map(|s| { PathBuf::from(s) })
-            .map_or(Err(Error::Format), |p| { Ok(p) })?;
+            .map_or(
+                Err(error::Error::Corrupted("Failed to construct correct file path from .LST index record.")),
+                |p| { Ok(p) },
+            )?;
 
-        fn sprite(path: &PathBuf) -> Result<Sprite, Error> {
-            let file = File::open(&path)?;
+        fn sprite<'a>(path: &PathBuf) -> Result<Sprite, error::Error<'a>> {
+            let file = File::open(&path)
+                .map_err(|io| error::Error::IO(io, "Failed to open sprite file."))?;
+
             let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
+            let sprite = frm::parse::sprite(&mut reader)
+                .map_err(|i| error::Error::Internal(i, "Failed to parse sprite."))?;
 
-            Ok(frm::parse::sprite(&mut reader)?)
+            Ok(sprite)
         }
 
         let sprite = if identifier.kind != Kind::Critter { sprite(&path) } else {
@@ -76,13 +87,18 @@ impl render::Provider for CommonProvider<'_> {
             let weapon = (identifier.raw >> 12) as u8 & 0b1111;
             let animation = (identifier.raw >> 16) as u8;
 
-            let suffix = suffix::detect(weapon, animation).ok_or(Error::Format)?;
+            let suffix = suffix::detect(weapon, animation).
+                ok_or(error::Error::Corrupted("Failed to detect proper .FRM file suffix for a critter."))?;
+
             path = path.to_str()
                 .map(|s| {
                     s.to_owned() + format!("{}{}", suffix.0, suffix.1).as_str()
                 })
                 .map(|s| { PathBuf::from(s) })
-                .map_or(Err(Error::Format), |p| { Ok(p) })?;
+                .map_or(
+                    Err(error::Error::Corrupted("Failed to construct proper .FRM file path.")),
+                    |p| { Ok(p) },
+                )?;
 
             if direction == 0 {
                 path.set_extension("frm");
@@ -95,7 +111,12 @@ impl render::Provider for CommonProvider<'_> {
                     sprites[i] = Some(sprite(&path)?);
                 }
 
-                Ok(frm::merge::sprites(sprites.map(|o| o.unwrap())).map_err(|_| { Error::Format })?)
+                let merged = frm::merge::sprites(sprites.map(|o| o.unwrap()))
+                    .map_err(|_| {
+                        error::Error::Corrupted("Failed to merge separate .fr0-5 sprites into single one. ")
+                    })?;
+
+                Ok(merged)
             }
         }?;
 
@@ -106,14 +127,17 @@ impl render::Provider for CommonProvider<'_> {
                 let mut reader = BufReader::with_capacity(1 * 1024 * 1024, f);
                 pal::parse::palette(&mut reader)
             })
-            .map_or(Ok(None), |r| { r.map(|p| { Some(p) }) })?;
+            .map_or(Ok(None), |r| { r.map(|p| { Some(p) }) })
+            .map_err(|e| {
+                error::Error::Internal(e, "Failed to load custom palette for a sprite.")
+            })?;
 
         Ok((sprite, palette))
     }
 }
 
 impl parse::Provider for CommonProvider<'_> {
-    fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<Prototype, Error> {
+    fn provide(&self, identifier: &Identifier<ObjectType>) -> Result<Prototype, errors::Error> {
         let kind = match identifier.kind {
             ObjectType::Item(_) => "ITEMS",
             ObjectType::Critter(_) => "CRITTERS",
@@ -124,14 +148,14 @@ impl parse::Provider for CommonProvider<'_> {
         };
 
         let directory = &self.directory.join(kind);
-        let path = directory.join((|| -> Result<String, Error> {
+        let path = directory.join((|| -> Result<String, errors::Error> {
             let lst = &directory.join(kind.to_owned() + ".LST");
 
             return BufReader::with_capacity(1 * 1024 * 1024, File::open(lst)?)
                 .lines()
                 .nth(identifier.index as usize - 1)
-                .ok_or(Error::Format)?
-                .map_err(|e| Error::IO(e));
+                .ok_or(errors::Error::Format)?
+                .map_err(|e| errors::Error::IO(e));
         })()?);
 
         let file = File::open(&path)?;

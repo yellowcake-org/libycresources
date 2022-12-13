@@ -26,28 +26,26 @@ pub fn palette<S: Read + Seek>(source: &mut S) -> Result<Palette, Error> {
         }
     }
 
-    let colors = colors.map(
-        |(red, green, blue, is_regular): (u8, u8, u8, bool)| {
-            if is_regular {
-                Some(Pixel {
-                    red: Scaled {
-                        value: red,
-                        scale: scale.clone(),
-                    },
-                    green: Scaled {
-                        value: green,
-                        scale: scale.clone(),
-                    },
-                    blue: Scaled {
-                        value: blue,
-                        scale: scale.clone(),
-                    },
-                })
-            } else {
-                None
-            }
-        },
-    );
+    let colors = colors.map(|(red, green, blue, is_regular)| {
+        if is_regular {
+            Some(Pixel {
+                red: Scaled {
+                    value: red,
+                    scale: scale.clone(),
+                },
+                green: Scaled {
+                    value: green,
+                    scale: scale.clone(),
+                },
+                blue: Scaled {
+                    value: blue,
+                    scale: scale.clone(),
+                },
+            })
+        } else {
+            None
+        }
+    });
 
     Ok(Palette { colors })
 }

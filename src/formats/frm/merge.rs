@@ -1,9 +1,7 @@
 use super::*;
 
 #[derive(Debug)]
-pub enum Error {
-    Inconsistency,
-}
+pub enum Error { Inconsistency }
 
 pub fn sprites(source: [Sprite; 6]) -> Result<Sprite, Error> {
     let fps = source[0].fps;

@@ -1,27 +1,28 @@
-use libycresources::common::types::errors::Error;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::map::blueprint;
 use libycresources::formats::pal;
 use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
 
-use crate::Layers;
-use crate::render::frame;
+use crate::cli::export::filter::Layers;
+use crate::error::Error;
+use crate::render::{frame, sprite};
 use crate::traits::render::Provider;
 
-pub(crate) fn imprint<P: Provider>(
+pub(crate) fn imprint<'a, P: Provider>(
     protos: &Vec<blueprint::prototype::Instance>,
     provider: &P,
     elevation: &Elevation,
     palette: &pal::Palette,
-    filter: &Layers,
+    darkness: u8,
+    layers: &Layers,
     image: &mut bmp::Image,
-) -> Result<(), Error> {
+) -> Result<(), Error<'a>> {
     for proto in protos.iter() {
-        if proto.id.kind == Item(()) && !filter.items { continue; };
-        if proto.id.kind == Critter(()) && !filter.critters { continue; };
-        if proto.id.kind == Scenery(()) && !filter.scenery { continue; };
-        if proto.id.kind == Wall(()) && !filter.walls { continue; };
-        if proto.id.kind == Misc(()) && !filter.misc { continue; };
+        if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
+        if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };
+        if proto.id.kind == Scenery(()) && !(layers.scenery || layers.all()) { continue; };
+        if proto.id.kind == Wall(()) && !(layers.walls || layers.all()) { continue; };
+        if proto.id.kind == Misc(()) && !(layers.misc || layers.all()) { continue; };
 
         if let (
             Some(location),
@@ -38,14 +39,9 @@ pub(crate) fn imprint<P: Provider>(
             let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
             assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
-            let orientation_idx = location.orientation.scaled.value;
-            let animation_idx = sprite.orientations[orientation_idx as usize];
-            let animation = sprite.animations
-                .get(animation_idx as usize)
-                .ok_or(Error::Format)?;
-
-            let frame_idx = proto.appearance.current.unwrap_or(sprite.keyframe);
-            let frame = animation.frames.get(frame_idx as usize).ok_or(Error::Format)?;
+            let (frame, shift) = sprite::frame(
+                &sprite, &location.orientation, proto.appearance.current,
+            )?;
 
             let (tw, th) = (80isize, 36isize);
             let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize);
@@ -71,9 +67,12 @@ pub(crate) fn imprint<P: Provider>(
                 oy + correction.y.value as isize
             );
 
-            let (ox, oy) = (ox + animation.shift.x as isize, oy + animation.shift.y as isize);
+            let (ox, oy) = (
+                ox + shift.x as isize,
+                oy + shift.y as isize
+            );
 
-            frame::imprint(frame, palette, (ox, oy), image);
+            frame::imprint(frame, palette, darkness, (ox, oy), image);
         }
     }
 
