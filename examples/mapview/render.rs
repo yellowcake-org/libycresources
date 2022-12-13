@@ -25,8 +25,6 @@ pub(crate) fn map<P: Provider>(
     provider: &P,
     resources: &PathBuf,
 ) -> Result<Option<bmp::Image>, Error> {
-    if layers.all() { println!("Filter has not been applied, rendering all layers.") }
-
     let darkness = darkness
         .map_or(u8::try_from(map.darkness).map_err(|_| Error::Format)?, |d| {
             match d {
@@ -63,16 +61,23 @@ pub(crate) fn map<P: Provider>(
     let palette = pal::parse::palette(&mut reader)?;
 
     if layers.floor || layers.all() {
+        println!("Rendering floor...");
         tiles::imprint(&floors, false, &palette, darkness, scale, &mut image)?;
     }
 
-    if layers.overlay || layers.all() { hexes::overlay(&mut image)?; }
+    if layers.overlay || layers.all() {
+        println!("Rendering hexagonal tiles' overlay...");
+        hexes::overlay(&mut image)?;
+    }
 
+    println!("Rendering prototypes...");
     protos::imprint(&map.prototypes, provider, &elevation, &palette, darkness, &layers, &mut image)?;
 
     if layers.roof || layers.all() {
+        println!("Rendering roofs...");
         tiles::imprint(&ceilings, true, &palette, darkness, scale, &mut image)?;
     }
 
+    println!("Success.");
     Ok(Some(image))
 }

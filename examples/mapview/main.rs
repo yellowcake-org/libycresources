@@ -23,13 +23,13 @@ fn main() {
     let provider = CommonProvider { directory: directory.as_path() };
 
     let map = match File::open(&options.input) {
-        Err(error) => { return eprintln!("Couldn't open input file: {:?}", error); }
+        Err(error) => { return eprintln!("Couldn't open input file: {:?}.", error); }
         Ok(value) => value,
     };
 
     let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, map);
     let map = match map::parse::map(&mut reader, &provider) {
-        Err(error) => { return eprintln!("Couldn't parse map file: {:?}", error); }
+        Err(error) => { return eprintln!("Couldn't parse map file: {:?}.", error); }
         Ok(value) => value,
     };
 
@@ -40,7 +40,7 @@ fn main() {
             if !export.output.is_dir() { return eprintln!("Output path is not a directory. Aborting."); }
 
             let stem = match options.input.file_stem() {
-                None => { return eprintln!("Couldn't determine frame output filename."); }
+                None => { return eprintln!("Couldn't determine output filename. Aborting."); }
                 Some(value) => value,
             };
 
@@ -51,7 +51,7 @@ fn main() {
             let provider = CommonProvider { directory: directory.as_path() };
 
             const MAX_ELEVATION: u8 = 2;
-            let levels = export.elevation
+            let levels = export.elevation.as_ref()
                 .map_or(0..=MAX_ELEVATION, |e| {
                     let level = match e {
                         elevation::Elevation::First => 0,
@@ -62,10 +62,15 @@ fn main() {
                     level..=level
                 });
 
+            if !filter.all() { println!("Layers filter has been applied."); }
+            if export.darkness.as_ref().is_some() { println!("Darkness customization has been applied."); }
+            if export.elevation.as_ref().is_some() { println!("Provided elevation will be rendered only."); }
+
             for level in levels {
                 let level_readable = level + 1;
                 let elevation = space::Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
 
+                println!("Started rendering level {:?}...", level_readable);
                 let result = render::map(
                     &map, &filter,
                     export.darkness.as_ref(),
@@ -80,7 +85,7 @@ fn main() {
                         value
                     }
                     Err(error) => {
-                        eprintln!("Failed to render elevation {:?}. Error: {:?}", level_readable, error);
+                        eprintln!("Failed to render elevation {:?}. Error: {:?}.", level_readable, error);
                         continue;
                     }
                     Ok(None) => {
@@ -96,9 +101,13 @@ fn main() {
                 let path = export.output.join(filename);
                 let file = path.with_extension("bmp");
 
+                println!("Writing to file...");
                 if let Err(error) = image.save(file) {
-                    return eprintln!("Couldn't save output file: {:}.", error);
+                    eprintln!("Couldn't save output file: {:}.", error);
+                    continue;
                 }
+
+                println!("Success.");
             }
         }
     }
