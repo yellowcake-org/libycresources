@@ -1,14 +1,14 @@
-use libycresources::common::types::errors::Error;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::map::blueprint;
 use libycresources::formats::pal;
 use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
 
 use crate::cli::export::filter::Layers;
+use crate::error::Error;
 use crate::render::{frame, sprite};
 use crate::traits::render::Provider;
 
-pub(crate) fn imprint<P: Provider>(
+pub(crate) fn imprint<'a, P: Provider>(
     protos: &Vec<blueprint::prototype::Instance>,
     provider: &P,
     elevation: &Elevation,
@@ -16,7 +16,7 @@ pub(crate) fn imprint<P: Provider>(
     darkness: u8,
     layers: &Layers,
     image: &mut bmp::Image,
-) -> Result<(), Error> {
+) -> Result<(), Error<'a>> {
     for proto in protos.iter() {
         if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
         if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };

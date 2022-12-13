@@ -1,10 +1,10 @@
 use bmp::Image;
 
-use libycresources::common::types::errors::Error;
+use crate::error::Error;
 
 mod bitmap;
 
-pub(crate) fn overlay(image: &mut Image) -> Result<(), Error> {
+pub(crate) fn overlay<'a>(image: &mut Image) -> Result<(), Error<'a>> {
     let (tw, th, sh) = (32usize, 16usize, 8usize);
 
     let (gw, gh) = (image.get_width() as usize / tw, image.get_height() as usize / th);

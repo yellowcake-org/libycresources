@@ -1,24 +1,24 @@
 use bmp::Image;
 
-use libycresources::common::types::errors::Error;
 use libycresources::common::types::geometry::{Orientation, Scaled};
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
 use libycresources::formats::map;
 use libycresources::formats::pal::Palette;
 
+use crate::error::Error;
 use crate::render::{frame, sprite};
 use crate::render::item::Instance;
 use crate::traits::render::Provider;
 
-pub(crate) fn imprint(
-    tiles: &Vec<Instance>,
+pub(crate) fn imprint<'a, 'b>(
+    tiles: &'a Vec<Instance>,
     is_roof: bool,
     palette: &Palette,
     darkness: u8,
     side: usize,
     image: &mut Image,
-) -> Result<(), Error> {
+) -> Result<(), Error<'b>> {
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);
         let (frame, shift) = sprite::frame(
@@ -48,7 +48,7 @@ pub(crate) fn imprint(
 pub(crate) fn convert<'a, P: Provider>(
     raw: &'a Vec<map::tiles::Instance<u8, u8>>,
     provider: &P,
-) -> Result<Vec<Instance<'a>>, Error> {
+) -> Result<Vec<Instance<'a>>, Error<'a>> {
     raw.iter()
         .map(|e| {
             let position = &e.position;

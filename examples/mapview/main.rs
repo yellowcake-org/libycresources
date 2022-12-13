@@ -15,6 +15,7 @@ mod render;
 mod provider;
 mod traits;
 mod cli;
+mod error;
 
 fn main() {
     let options = Options::parse();
@@ -85,7 +86,7 @@ fn main() {
                         value
                     }
                     Err(error) => {
-                        eprintln!("Failed to render elevation {:?}. Error: {:?}.", level_readable, error);
+                        eprintln!("Failed to render elevation {:?}. Error: {:?}.", level_readable, error.to_string());
                         continue;
                     }
                     Ok(None) => {
