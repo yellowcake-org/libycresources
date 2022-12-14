@@ -16,6 +16,7 @@ mod hexes;
 mod protos;
 mod item;
 mod sprite;
+mod grid;
 
 pub(crate) fn map<'a, P: Provider>(
     map: &'a map::Map,
@@ -68,7 +69,7 @@ pub(crate) fn map<'a, P: Provider>(
 
     if layers.floor || layers.all() {
         println!("Rendering floor...");
-        tiles::imprint(&floors, false, &palette, darkness, scale, &mut image)?;
+        tiles::imprint(&floors, false, &palette, darkness, &mut image)?;
     }
 
     if layers.overlay || layers.all() {
@@ -77,11 +78,20 @@ pub(crate) fn map<'a, P: Provider>(
     }
 
     println!("Rendering prototypes...");
-    protos::imprint(&map.prototypes, provider, &elevation, &palette, darkness, &layers, &mut image)?;
+    protos::imprint(
+        &map.prototypes,
+        provider,
+        &elevation,
+        &palette,
+        darkness,
+        &layers,
+        (tw, th),
+        &mut image,
+    )?;
 
     if layers.roof || layers.all() {
         println!("Rendering roofs...");
-        tiles::imprint(&ceilings, true, &palette, darkness, scale, &mut image)?;
+        tiles::imprint(&ceilings, true, &palette, darkness, &mut image)?;
     }
 
     println!("Success.");
