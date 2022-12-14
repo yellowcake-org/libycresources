@@ -5,7 +5,7 @@ use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
 
 use crate::cli::export::filter::Layers;
 use crate::error::Error;
-use crate::render::{frame, sprite};
+use crate::render::{frame, grid, sprite};
 use crate::traits::render::Provider;
 
 pub(crate) fn imprint<'a, P: Provider>(
@@ -15,8 +15,11 @@ pub(crate) fn imprint<'a, P: Provider>(
     palette: &pal::Palette,
     darkness: u8,
     layers: &Layers,
+    dimensions: (usize, usize),
     image: &mut bmp::Image,
 ) -> Result<(), Error<'a>> {
+    let bounds = (image.get_width() as usize, image.get_height() as usize);
+
     for proto in protos.iter() {
         if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
         if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };
@@ -43,23 +46,19 @@ pub(crate) fn imprint<'a, P: Provider>(
                 &sprite, &location.orientation, proto.appearance.current,
             )?;
 
-            let (tw, th) = (80isize, 36isize);
-            let (tx, ty) = (location.position.x.value as isize, location.position.y.value as isize);
+            let point = grid::screen(&location.position, dimensions, bounds);
 
-            let (ox, oy) = ((tx * tw) as isize, (ty * th) as isize);
-            let (ox, oy) = (ox + (ty * 32), oy + ((location.position.x.scale.len() as isize - tx) * 12));
-            let (ox, oy) = (ox - (tx * 32), oy - (ty * 12));
-            let (ox, oy) = (ox / 2, oy / 2);
-
-            let (ox, oy) = (
-                ox - (frame.size.width as i16 + frame.shift.x) as isize / 2,
-                oy - (frame.size.height as i16 + frame.shift.y) as isize
+            // Aligning with frame's shift within it's own bounds.
+            let (x, y) = (
+                point.x.value as isize - (frame.size.width as i16 + frame.shift.x) as isize / 2,
+                point.y.value as isize - (frame.size.height as i16 + frame.shift.y) as isize
             );
 
             // Aligning with the hex grid from tiles' one.
+            let is_odd_row = location.position.x.value as isize % 2 != 0;
             let (ox, oy) = (
-                ox + (16) - if tx % 2 != 0 { 8 } else { 0 },
-                oy + (16 + 8) - if tx % 2 != 0 { 6 } else { 0 }
+                x + (16) - if is_odd_row { 8 } else { 0 },
+                y + (16 + 8) - if is_odd_row { 6 } else { 0 }
             );
 
             let (ox, oy) = (
