@@ -1,13 +1,11 @@
-use bmp::Image;
-
 use crate::error::Error;
 
 mod bitmap;
 
-pub(crate) fn overlay<'a>(image: &mut Image) -> Result<(), Error<'a>> {
+pub(crate) fn overlay<'a>(image: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize))) -> Result<(), Error<'a>> {
     let (tw, th, sh) = (32usize, 16usize, 8usize);
 
-    let (gw, gh) = (image.get_width() as usize / tw, image.get_height() as usize / th);
+    let (gw, gh) = (image.1.0 / tw, image.1.1 as usize / th);
     let (gw, gh) = (gw, gh + ((0..gh).reduce(|a, i| {
         a + (i * (th - sh / 2)) / gh
     }).unwrap_or(0) as usize - (th - sh / 2)) / th - 1);

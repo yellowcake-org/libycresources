@@ -27,7 +27,7 @@ pub(crate) fn map<'a, P: Provider>(
     elevation: &Elevation,
     provider: &P,
     resources: &PathBuf,
-) -> Result<Option<bmp::Image>, Error<'a>> {
+) -> Result<Option<(Vec<(u8, u8, u8)>, (usize, usize))>, Error<'a>> {
     let darkness = darkness.map_or(
         u8::try_from(map.darkness).map_err(|_| Error::Corrupted("Map darkness value is out of range."))?,
         |d| {
@@ -60,7 +60,8 @@ pub(crate) fn map<'a, P: Provider>(
         .ok_or(Error::Corrupted("Failed to determine tiles' grid parameters."))?;
 
     let (w, h) = (tw * scale, th * scale);
-    let mut image = bmp::Image::new(w as u32, h as u32);
+    let mut pixels = vec![(u8::MIN, u8::MIN, u8::MIN); w * h];
+    let mut image = (&mut pixels, (w, h));
 
     let file = File::open(&resources.join("COLOR.PAL"))
         .map_err(|io| Error::IO(io, "Failed to load main palette."))?;
@@ -114,5 +115,5 @@ pub(crate) fn map<'a, P: Provider>(
     }
 
     println!("Success.");
-    Ok(Some(image))
+    Ok(Some((pixels, (w, h))))
 }

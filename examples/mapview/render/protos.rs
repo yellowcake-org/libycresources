@@ -18,9 +18,9 @@ pub(crate) fn imprint<'a, P: Provider>(
     darkness: u8,
     layers: &Layers,
     dimensions: (usize, usize),
-    image: &mut bmp::Image,
+    image: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize)),
 ) -> Result<(), Error<'a>> {
-    let bounds = (image.get_width() as usize, image.get_height() as usize);
+    let bounds = image.1;
 
     let mut grid: HashMap<(u8, u8), Vec<&blueprint::prototype::Instance>> = HashMap::new();
     for proto in protos.iter() {

@@ -1,12 +1,16 @@
 use std::ops::RangeInclusive;
 
-use bmp::Image;
-
 use libycresources::common::types::geometry::Scaled;
 use libycresources::formats::frm::Frame;
 use libycresources::formats::pal::Palette;
 
-pub(crate) fn imprint(frame: &Frame, palette: &Palette, darkness: u8, origin: (isize, isize), destination: &mut Image) {
+pub(crate) fn imprint(
+    frame: &Frame,
+    palette: &Palette,
+    darkness: u8,
+    origin: (isize, isize),
+    destination: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize)),
+) {
     let origin = (origin.0 + frame.shift.x as isize, origin.1 + frame.shift.y as isize);
 
     for (number, &index) in frame.indexes.iter().enumerate() {
@@ -31,7 +35,7 @@ pub(crate) fn imprint(frame: &Frame, palette: &Palette, darkness: u8, origin: (i
                 let green = adjusted(&pixel.green, darkness);
                 let blue = adjusted(&pixel.blue, darkness);
 
-                Some(bmp::Pixel::new(red, green, blue))
+                Some((red, green, blue))
             }
         };
 
@@ -43,6 +47,7 @@ pub(crate) fn imprint(frame: &Frame, palette: &Palette, darkness: u8, origin: (i
         let (x, y) = origin;
         let (x, y) = (x + rx, y + ry);
 
-        if let Some(pixel) = pixel { destination.set_pixel(x as u32, y as u32, pixel); }
+        let index = (x + (y * destination.1.0 as isize)) as usize;
+        if let Some(pixel) = pixel { destination.0[index] = pixel }
     }
 }
