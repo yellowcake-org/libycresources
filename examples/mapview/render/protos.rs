@@ -43,8 +43,8 @@ pub(crate) fn imprint<'a, P: Provider>(
                 protos.sort_by(|l, r| {
                     fn weight<I, C, S, W, T, M>(t: &pro::Type<I, C, S, W, T, M>) -> u8 {
                         match t {
-                            Item(_) => 3,
-                            Critter(_) => 4,
+                            Item(_) => 4,
+                            Critter(_) => 5,
                             Scenery(_) => 2,
                             Wall(_) => 1,
                             Tile(_) => 0,
