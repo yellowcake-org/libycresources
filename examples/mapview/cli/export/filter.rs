@@ -28,7 +28,10 @@ pub(crate) struct Layers {
 
 impl Layers {
     pub(crate) fn all(&self) -> bool {
-        let flags = [self.floor, self.overlay, self.roof, self.walls, self.items, self.misc, self.critters];
+        let flags = [
+            self.floor, self.overlay, self.roof, self.walls, self.items, self.misc, self.scenery, self.critters
+        ];
+
         flags.iter().min() == flags.iter().max()
     }
 }

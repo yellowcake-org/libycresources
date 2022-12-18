@@ -11,7 +11,7 @@ use crate::render::{frame, grid, sprite};
 use crate::traits::render::Provider;
 
 pub(crate) fn imprint<'a, P: Provider>(
-    protos: &Vec<blueprint::prototype::Instance>,
+    protos: &Vec<&blueprint::prototype::Instance>,
     provider: &P,
     elevation: &Elevation,
     palette: &pal::Palette,
