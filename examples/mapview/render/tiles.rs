@@ -1,5 +1,3 @@
-use bmp::Image;
-
 use libycresources::common::types::geometry::{Orientation, Scaled};
 use libycresources::common::types::models::Identifier;
 use libycresources::common::types::models::sprite::Kind;
@@ -16,9 +14,9 @@ pub(crate) fn imprint<'a, 'b>(
     is_roof: bool,
     palette: &Palette,
     darkness: u8,
-    image: &mut Image,
+    image: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize)),
 ) -> Result<(), Error<'b>> {
-    let bounds = (image.get_width() as usize, image.get_height() as usize);
+    let bounds = image.1;
 
     for tile in tiles.iter() {
         let palette = tile.palette.as_ref().unwrap_or(palette);

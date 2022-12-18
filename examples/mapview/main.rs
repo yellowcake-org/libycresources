@@ -108,9 +108,9 @@ fn main() {
                 let file = File::create(file).unwrap();
                 let ref mut writer = BufWriter::new(file);
 
-                println!("Saving data...");
+                println!("Writing header...");
                 let mut encoder =
-                    png::Encoder::new(writer, image.get_width(), image.get_height());
+                    png::Encoder::new(writer, image.1.0 as u32, image.1.1 as u32);
 
                 encoder.set_color(png::ColorType::Rgba);
                 encoder.set_depth(png::BitDepth::Eight);
@@ -123,18 +123,20 @@ fn main() {
                     }
                 };
 
-                let mut data: Vec<u8> = Vec::new();
-                for y in 0..image.get_height() {
-                    for x in 0..image.get_width() {
-                        let pixel = image.get_pixel(x, y);
+                println!("Converting bitmap...");
+                let data: Vec<u8> = image.0
+                    .iter()
+                    .map(|t| { (t.0, t.1, t.2, u8::MAX) })
+                    .fold(Vec::new(), |mut accum, t| {
+                        accum.push(t.0);
+                        accum.push(t.1);
+                        accum.push(t.2);
+                        accum.push(t.3);
 
-                        data.push(pixel.r);
-                        data.push(pixel.g);
-                        data.push(pixel.b);
-                        data.push(u8::MAX);
-                    }
-                }
+                        accum
+                    });
 
+                println!("Writing image...");
                 if let Err(error) = writer.write_image_data(&data) {
                     eprintln!("Couldn't write PNG header: {:}.", error);
                     continue;
