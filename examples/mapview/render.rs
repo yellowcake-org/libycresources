@@ -4,6 +4,8 @@ use std::path::PathBuf;
 use item::Instance;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::{map, pal};
+use libycresources::formats::map::blueprint;
+use libycresources::formats::pro::meta::info::flags::Root::Flat;
 
 use crate::cli::export::darkness::Darkness;
 use crate::cli::export::filter::Layers;
@@ -78,8 +80,25 @@ pub(crate) fn map<'a, P: Provider>(
     }
 
     println!("Rendering prototypes...");
+    let flat: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
+        .filter(|p| p.patch.meta.flags.contains(&Flat)).collect();
+
+    let other: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
+        .filter(|p| !p.patch.meta.flags.contains(&Flat)).collect();
+
     protos::imprint(
-        &map.prototypes,
+        &flat,
+        provider,
+        &elevation,
+        &palette,
+        darkness,
+        &layers,
+        (tw, th),
+        &mut image,
+    )?;
+
+    protos::imprint(
+        &other,
         provider,
         &elevation,
         &palette,

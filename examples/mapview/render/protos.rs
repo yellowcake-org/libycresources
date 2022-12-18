@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use libycresources::common::types::space::Elevation;
+use libycresources::formats::{pal, pro};
 use libycresources::formats::map::blueprint;
-use libycresources::formats::pal;
-use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Wall};
+use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Tile, Wall};
 
 use crate::cli::export::filter::Layers;
 use crate::error::Error;
@@ -9,7 +11,7 @@ use crate::render::{frame, grid, sprite};
 use crate::traits::render::Provider;
 
 pub(crate) fn imprint<'a, P: Provider>(
-    protos: &Vec<blueprint::prototype::Instance>,
+    protos: &Vec<&blueprint::prototype::Instance>,
     provider: &P,
     elevation: &Elevation,
     palette: &pal::Palette,
@@ -20,58 +22,94 @@ pub(crate) fn imprint<'a, P: Provider>(
 ) -> Result<(), Error<'a>> {
     let bounds = (image.get_width() as usize, image.get_height() as usize);
 
+    let mut grid: HashMap<(u8, u8), Vec<&blueprint::prototype::Instance>> = HashMap::new();
     for proto in protos.iter() {
-        if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
-        if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };
-        if proto.id.kind == Scenery(()) && !(layers.scenery || layers.all()) { continue; };
-        if proto.id.kind == Wall(()) && !(layers.walls || layers.all()) { continue; };
-        if proto.id.kind == Misc(()) && !(layers.misc || layers.all()) { continue; };
+        if let Some(location) = &proto.location.grid {
+            let location = (location.position.x.value, location.position.y.value);
 
-        if let (
-            Some(location),
-            correction
-        ) = (
-            &proto.location.grid,
-            &proto.location.screen.correction
-        ) {
-            if &location.elevation != elevation { continue; }
+            let mut new: Vec<&blueprint::prototype::Instance> = Vec::new();
+            let existed = grid.get_mut(&location);
 
-            let identifier = &proto.appearance.sprite;
-            let item = provider.provide(&identifier)?;
+            let vec = existed.unwrap_or(&mut new);
+            vec.push(proto);
 
-            let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
-            assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
+            if !new.is_empty() { grid.insert(location, new); };
+        }
+    }
 
-            let (frame, shift) = sprite::frame(
-                &sprite, &location.orientation, proto.appearance.current,
-            )?;
+    for y in 0u8..200 {
+        for x in 0u8..200 {
+            if let Some(protos) = grid.get_mut(&(200 - x - 1, y)) {
+                protos.sort_by(|l, r| {
+                    fn weight<I, C, S, W, T, M>(t: &pro::Type<I, C, S, W, T, M>) -> u8 {
+                        match t {
+                            Item(_) => 4,
+                            Critter(_) => 5,
+                            Scenery(_) => 2,
+                            Wall(_) => 1,
+                            Tile(_) => 0,
+                            Misc(_) => 3,
+                        }
+                    }
 
-            let point = grid::screen(&location.position, dimensions, bounds);
+                    weight(&l.id.kind).cmp(&weight(&r.id.kind))
+                });
 
-            // Aligning with frame's shift within it's own bounds.
-            let (x, y) = (
-                point.x.value as isize - (frame.size.width as i16 + frame.shift.x) as isize / 2,
-                point.y.value as isize - (frame.size.height as i16 + frame.shift.y) as isize
-            );
+                for proto in protos.iter() {
+                    if proto.id.kind == Item(()) && !(layers.items || layers.all()) { continue; };
+                    if proto.id.kind == Critter(()) && !(layers.critters || layers.all()) { continue; };
+                    if proto.id.kind == Scenery(()) && !(layers.scenery || layers.all()) { continue; };
+                    if proto.id.kind == Wall(()) && !(layers.walls || layers.all()) { continue; };
+                    if proto.id.kind == Misc(()) && !(layers.misc || layers.all()) { continue; };
 
-            // Aligning with the hex grid from tiles' one.
-            let is_odd_row = location.position.x.value as isize % 2 != 0;
-            let (ox, oy) = (
-                x + (16) - if is_odd_row { 8 } else { 0 },
-                y + (16 + 8) - if is_odd_row { 6 } else { 0 }
-            );
+                    if let (
+                        Some(location),
+                        correction
+                    ) = (
+                        &proto.location.grid,
+                        &proto.location.screen.correction
+                    ) {
+                        if &location.elevation != elevation { continue; }
 
-            let (ox, oy) = (
-                ox + correction.x.value as isize,
-                oy + correction.y.value as isize
-            );
+                        let identifier = &proto.appearance.sprite;
+                        let item = provider.provide(&identifier)?;
 
-            let (ox, oy) = (
-                ox + shift.x as isize,
-                oy + shift.y as isize
-            );
+                        let (sprite, palette) = (item.0, item.1.as_ref().unwrap_or(palette));
+                        assert_eq!(location.orientation.scaled.scale.len(), sprite.orientations.len());
 
-            frame::imprint(frame, palette, darkness, (ox, oy), image);
+                        let (frame, shift) = sprite::frame(
+                            &sprite, &location.orientation, proto.appearance.current,
+                        )?;
+
+                        let point = grid::screen(&location.position, dimensions, bounds);
+
+                        // Aligning with frame's shift within it's own bounds.
+                        let (x, y) = (
+                            point.x.value as isize - (frame.size.width as i16 + frame.shift.x) as isize / 2,
+                            point.y.value as isize - (frame.size.height as i16 + frame.shift.y) as isize
+                        );
+
+                        // Aligning with the hex grid from tiles' one.
+                        let is_odd_row = location.position.x.value as isize % 2 != 0;
+                        let (ox, oy) = (
+                            x + (16) - if is_odd_row { 8 } else { 0 },
+                            y + (16 + 8) - if is_odd_row { 6 } else { 0 }
+                        );
+
+                        let (ox, oy) = (
+                            ox + correction.x.value as isize,
+                            oy + correction.y.value as isize
+                        );
+
+                        let (ox, oy) = (
+                            ox + shift.x as isize,
+                            oy + shift.y as isize
+                        );
+
+                        frame::imprint(frame, palette, darkness, (ox, oy), image);
+                    }
+                }
+            }
         }
     }
 
