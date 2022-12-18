@@ -1,6 +1,8 @@
 use std::fs::File;
+use std::io::BufWriter;
 
 use clap::Parser;
+use png;
 
 use cli::{Action, Options};
 use cli::export::elevation;
@@ -100,11 +102,41 @@ fn main() {
                 );
 
                 let path = export.output.join(filename);
-                let file = path.with_extension("bmp");
+                let file = path.with_extension("png");
 
-                println!("Writing to file...");
-                if let Err(error) = image.save(file) {
-                    eprintln!("Couldn't save output file: {:}.", error);
+                println!("Creating file...");
+                let file = File::create(file).unwrap();
+                let ref mut writer = BufWriter::new(file);
+
+                println!("Saving data...");
+                let mut encoder =
+                    png::Encoder::new(writer, image.get_width(), image.get_height());
+
+                encoder.set_color(png::ColorType::Rgba);
+                encoder.set_depth(png::BitDepth::Eight);
+
+                let mut writer = match encoder.write_header() {
+                    Ok(value) => value,
+                    Err(error) => {
+                        eprintln!("Couldn't write PNG header: {:}.", error);
+                        continue;
+                    }
+                };
+
+                let mut data: Vec<u8> = Vec::new();
+                for y in 0..image.get_height() {
+                    for x in 0..image.get_width() {
+                        let pixel = image.get_pixel(x, y);
+
+                        data.push(pixel.r);
+                        data.push(pixel.g);
+                        data.push(pixel.b);
+                        data.push(u8::MAX);
+                    }
+                }
+
+                if let Err(error) = writer.write_image_data(&data) {
+                    eprintln!("Couldn't write PNG header: {:}.", error);
                     continue;
                 }
 
