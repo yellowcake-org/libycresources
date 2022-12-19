@@ -14,7 +14,8 @@ pub(crate) fn detect(w: u8, anim: u8) -> Option<(char, char)> {
             (weapon_to_code(w), animation_to_code(anim, 38, b'c'))
         }
         64 => ('n', 'a'),
-        _ if anim >= 48 => ('r', animation_to_code(anim, 48, b'a')),
+        _ if anim >= 48 =>
+            ('r', animation_to_code(anim, 48, b'a')),
         _ if anim >= 20 => ('b', animation_to_code(anim, 20, b'a')),
         18 => match w {
             1 | 4 => (weapon_to_code(w), 'm'),
