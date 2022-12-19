@@ -4,13 +4,15 @@ use libycresources::common::types::geometry::Scaled;
 use libycresources::formats::frm::Frame;
 use libycresources::formats::pal::Palette;
 
-pub(crate) fn imprint(
+use crate::error::Error;
+
+pub(crate) fn imprint<'a>(
     frame: &Frame,
     palette: &Palette,
     darkness: u8,
     origin: (isize, isize),
     destination: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize)),
-) {
+) -> Result<(), Error<'a>> {
     let origin = (origin.0 + frame.shift.x as isize, origin.1 + frame.shift.y as isize);
 
     for (number, &index) in frame.indexes.iter().enumerate() {
@@ -48,6 +50,14 @@ pub(crate) fn imprint(
         let (x, y) = (x + rx, y + ry);
 
         let index = (x + (y * destination.1.0 as isize)) as usize;
-        if let Some(pixel) = pixel { destination.0[index] = pixel }
+        if let Some(pixel) = pixel {
+            if destination.0.get(index).is_none() {
+                return Err(Error::Corrupted("Object's screen location is out of map bounds"));
+            }
+
+            destination.0[index] = pixel;
+        }
     }
+
+    Ok(())
 }

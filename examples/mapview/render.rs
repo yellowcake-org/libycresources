@@ -59,7 +59,7 @@ pub(crate) fn map<'a, P: Provider>(
         .map(|t| { (t.0 as usize, t.1 as usize, t.2.x.scale.len() as usize) })
         .ok_or(Error::Corrupted("Failed to determine tiles' grid parameters."))?;
 
-    let (w, h) = (tw * scale, th * scale);
+    let (w, h) = (tw * scale, th * scale + 15);
     let mut pixels = vec![(u8::MIN, u8::MIN, u8::MIN); w * h];
     let mut image = (&mut pixels, (w, h));
 

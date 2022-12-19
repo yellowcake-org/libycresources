@@ -30,7 +30,7 @@ pub(crate) fn imprint<'a, 'b>(
         let (x, y) = (point.x.value as isize, point.y.value as isize - if is_roof { 96 } else { 0 });
         let (x, y) = (x + shift.x as isize, y + shift.y as isize);
 
-        frame::imprint(frame, palette, darkness, (x, y), image);
+        frame::imprint(frame, palette, darkness, (x, y), image)?;
     }
 
     Ok(())

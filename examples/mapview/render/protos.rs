@@ -106,7 +106,7 @@ pub(crate) fn imprint<'a, P: Provider>(
                             oy + shift.y as isize
                         );
 
-                        frame::imprint(frame, palette, darkness, (ox, oy), image);
+                        frame::imprint(frame, palette, darkness, (ox, oy), image)?;
                     }
                 }
             }
