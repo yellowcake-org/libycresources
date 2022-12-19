@@ -1,6 +1,7 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 use libycresources::common::types::errors;
 use libycresources::common::types::models::Identifier;
@@ -37,15 +38,18 @@ impl render::Provider for CommonProvider<'_> {
         };
 
         let directory = &self.directory.join(subdirectory);
-        let mut path = directory.join((|| -> Result<String, error::Error> {
-            let lst = &directory.join(subdirectory.to_owned() + ".LST");
 
-            let reader = File::open(lst)
-                .map_err(|io| error::Error::IO(io, "Failed to open .LST file."))?;
+        let lst = &directory.join(subdirectory.to_string() + ".LST");
+        let mut list = File::open(lst)
+            .map_err(|io| error::Error::IO(io, "Failed to open .LST file."))?;
 
-            return BufReader::with_capacity(1 * 1024 * 1024, reader)
+        fn values<'a>(index: u16, lst: &mut File) -> Result<Vec<String>, error::Error<'a>> {
+            lst.seek(SeekFrom::Start(0))
+                .map_err(|io| error::Error::IO(io, "Couldn't reset file handler to start."))?;
+
+            BufReader::with_capacity(1 * 1024 * 1024, lst)
                 .lines()
-                .nth(identifier.index as usize)
+                .nth(index as usize)
                 .ok_or(error::Error::Corrupted(".LST file doesn't contain expected line."))?
                 .map_err(|io| error::Error::IO(io, ""))
                 .map(|s| {
@@ -54,25 +58,27 @@ impl render::Provider for CommonProvider<'_> {
                         .next()
                         .unwrap_or(&s);
 
-                    let mut fields: Vec<String> = s
-                        .split(',')
-                        .map(|s| { s.to_string() }).collect();
+                    Ok(s.split(',').map(|s| { s.to_string() }).collect())
+                })?
+        }
 
-                    Ok(fields.remove(0))
-                })?;
-        })()?);
+        let row: Vec<String> = values(identifier.index, &mut list)?;
+        let name = row.first()
+            .ok_or(error::Error::Corrupted("Could not read sprite name from the .LST entry."))?;
 
-        path = path.to_str()
-            .map(|s| s.trim())
-            .map(|s| { PathBuf::from(s) })
-            .map_or(
-                Err(error::Error::Corrupted("Failed to construct correct file path from .LST index record.")),
-                |p| { Ok(p) },
-            )?;
+        fn filename<'a>(from: &PathBuf, name: &String) -> Result<PathBuf, error::Error<'a>> {
+            from.join(name).to_str()
+                .map(|s| s.trim())
+                .map(|s| { PathBuf::from(s) })
+                .map_or(
+                    Err(error::Error::Corrupted("Failed to construct correct file path from .LST index record.")),
+                    |p| { Ok(p) },
+                )
+        }
 
         fn sprite<'a>(path: &PathBuf) -> Result<Sprite, error::Error<'a>> {
             let file = File::open(&path)
-                .map_err(|io| error::Error::IO(io, "Failed to open sprite file."))?;
+                .map_err(|io| { error::Error::IO(io, "Failed to open sprite file.") })?;
 
             let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
             let sprite = frm::parse::sprite(&mut reader)
@@ -81,7 +87,10 @@ impl render::Provider for CommonProvider<'_> {
             Ok(sprite)
         }
 
-        let sprite = if identifier.kind != Kind::Critter { sprite(&path) } else {
+        let (sprite, path) = if identifier.kind != Kind::Critter {
+            let path = filename(&directory, &name)?;
+            (sprite(&path)?, path)
+        } else {
             let direction = (identifier.raw >> 28) as u8 & 0b111;
 
             let weapon = (identifier.raw >> 12) as u8 & 0b1111;
@@ -90,36 +99,58 @@ impl render::Provider for CommonProvider<'_> {
             let suffix = suffix::detect(weapon, animation).
                 ok_or(error::Error::Corrupted("Failed to detect proper .FRM file suffix for a critter."))?;
 
-            path = path.to_str()
-                .map(|s| {
-                    s.to_owned() + format!("{}{}", suffix.0, suffix.1).as_str()
-                })
-                .map(|s| { PathBuf::from(s) })
-                .map_or(
-                    Err(error::Error::Corrupted("Failed to construct proper .FRM file path.")),
-                    |p| { Ok(p) },
-                )?;
+            fn load<'a>(path: &PathBuf, suffix: &(char, char), direction: u8) -> Result<Sprite, error::Error<'a>> {
+                let mut path = path.to_str()
+                    .map(|s| {
+                        s.to_owned() + format!("{}{}", suffix.0, suffix.1).as_str()
+                    })
+                    .map(|s| { PathBuf::from(s) })
+                    .map_or(
+                        Err(error::Error::Corrupted("Failed to construct proper .FRM file path.")),
+                        |p| { Ok(p) },
+                    )?;
 
-            if direction == 0 {
-                path.set_extension("frm");
-                sprite(&path)
-            } else {
-                let mut sprites: [Option<Sprite>; 6] = [None, None, None, None, None, None];
+                if direction == 0 {
+                    path.set_extension("frm");
+                    sprite(&path)
+                } else {
+                    let mut sprites: [Option<Sprite>; 6] = [None, None, None, None, None, None];
 
-                for i in 0..6 {
-                    path.set_extension("fr".to_owned() + i.to_string().as_str());
-                    sprites[i] = Some(sprite(&path)?);
+                    for i in 0..6 {
+                        path.set_extension("fr".to_owned() + i.to_string().as_str());
+                        sprites[i] = Some(sprite(&path)?);
+                    }
+
+                    let merged = frm::merge::sprites(sprites.map(|o| o.unwrap()))
+                        .map_err(|_| {
+                            error::Error::Corrupted("Failed to merge separate .fr0-5 sprites into single one. ")
+                        })?;
+
+                    Ok(merged)
                 }
-
-                let merged = frm::merge::sprites(sprites.map(|o| o.unwrap()))
-                    .map_err(|_| {
-                        error::Error::Corrupted("Failed to merge separate .fr0-5 sprites into single one. ")
-                    })?;
-
-                Ok(merged)
             }
-        }?;
 
+            let path = filename(&directory, &name)?;
+            let result = load(&path, &suffix, direction);
+
+            if let Ok(result) = result { (result, path) } else {
+                let index = row.get(1)
+                    .map(|s| u16::from_str(s))
+                    .ok_or(error::Error::Corrupted("Couldn't find critter's sprite fallback index."))?
+                    .map_err(|_| error::Error::Corrupted("Couldn't parse critter's sprite fallback index."))?;
+
+                let row: Vec<String> = values(index, &mut list)?;
+                let name = row.first()
+                    .ok_or(error::Error::Corrupted("Could not read fallback sprite name from the .LST entry."))?;
+
+                let path = filename(&directory, &name)?;
+                let result = load(&path, &suffix, direction)?;
+
+                (result, path)
+            }
+        };
+
+        let mut path = path;
         path.set_extension("pal");
         let file = File::open(&path).ok();
         let palette = file

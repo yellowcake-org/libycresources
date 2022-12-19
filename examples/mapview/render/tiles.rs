@@ -30,7 +30,7 @@ pub(crate) fn imprint<'a, 'b>(
         let (x, y) = (point.x.value as isize, point.y.value as isize - if is_roof { 96 } else { 0 });
         let (x, y) = (x + shift.x as isize, y + shift.y as isize);
 
-        frame::imprint(frame, palette, darkness, (x, y), image);
+        frame::imprint(frame, palette, darkness, (x, y), image)?;
     }
 
     Ok(())
@@ -44,7 +44,11 @@ pub(crate) fn convert<'a, P: Provider>(
     raw.iter()
         .map(|e| {
             let position = &e.position;
-            let identifier = Identifier { raw: e.index as u32, kind: Kind::Tile, index: e.index };
+            let identifier = Identifier {
+                raw: u32::from(e.id),
+                kind: Kind::Tile,
+                index: e.id & 0b1111_1111_1111,
+            };
 
             let (sprite, palette) = provider.provide(&identifier)?;
             Ok(Instance { sprite, palette, position })
