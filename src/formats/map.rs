@@ -60,7 +60,7 @@ pub mod tiles {
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Instance<V, S> {
-        pub index: u16,
+        pub id: u16,
         pub position: Coordinate<V, Range<S>>,
     }
 

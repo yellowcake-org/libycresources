@@ -32,7 +32,7 @@ pub fn list<S: Read>(source: &mut S, elevations: &[Option<()>; 3]) -> Result<Vec
 
                     if id > 1 {
                         into.push(tiles::Instance {
-                            index: id,
+                            id: id,
                             position: Coordinate {
                                 x: Scaled { value: x, scale: u8::MIN..SIDE_LEN },
                                 y: Scaled { value: y, scale: u8::MIN..SIDE_LEN },

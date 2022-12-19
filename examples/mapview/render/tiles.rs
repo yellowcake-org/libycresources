@@ -44,7 +44,11 @@ pub(crate) fn convert<'a, P: Provider>(
     raw.iter()
         .map(|e| {
             let position = &e.position;
-            let identifier = Identifier { raw: e.index as u32, kind: Kind::Tile, index: e.index };
+            let identifier = Identifier {
+                raw: u32::from(e.id),
+                kind: Kind::Tile,
+                index: e.id & 0b1111_1111_1111,
+            };
 
             let (sprite, palette) = provider.provide(&identifier)?;
             Ok(Instance { sprite, palette, position })
