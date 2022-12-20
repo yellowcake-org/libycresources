@@ -30,6 +30,7 @@ pub(crate) fn screen(
     let (x, y) = (x + (ty * x_overlap), y + ((from.x.scale.len() as isize - tx) * y_overlap));
     let (x, y) = (x - (tx * x_overlap), y - (ty * y_overlap));
     let (x, y) = (x / x_scale, y / y_scale);
+    let (x, y) = (x, y - y_overlap);
 
     Coordinate {
         x: Scaled { value: x as usize, scale: 0..bounds.0 },

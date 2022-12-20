@@ -18,9 +18,10 @@ pub(crate) fn line(
     loop {
         fn reddify(x: usize, y: usize, image: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize))) {
             let index = x + (y * image.1.0);
-            image.0[index] = image.0.get(index).map(|pixel| {
+
+            if let Some(pixel) = image.0.get(index).map(|pixel| {
                 (pixel.0 + min(u8::MAX - pixel.0, 255 / 4), pixel.1, pixel.2)
-            }).unwrap();
+            }) { image.0[index] = pixel; } else { debug_assert!(true) };
         }
 
         reddify(current.0 as usize, current.1 as usize, image);
