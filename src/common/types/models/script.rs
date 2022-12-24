@@ -9,11 +9,11 @@ pub enum Kind<Sys, Sp, T, I, C> {
     Critter(C),
 }
 
-impl TryFrom<u8> for Type {
+impl TryFrom<u32> for Type {
     type Error = super::super::errors::Error;
 
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        Ok(match value {
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        Ok(match (value >> u8::BITS * 3) as u8 {
             0 => Self::System(()),
             1 => Self::Spatial(()),
             2 => Self::Timed(()),
