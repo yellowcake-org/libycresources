@@ -45,7 +45,6 @@ pub(crate) fn convert<'a, P: Provider>(
         .map(|e| {
             let position = &e.position;
             let identifier = Identifier {
-                raw: u32::from(e.id),
                 kind: Kind::Tile,
                 index: e.id & 0b1111_1111_1111,
             };
