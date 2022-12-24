@@ -12,12 +12,12 @@ pub(crate) fn overlay<'a>(image: &mut (&mut Vec<(u8, u8, u8)>, (usize, usize))) 
 
     for gy in 0..gh {
         for gx in 0..gw {
-            if gy == 0 || gy == gh - 1 { continue; }
+            if gy == gh - 1 { continue; }
             if gy % 2 == 0 && (gx == gw - 1) { continue; }
 
             let (ox, oy) = ((gx * tw + if gy % 2 == 0 { tw / 2 } else { 0 }) as usize, (gy * th) as usize);
             let (ox, oy) = (ox, oy - (gy as usize * sh as usize / 2));
-            let (ox, oy) = (ox, oy - sh);
+            let (ox, oy) = (ox, oy + th);
 
             let v0 = (ox + tw / 2, oy);
             let v1 = (ox + tw - 1, oy + (th - sh) / 2 - 1);

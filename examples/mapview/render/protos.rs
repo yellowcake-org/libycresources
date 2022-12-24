@@ -81,7 +81,11 @@ pub(crate) fn imprint<'a, P: Provider>(
                             &sprite, &location.orientation, proto.appearance.current,
                         )?;
 
-                        let point = grid::screen(&location.position, dimensions, bounds);
+                        let point = grid::screen(
+                            &location.position,
+                            dimensions,
+                            bounds,
+                        );
 
                         // Aligning with frame's shift within it's own bounds.
                         let (x, y) = (
@@ -93,7 +97,7 @@ pub(crate) fn imprint<'a, P: Provider>(
                         let is_odd_row = location.position.x.value as isize % 2 != 0;
                         let (ox, oy) = (
                             x + (16) - if is_odd_row { 8 } else { 0 },
-                            y + (16 + 8) - if is_odd_row { 6 } else { 0 }
+                            y + (16) - if is_odd_row { 6 } else { 0 }
                         );
 
                         let (ox, oy) = (
