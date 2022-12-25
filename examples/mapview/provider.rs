@@ -45,23 +45,20 @@ impl render::Provider for CommonProvider<'_> {
             .map_err(|io| error::Error::IO(io, "Failed to open .LST file."))?;
 
         fn values<'a>(index: u16, lst: &mut File) -> Result<Vec<String>, error::Error<'a>> {
-            lst.seek(SeekFrom::Start(0))
-                .map_err(|io|
-                    error::Error::IO(io, "Couldn't reset file handler to the beginning.")
-                )?;
+            lst.seek(SeekFrom::Start(0)).map_err(|io|
+                error::Error::IO(io, "Couldn't reset file handler to the beginning.")
+            )?;
 
             BufReader::with_capacity(1 * 1024 * 1024, lst)
                 .lines()
                 .nth(index as usize)
                 .ok_or(error::Error::Corrupted(".LST file doesn't contain expected line."))?
                 .map_err(|io| error::Error::IO(io, ""))
-                .map(|s| {
-                    let s = s
-                        .splitn(2, |c| c == ' ' || c == ';' || c == '\t')
-                        .next()
-                        .unwrap_or(&s);
+                .map(|line| {
+                    let records = line.splitn(2, |c| c == ' ' || c == ';' || c == '\t')
+                        .next().unwrap_or(&line);
 
-                    Ok(s.split(',').map(|s| { s.to_string() }).collect())
+                    Ok(records.split(',').map(|s| { s.to_string() }).collect())
                 })?
         }
 
@@ -74,18 +71,14 @@ impl render::Provider for CommonProvider<'_> {
                 .map(|s| s.trim())
                 .map(|s| { PathBuf::from(s) })
                 .map_or(
-                    Err(
-                        error::Error::Corrupted("Failed to construct correct file path from .LST index record.")
-                    ),
+                    Err(error::Error::Corrupted("Failed to construct correct file path from .LST index record.")),
                     |p| { Ok(p) },
                 )
         }
 
         fn sprite<'a>(path: &PathBuf) -> Result<Sprite, error::Error<'a>> {
             let file = File::open(&path)
-                .map_err(|io| {
-                    error::Error::IO(io, "Failed to open sprite file.")
-                })?;
+                .map_err(|io| { error::Error::IO(io, "Failed to open sprite file.") })?;
 
             let mut reader = BufReader::with_capacity(1 * 1024 * 1024, file);
             let sprite = frm::parse::sprite(&mut reader)
@@ -162,6 +155,7 @@ impl render::Provider for CommonProvider<'_> {
 
         let mut path = path;
         path.set_extension("pal");
+
         let file = File::open(&path).ok();
         let palette = file
             .map(|f| {

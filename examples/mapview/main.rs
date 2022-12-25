@@ -83,10 +83,6 @@ fn main() {
                 );
 
                 let image = match result {
-                    Ok(Some(value)) => {
-                        println!("Succeeded rendering elevation {:?}.", level_readable);
-                        value
-                    }
                     Err(error) => {
                         eprintln!("Failed to render elevation {:?}. Error: {:?}.", level_readable, error.to_string());
                         continue;
@@ -94,6 +90,10 @@ fn main() {
                     Ok(None) => {
                         println!("Elevation {:?} is not present in the file, skipping...", level_readable);
                         continue;
+                    }
+                    Ok(Some(value)) => {
+                        println!("Succeeded rendering elevation {:?}.", level_readable);
+                        value
                     }
                 };
 
