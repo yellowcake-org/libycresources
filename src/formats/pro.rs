@@ -142,6 +142,74 @@ pub mod object {
 
         pub mod critter {
             #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
+            pub enum Animation {
+                Stand,
+                Walk,
+                JumpBegin,
+                JumpEnd,
+                ClimbLadder,
+                Falling,
+                UpStairsRight,
+                UpStairsLeft,
+                DownStairsRight,
+                DownStairsLeft,
+                MagicHandsGround,
+                MagicHandsMiddle,
+                MagicHandsUp,
+                Dodge,
+                HitFromFront,
+                HitFromBack,
+                ThrowPunch,
+                KickLeg,
+                Throw,
+                Running,
+                FallBack,
+                FallFront,
+                BadLanding,
+                BigHole,
+                CharredBody,
+                ChunksOfFlesh,
+                DancingAutofire,
+                Electrify,
+                SlicedInHalf,
+                BurnedToNothing,
+                ElectrifiedToNothing,
+                ExplodedToNothing,
+                MeltedToNothing,
+                FireDance,
+                FallBackBlood,
+                FallFrontBlood,
+                ProneToStanding,
+                BackToStanding,
+                TakeOut,
+                PutAway,
+                Parry,
+                Thrust,
+                Swing,
+                Point,
+                Unpoint,
+                FireSingle,
+                FireBurst,
+                FireContinuous,
+                FallBackSf,
+                FallFrontSf,
+                BadLandingSf,
+                BigHoleSf,
+                CharredBodySf,
+                ChunksOfFleshSf,
+                DancingAutofireSf,
+                ElectrifySf,
+                SlicedInHalfSf,
+                BurnedToNothingSf,
+                ElectrifiedToNothingSf,
+                ExplodedToNothingSf,
+                MeltedToNothingSf,
+                FallBackBloodSf,
+                FallFrontBloodSf,
+                CalledShotPic,
+            }
+
+            #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
             pub enum Statistic {
                 Strength,
                 Perception,
@@ -516,7 +584,7 @@ pub mod object {
                 }
             }
 
-            #[derive(Debug)]
+            #[derive(Debug, Eq, PartialEq)]
             pub enum Animation {
                 Knife,
                 Club,

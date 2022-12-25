@@ -64,9 +64,13 @@ fn main() {
         }
         Action::Print(arguments) => {
             for char in arguments.string.chars() {
-                if char.is_alphanumeric() {
-                    let glyph = &font.glyphs[char as usize];
-                    print::glyph(&glyph);
+                if char.is_ascii() {
+                    if let Some(glyph) = &font.glyphs.get(char as usize) {
+                        print::glyph(&glyph);
+                    } else {
+                        eprintln!("Encountered char, which is absent in provided font. Aborting.");
+                        return;
+                    }
                 } else {
                     eprintln!("Non-ASCII char was found within provided string. Aborting.");
                     return;

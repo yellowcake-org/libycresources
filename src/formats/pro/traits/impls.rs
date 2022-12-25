@@ -280,6 +280,80 @@ impl TryFrom<i32> for object::common::critter::Statistic {
     }
 }
 
+impl TryFrom<u8> for object::common::critter::Animation {
+    type Error = errors::Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Stand),
+            1 => Ok(Self::Walk),
+            2 => Ok(Self::JumpBegin),
+            3 => Ok(Self::JumpEnd),
+            4 => Ok(Self::ClimbLadder),
+            5 => Ok(Self::Falling),
+            6 => Ok(Self::UpStairsRight),
+            7 => Ok(Self::UpStairsLeft),
+            8 => Ok(Self::DownStairsRight),
+            9 => Ok(Self::DownStairsLeft),
+            10 => Ok(Self::MagicHandsGround),
+            11 => Ok(Self::MagicHandsMiddle),
+            12 => Ok(Self::MagicHandsUp),
+            13 => Ok(Self::Dodge),
+            14 => Ok(Self::HitFromFront),
+            15 => Ok(Self::HitFromBack),
+            16 => Ok(Self::ThrowPunch),
+            17 => Ok(Self::KickLeg),
+            18 => Ok(Self::Throw),
+            19 => Ok(Self::Running),
+            20 => Ok(Self::FallBack),
+            21 => Ok(Self::FallFront),
+            22 => Ok(Self::BadLanding),
+            23 => Ok(Self::BigHole),
+            24 => Ok(Self::CharredBody),
+            25 => Ok(Self::ChunksOfFlesh),
+            26 => Ok(Self::DancingAutofire),
+            27 => Ok(Self::Electrify),
+            28 => Ok(Self::SlicedInHalf),
+            29 => Ok(Self::BurnedToNothing),
+            30 => Ok(Self::ElectrifiedToNothing),
+            31 => Ok(Self::ExplodedToNothing),
+            32 => Ok(Self::MeltedToNothing),
+            33 => Ok(Self::FireDance),
+            34 => Ok(Self::FallBackBlood),
+            35 => Ok(Self::FallFrontBlood),
+            36 => Ok(Self::ProneToStanding),
+            37 => Ok(Self::BackToStanding),
+            38 => Ok(Self::TakeOut),
+            39 => Ok(Self::PutAway),
+            40 => Ok(Self::Parry),
+            41 => Ok(Self::Thrust),
+            42 => Ok(Self::Swing),
+            43 => Ok(Self::Point),
+            44 => Ok(Self::Unpoint),
+            45 => Ok(Self::FireSingle),
+            46 => Ok(Self::FireBurst),
+            47 => Ok(Self::FireContinuous),
+            48 => Ok(Self::FallBackSf),
+            49 => Ok(Self::FallFrontSf),
+            50 => Ok(Self::BadLandingSf),
+            51 => Ok(Self::BigHoleSf),
+            52 => Ok(Self::CharredBodySf),
+            53 => Ok(Self::ChunksOfFleshSf),
+            54 => Ok(Self::DancingAutofireSf),
+            55 => Ok(Self::ElectrifySf),
+            56 => Ok(Self::SlicedInHalfSf),
+            57 => Ok(Self::BurnedToNothingSf),
+            58 => Ok(Self::ElectrifiedToNothingSf),
+            59 => Ok(Self::ExplodedToNothingSf),
+            60 => Ok(Self::MeltedToNothingSf),
+            61 => Ok(Self::FallBackBloodSf),
+            62 => Ok(Self::FallFrontBloodSf),
+            64 => Ok(Self::CalledShotPic),
+            _ => Err(errors::Error::Format)
+        }
+    }
+}
+
 impl TryFrom<&[u8; 4]> for object::common::map::Destination {
     type Error = errors::Error;
 

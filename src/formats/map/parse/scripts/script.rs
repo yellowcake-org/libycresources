@@ -66,7 +66,7 @@ pub fn instance<S: Read + Seek>(source: &mut S, type_raw: u8) -> Result<blueprin
 
     Ok(blueprint::script::Instance {
         id,
-        kind: match models::script::Type::try_from(type_raw)? {
+        kind: match models::script::Type::try_from(u32::try_from(type_raw).map_err(|_| errors::Error::Format)?)? {
             System(_) => System(()),
             Spatial(_) => Spatial(spatial_inners.ok_or(errors::Error::Format)?),
             Timed(_) => Timed(timed_inners.ok_or(errors::Error::Format)?),

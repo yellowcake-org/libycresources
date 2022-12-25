@@ -28,8 +28,11 @@ pub(crate) fn map<'a, P: Provider>(
     provider: &P,
     resources: &PathBuf,
 ) -> Result<Option<(Vec<(u8, u8, u8)>, (usize, usize))>, Error<'a>> {
+    let default = u8::try_from(map.darkness)
+        .map_err(|_| Error::Corrupted("Map darkness value is out of range."))?;
+
     let darkness = darkness.map_or(
-        u8::try_from(map.darkness).map_err(|_| Error::Corrupted("Map darkness value is out of range."))?,
+        default,
         |d| {
             match d {
                 Darkness::None => 1,

@@ -131,10 +131,18 @@ fn main() {
                 for (index, frame) in animation.frames.iter().enumerate() {
                     let frame_path = animation_dir.join(index.to_string()).with_extension("bmp");
 
-                    match render::frame(&frame, &palette).save(frame_path) {
-                        Ok(_) => {}
+                    match render::frame(&frame, &palette) {
+                        Ok(image) => {
+                            match image.save(frame_path) {
+                                Ok(_) => {}
+                                Err(error) => {
+                                    eprintln!("Couldn't write output file: {:}", error);
+                                    return;
+                                }
+                            }
+                        }
                         Err(error) => {
-                            eprintln!("Couldn't write output file: {:}", error);
+                            eprintln!("Couldn't write output file: {:?}", error);
                             return;
                         }
                     }
