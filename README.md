@@ -20,4 +20,4 @@ Basically you just use Cargo and default Rust tooling to explore different modul
 
 ### Who maintains and contributes
 
-Currently, only @0xceed is working on the library. While help from the community will be _very_ needed in the future, this early in development I need to focus on creating good example of my vision, guidelines and many, many more.
+Currently, only [@0xceed](https://github.com/0xceed) is working on the library. While help from the community will be _very_ needed in the future, this early in development I need to focus on creating good example of my vision, guidelines and many, many more.
