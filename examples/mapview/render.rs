@@ -1,7 +1,6 @@
 use item::Instance;
 use libycresources::common::types::space::Elevation;
 use libycresources::formats::map;
-use libycresources::formats::map::blueprint;
 use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::meta::info::flags::Root::Flat;
 
@@ -75,11 +74,8 @@ pub(crate) fn map<'a, P: Provider>(
     }
 
     println!("Rendering prototypes...");
-    let flat: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
-        .filter(|p| p.patch.meta.flags.contains(&Flat)).collect();
-
-    let other: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
-        .filter(|p| !p.patch.meta.flags.contains(&Flat)).collect();
+    let (flat, normal) = map.prototypes.iter()
+        .partition(|p| p.patch.meta.flags.contains(&Flat));
 
     protos::imprint(
         &flat,
@@ -93,7 +89,7 @@ pub(crate) fn map<'a, P: Provider>(
     )?;
 
     protos::imprint(
-        &other,
+        &normal,
         provider,
         &elevation,
         &palette,
