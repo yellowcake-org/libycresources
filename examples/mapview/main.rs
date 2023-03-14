@@ -9,7 +9,7 @@ use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
 use libycresources::common::types::geometry::Scaled;
 use libycresources::common::types::space;
-use libycresources::formats::map;
+use libycresources::formats::{map, pal};
 use provider::CommonProvider;
 
 mod print;
@@ -69,6 +69,21 @@ fn main() {
             if export.darkness.as_ref().is_some() { println!("Darkness customization has been applied."); }
             if export.elevation.as_ref().is_some() { println!("Provided elevation will be rendered only."); }
 
+            println!("Loading common palette...");
+
+            let file = match File::open(&options.resources.join("COLOR.PAL")) {
+                Err(error) => { return eprintln!("Failed to open main palette's file. Error: {:?}.", error); }
+                Ok(value) => value
+            };
+
+            let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
+            let palette = match pal::parse::palette(&mut reader) {
+                Err(error) => { return eprintln!("Failed to parse main palette. Error: {:?}.", error); }
+                Ok(value) => value
+            };
+
+            println!("Success.");
+
             for level in levels {
                 let level_readable = level + 1;
                 let elevation = space::Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
@@ -79,7 +94,7 @@ fn main() {
                     export.darkness.as_ref(),
                     &elevation,
                     &provider,
-                    &options.resources,
+                    &palette,
                 );
 
                 let image = match result {

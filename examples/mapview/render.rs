@@ -1,10 +1,8 @@
-use std::fs::File;
-use std::path::PathBuf;
-
 use item::Instance;
 use libycresources::common::types::space::Elevation;
-use libycresources::formats::{map, pal};
+use libycresources::formats::map;
 use libycresources::formats::map::blueprint;
+use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::meta::info::flags::Root::Flat;
 
 use crate::cli::export::darkness::Darkness;
@@ -26,7 +24,7 @@ pub(crate) fn map<'a, P: Provider>(
     darkness: Option<&Darkness>,
     elevation: &Elevation,
     provider: &P,
-    resources: &PathBuf,
+    palette: &Palette,
 ) -> Result<Option<(Vec<(u8, u8, u8)>, (usize, usize))>, Error<'a>> {
     let default = u8::try_from(map.darkness)
         .map_err(|_| Error::Corrupted("Map darkness value is out of range."))?;
@@ -66,16 +64,9 @@ pub(crate) fn map<'a, P: Provider>(
     let mut pixels = vec![(u8::MIN, u8::MIN, u8::MIN); w * h];
     let mut image = (&mut pixels, (w, h));
 
-    let file = File::open(&resources.join("COLOR.PAL"))
-        .map_err(|io| Error::IO(io, "Failed to load main palette."))?;
-
-    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
-    let palette = pal::parse::palette(&mut reader)
-        .map_err(|i| Error::Internal(i, "Failed to parse main palette."))?;
-
     if layers.floor || layers.all() {
         println!("Rendering floor...");
-        tiles::imprint(&floors, false, &palette, darkness, &mut image)?;
+        tiles::imprint(&floors, false, palette, darkness, &mut image)?;
     }
 
     if layers.overlay || layers.all() {
