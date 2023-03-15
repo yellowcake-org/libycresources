@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufWriter;
 
@@ -9,8 +10,12 @@ use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
 use libycresources::common::types::geometry::Scaled;
 use libycresources::common::types::space;
-use libycresources::formats::map;
+use libycresources::formats::{map, pal};
+use libycresources::formats::map::blueprint::prototype::Instance;
+use libycresources::formats::map::tiles::Group;
 use provider::CommonProvider;
+
+use crate::cli::export::darkness::Darkness;
 
 mod print;
 mod render;
@@ -69,17 +74,75 @@ fn main() {
             if export.darkness.as_ref().is_some() { println!("Darkness customization has been applied."); }
             if export.elevation.as_ref().is_some() { println!("Provided elevation will be rendered only."); }
 
-            for level in levels {
-                let level_readable = level + 1;
-                let elevation = space::Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
+            let default = match u8::try_from(map.darkness) {
+                Ok(value) => value,
+                Err(error) => {
+                    return eprintln!("Map darkness value is out of range. Error: {:?}", error);
+                }
+            };
+
+            let darkness = export.darkness.map_or(
+                default,
+                |d| {
+                    match d {
+                        Darkness::None => 1,
+                        Darkness::Night => 2,
+                        Darkness::Dusk => 3,
+                        Darkness::Day => 4,
+                    }
+                },
+            );
+
+            println!("Loading common palette...");
+
+            let file = match File::open(&options.resources.join("COLOR.PAL")) {
+                Err(error) => { return eprintln!("Failed to open main palette's file. Error: {:?}.", error); }
+                Ok(value) => value
+            };
+
+            let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
+            let palette = match pal::parse::palette(&mut reader) {
+                Err(error) => { return eprintln!("Failed to parse main palette. Error: {:?}.", error); }
+                Ok(value) => value
+            };
+
+            println!("Success.");
+
+            let mut tiles = HashMap::new();
+            for group in &map.tiles { tiles.insert(&group.elevation, group); }
+
+            let mut protos: HashMap<&space::Elevation, Vec<&Instance>> = HashMap::new();
+            for proto in &map.prototypes {
+                if let Some(grid) = &proto.location.grid {
+                    if let Some(protos) = protos.get_mut(&grid.elevation) {
+                        protos.push(&proto);
+                    } else {
+                        let mut list = Vec::new();
+                        list.push(proto);
+
+                        protos.insert(&grid.elevation, list);
+                    }
+                }
+            }
+
+            let drawables: Vec<(space::Elevation, &&Group, Option<&Vec<&Instance>>)> = levels.map(
+                |l| space::Elevation { level: Scaled { value: l, scale: 0..MAX_ELEVATION + 1 } }
+            ).map(|e| {
+                let protos = protos.get(&e);
+                tiles.get(&e).map(|t| (e, t, protos))
+            }).flatten().collect();
+
+            for (elevation, tiles, protos) in drawables {
+                let level_readable = elevation.level.value + 1;
 
                 println!("Started rendering level {:?}...", level_readable);
                 let result = render::map(
-                    &map, &filter,
-                    export.darkness.as_ref(),
-                    &elevation,
+                    &tiles,
+                    protos,
+                    &filter,
+                    darkness,
                     &provider,
-                    &options.resources,
+                    &palette,
                 );
 
                 let image = match result {

@@ -1,13 +1,9 @@
-use std::fs::File;
-use std::path::PathBuf;
-
 use item::Instance;
-use libycresources::common::types::space::Elevation;
-use libycresources::formats::{map, pal};
-use libycresources::formats::map::blueprint;
+use libycresources::formats::map;
+use libycresources::formats::map::tiles::Group;
+use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::meta::info::flags::Root::Flat;
 
-use crate::cli::export::darkness::Darkness;
 use crate::cli::export::filter::Layers;
 use crate::error::Error;
 use crate::traits::render::Provider;
@@ -21,37 +17,13 @@ mod sprite;
 mod grid;
 
 pub(crate) fn map<'a, P: Provider>(
-    map: &'a map::Map,
+    tiles: &'a Group,
+    protos: Option<&Vec<&map::blueprint::prototype::Instance>>,
     layers: &Layers,
-    darkness: Option<&Darkness>,
-    elevation: &Elevation,
+    darkness: u8,
     provider: &P,
-    resources: &PathBuf,
+    palette: &Palette,
 ) -> Result<Option<(Vec<(u8, u8, u8)>, (usize, usize))>, Error<'a>> {
-    let default = u8::try_from(map.darkness)
-        .map_err(|_| Error::Corrupted("Map darkness value is out of range."))?;
-
-    let darkness = darkness.map_or(
-        default,
-        |d| {
-            match d {
-                Darkness::None => 1,
-                Darkness::Night => 2,
-                Darkness::Dusk => 3,
-                Darkness::Day => 4,
-            }
-        },
-    );
-
-    let tiles = map.tiles
-        .iter()
-        .find(|e| { &e.elevation == elevation });
-
-    let tiles = match tiles {
-        None => return Ok(None),
-        Some(value) => value
-    };
-
     let floors: Vec<Instance> = tiles::convert(&tiles.floor, provider)?;
     let ceilings: Vec<Instance> = tiles::convert(&tiles.ceiling, provider)?;
 
@@ -66,16 +38,9 @@ pub(crate) fn map<'a, P: Provider>(
     let mut pixels = vec![(u8::MIN, u8::MIN, u8::MIN); w * h];
     let mut image = (&mut pixels, (w, h));
 
-    let file = File::open(&resources.join("COLOR.PAL"))
-        .map_err(|io| Error::IO(io, "Failed to load main palette."))?;
-
-    let mut reader = std::io::BufReader::with_capacity(1 * 1024 * 1024, file);
-    let palette = pal::parse::palette(&mut reader)
-        .map_err(|i| Error::Internal(i, "Failed to parse main palette."))?;
-
     if layers.floor || layers.all() {
         println!("Rendering floor...");
-        tiles::imprint(&floors, false, &palette, darkness, &mut image)?;
+        tiles::imprint(&floors, false, palette, darkness, &mut image)?;
     }
 
     if layers.overlay || layers.all() {
@@ -83,34 +48,31 @@ pub(crate) fn map<'a, P: Provider>(
         hexes::overlay(&mut image)?;
     }
 
-    println!("Rendering prototypes...");
-    let flat: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
-        .filter(|p| p.patch.meta.flags.contains(&Flat)).collect();
+    if let Some(protos) = protos {
+        println!("Rendering prototypes...");
+        let (flat, normal) = protos.iter()
+            .partition(|p| p.patch.meta.flags.contains(&Flat));
 
-    let other: Vec<&blueprint::prototype::Instance> = map.prototypes.iter()
-        .filter(|p| !p.patch.meta.flags.contains(&Flat)).collect();
+        protos::imprint(
+            &flat,
+            provider,
+            &palette,
+            darkness,
+            &layers,
+            (tw, th),
+            &mut image,
+        )?;
 
-    protos::imprint(
-        &flat,
-        provider,
-        &elevation,
-        &palette,
-        darkness,
-        &layers,
-        (tw, th),
-        &mut image,
-    )?;
-
-    protos::imprint(
-        &other,
-        provider,
-        &elevation,
-        &palette,
-        darkness,
-        &layers,
-        (tw, th),
-        &mut image,
-    )?;
+        protos::imprint(
+            &normal,
+            provider,
+            &palette,
+            darkness,
+            &layers,
+            (tw, th),
+            &mut image,
+        )?;
+    }
 
     if layers.roof || layers.all() {
         println!("Rendering roofs...");
