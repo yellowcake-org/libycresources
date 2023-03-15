@@ -1,10 +1,9 @@
 use item::Instance;
-use libycresources::common::types::space::Elevation;
 use libycresources::formats::map;
+use libycresources::formats::map::tiles::Group;
 use libycresources::formats::pal::Palette;
 use libycresources::formats::pro::meta::info::flags::Root::Flat;
 
-use crate::cli::export::darkness::Darkness;
 use crate::cli::export::filter::Layers;
 use crate::error::Error;
 use crate::traits::render::Provider;
@@ -18,37 +17,13 @@ mod sprite;
 mod grid;
 
 pub(crate) fn map<'a, P: Provider>(
-    map: &'a map::Map,
+    tiles: &'a Group,
+    protos: Option<&Vec<&map::blueprint::prototype::Instance>>,
     layers: &Layers,
-    darkness: Option<&Darkness>,
-    elevation: &Elevation,
+    darkness: u8,
     provider: &P,
     palette: &Palette,
 ) -> Result<Option<(Vec<(u8, u8, u8)>, (usize, usize))>, Error<'a>> {
-    let default = u8::try_from(map.darkness)
-        .map_err(|_| Error::Corrupted("Map darkness value is out of range."))?;
-
-    let darkness = darkness.map_or(
-        default,
-        |d| {
-            match d {
-                Darkness::None => 1,
-                Darkness::Night => 2,
-                Darkness::Dusk => 3,
-                Darkness::Day => 4,
-            }
-        },
-    );
-
-    let tiles = map.tiles
-        .iter()
-        .find(|e| { &e.elevation == elevation });
-
-    let tiles = match tiles {
-        None => return Ok(None),
-        Some(value) => value
-    };
-
     let floors: Vec<Instance> = tiles::convert(&tiles.floor, provider)?;
     let ceilings: Vec<Instance> = tiles::convert(&tiles.ceiling, provider)?;
 
@@ -73,31 +48,31 @@ pub(crate) fn map<'a, P: Provider>(
         hexes::overlay(&mut image)?;
     }
 
-    println!("Rendering prototypes...");
-    let (flat, normal) = map.prototypes.iter()
-        .partition(|p| p.patch.meta.flags.contains(&Flat));
+    if let Some(protos) = protos {
+        println!("Rendering prototypes...");
+        let (flat, normal) = protos.iter()
+            .partition(|p| p.patch.meta.flags.contains(&Flat));
 
-    protos::imprint(
-        &flat,
-        provider,
-        &elevation,
-        &palette,
-        darkness,
-        &layers,
-        (tw, th),
-        &mut image,
-    )?;
+        protos::imprint(
+            &flat,
+            provider,
+            &palette,
+            darkness,
+            &layers,
+            (tw, th),
+            &mut image,
+        )?;
 
-    protos::imprint(
-        &normal,
-        provider,
-        &elevation,
-        &palette,
-        darkness,
-        &layers,
-        (tw, th),
-        &mut image,
-    )?;
+        protos::imprint(
+            &normal,
+            provider,
+            &palette,
+            darkness,
+            &layers,
+            (tw, th),
+            &mut image,
+        )?;
+    }
 
     if layers.roof || layers.all() {
         println!("Rendering roofs...");

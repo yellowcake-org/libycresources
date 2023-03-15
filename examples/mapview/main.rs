@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufWriter;
 
@@ -9,8 +10,13 @@ use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
 use libycresources::common::types::geometry::Scaled;
 use libycresources::common::types::space;
+use libycresources::common::types::space::Elevation;
 use libycresources::formats::{map, pal};
+use libycresources::formats::map::blueprint::prototype::Instance;
+use libycresources::formats::map::tiles::Group;
 use provider::CommonProvider;
+
+use crate::cli::export::darkness::Darkness;
 
 mod print;
 mod render;
@@ -69,6 +75,25 @@ fn main() {
             if export.darkness.as_ref().is_some() { println!("Darkness customization has been applied."); }
             if export.elevation.as_ref().is_some() { println!("Provided elevation will be rendered only."); }
 
+            let default = match u8::try_from(map.darkness) {
+                Ok(value) => value,
+                Err(error) => {
+                    return eprintln!("Map darkness value is out of range. Error: {:?}", error);
+                }
+            };
+
+            let darkness = export.darkness.map_or(
+                default,
+                |d| {
+                    match d {
+                        Darkness::None => 1,
+                        Darkness::Night => 2,
+                        Darkness::Dusk => 3,
+                        Darkness::Day => 4,
+                    }
+                },
+            );
+
             println!("Loading common palette...");
 
             let file = match File::open(&options.resources.join("COLOR.PAL")) {
@@ -84,15 +109,49 @@ fn main() {
 
             println!("Success.");
 
-            for level in levels {
-                let level_readable = level + 1;
-                let elevation = space::Elevation { level: Scaled { value: level, scale: 0..MAX_ELEVATION + 1 } };
+            let mut tiles = HashMap::new();
+            map.tiles.iter().fold(&mut tiles, |a, g| {
+                a.insert(&g.elevation, g);
+                return a;
+            });
+
+            let mut protos: HashMap<&Elevation, Vec<&Instance>> = HashMap::new();
+            map.prototypes.iter().fold(&mut protos, |a, g| {
+                if let Some(grid) = &g.location.grid {
+                    if let Some(protos) = a.get_mut(&grid.elevation) {
+                        protos.push(g);
+                    } else {
+                        let mut protos = Vec::new();
+                        protos.push(g);
+
+                        a.insert(&grid.elevation, protos);
+                    }
+                }
+                return a;
+            });
+
+            let renderables: Vec<(Elevation, &&Group, Option<&Vec<&Instance>>)> = levels.map(
+                |l| space::Elevation { level: Scaled { value: l, scale: 0..MAX_ELEVATION + 1 } }
+            ).map(|e| {
+                let tiles = tiles.get(&e);
+                let protos = protos.get(&e);
+
+                if let Some(tiles) = tiles {
+                    return Some((e, tiles, protos));
+                }
+
+                return None;
+            }).flatten().collect();
+
+            for (elevation, tiles, protos) in renderables {
+                let level_readable = elevation.level.value + 1;
 
                 println!("Started rendering level {:?}...", level_readable);
                 let result = render::map(
-                    &map, &filter,
-                    export.darkness.as_ref(),
-                    &elevation,
+                    &tiles,
+                    protos,
+                    &filter,
+                    darkness,
                     &provider,
                     &palette,
                 );
