@@ -10,7 +10,6 @@ use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
 use libycresources::common::types::geometry::Scaled;
 use libycresources::common::types::space;
-use libycresources::common::types::space::Elevation;
 use libycresources::formats::{map, pal};
 use libycresources::formats::map::blueprint::prototype::Instance;
 use libycresources::formats::map::tiles::Group;
@@ -110,40 +109,30 @@ fn main() {
             println!("Success.");
 
             let mut tiles = HashMap::new();
-            map.tiles.iter().fold(&mut tiles, |a, g| {
-                a.insert(&g.elevation, g);
-                return a;
-            });
+            for group in &map.tiles { tiles.insert(&group.elevation, group); }
 
-            let mut protos: HashMap<&Elevation, Vec<&Instance>> = HashMap::new();
-            map.prototypes.iter().fold(&mut protos, |a, g| {
-                if let Some(grid) = &g.location.grid {
-                    if let Some(protos) = a.get_mut(&grid.elevation) {
-                        protos.push(g);
+            let mut protos: HashMap<&space::Elevation, Vec<&Instance>> = HashMap::new();
+            for proto in &map.prototypes {
+                if let Some(grid) = &proto.location.grid {
+                    if let Some(protos) = protos.get_mut(&grid.elevation) {
+                        protos.push(&proto);
                     } else {
-                        let mut protos = Vec::new();
-                        protos.push(g);
+                        let mut list = Vec::new();
+                        list.push(proto);
 
-                        a.insert(&grid.elevation, protos);
+                        protos.insert(&grid.elevation, list);
                     }
                 }
-                return a;
-            });
+            }
 
-            let renderables: Vec<(Elevation, &&Group, Option<&Vec<&Instance>>)> = levels.map(
+            let drawables: Vec<(space::Elevation, &&Group, Option<&Vec<&Instance>>)> = levels.map(
                 |l| space::Elevation { level: Scaled { value: l, scale: 0..MAX_ELEVATION + 1 } }
             ).map(|e| {
-                let tiles = tiles.get(&e);
                 let protos = protos.get(&e);
-
-                if let Some(tiles) = tiles {
-                    return Some((e, tiles, protos));
-                }
-
-                return None;
+                tiles.get(&e).map(|t| (e, t, protos))
             }).flatten().collect();
 
-            for (elevation, tiles, protos) in renderables {
+            for (elevation, tiles, protos) in drawables {
                 let level_readable = elevation.level.value + 1;
 
                 println!("Started rendering level {:?}...", level_readable);
