@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use libycresources::common::types::space::Elevation;
 use libycresources::formats::{pal, pro};
 use libycresources::formats::map::blueprint;
 use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Tile, Wall};
@@ -13,7 +12,6 @@ use crate::traits::render::Provider;
 pub(crate) fn imprint<'a, P: Provider>(
     protos: &Vec<&blueprint::prototype::Instance>,
     provider: &P,
-    elevation: &Elevation,
     palette: &pal::Palette,
     darkness: u8,
     layers: &Layers,
@@ -69,8 +67,6 @@ pub(crate) fn imprint<'a, P: Provider>(
                         &proto.location.grid,
                         &proto.location.screen.correction
                     ) {
-                        if &location.elevation != elevation { continue; }
-
                         let identifier = &proto.appearance.sprite;
                         let item = provider.provide(&identifier)?;
 

@@ -15,7 +15,7 @@ pub(crate) fn detect(weapon: &Option<weapon::Animation>, animation: &critter::An
             Some(weapon::Animation::BigGun) => 8,
             Some(weapon::Animation::Minigun) => 9,
             Some(weapon::Animation::RocketLauncher) => 10,
-        }) as char
+        }) as char;
     }
 
     fn a_char(a: &critter::Animation) -> char {
