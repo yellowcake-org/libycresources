@@ -1,8 +1,8 @@
-use libycresources::common::types::geometry::{Orientation, Scaled};
-use libycresources::common::types::models::Identifier;
-use libycresources::common::types::models::sprite::Kind;
-use libycresources::formats::map;
-use libycresources::formats::pal::Palette;
+use ycresources::common::types::geometry::{Orientation, Scaled};
+use ycresources::common::types::models::Identifier;
+use ycresources::common::types::models::sprite::Kind;
+use ycresources::formats::map;
+use ycresources::formats::pal::Palette;
 
 use crate::error::Error;
 use crate::render::{frame, grid, sprite};

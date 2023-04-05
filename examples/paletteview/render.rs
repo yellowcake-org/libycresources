@@ -1,4 +1,4 @@
-use libycresources::common::graphics::Pixel;
+use ycresources::common::graphics::Pixel;
 
 pub fn image(pixels: &[Option<Pixel<u8>>], width: usize) -> bmp::Image {
     let height = pixels.len() / width;

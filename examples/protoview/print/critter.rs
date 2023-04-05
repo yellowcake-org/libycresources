@@ -1,4 +1,4 @@
-pub(crate) fn critter(critter: &libycresources::formats::pro::object::critter::Instance) {
+pub(crate) fn critter(critter: &ycresources::formats::pro::object::critter::Instance) {
     println!("Prototype is Critter");
     println!();
 

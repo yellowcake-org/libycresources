@@ -1,8 +1,8 @@
 use std::ops::RangeInclusive;
 
-use libycresources::common::types::geometry::Scaled;
-use libycresources::formats::frm::Frame;
-use libycresources::formats::pal::Palette;
+use ycresources::common::types::geometry::Scaled;
+use ycresources::formats::frm::Frame;
+use ycresources::formats::pal::Palette;
 
 use crate::error::Error;
 

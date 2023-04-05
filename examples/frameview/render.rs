@@ -1,4 +1,4 @@
-use libycresources::formats::{frm, pal};
+use ycresources::formats::{frm, pal};
 
 #[derive(Debug)]
 pub enum Error { Corrupted }

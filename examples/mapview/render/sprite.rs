@@ -1,5 +1,5 @@
-use libycresources::common::types::geometry::Orientation;
-use libycresources::formats::frm::{Frame, FrameIndex, Shift, Sprite};
+use ycresources::common::types::geometry::Orientation;
+use ycresources::formats::frm::{Frame, FrameIndex, Shift, Sprite};
 
 use crate::error::Error;
 

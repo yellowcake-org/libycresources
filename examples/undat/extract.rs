@@ -1,8 +1,8 @@
 use std::io::{Read, Seek};
 use std::path::PathBuf;
 
-use libycresources::common::types::errors::Error;
-use libycresources::formats::dat;
+use ycresources::common::types::errors::Error;
+use ycresources::formats::dat;
 
 pub(crate) fn tree<R>(reader: &mut R, tree: &dat::Directory, output: &String) -> Result<(), Error> where R: Read + Seek {
     let mut path = PathBuf::new();

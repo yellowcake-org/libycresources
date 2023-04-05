@@ -1,4 +1,4 @@
-pub(crate) fn door(door: &libycresources::formats::pro::object::scenery::door::Instance) {
+pub(crate) fn door(door: &ycresources::formats::pro::object::scenery::door::Instance) {
     println!("Scenery is Door");
     println!();
 

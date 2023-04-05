@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use libycresources::formats::{pal, pro};
-use libycresources::formats::map::blueprint;
-use libycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Tile, Wall};
+use ycresources::formats::{pal, pro};
+use ycresources::formats::map::blueprint;
+use ycresources::formats::pro::Type::{Critter, Item, Misc, Scenery, Tile, Wall};
 
 use crate::cli::export::filter::Layers;
 use crate::error::Error;

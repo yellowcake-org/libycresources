@@ -1,4 +1,4 @@
-use libycresources::formats::map;
+use ycresources::formats::map;
 
 pub(crate) fn print(map: &map::Map) {
     println!("Tiles");

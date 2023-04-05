@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use libycresources::common::types::geometry::{Coordinate, Scaled};
+use ycresources::common::types::geometry::{Coordinate, Scaled};
 
 pub(crate) fn screen(
     from: &Coordinate<u8, Range<u8>>,

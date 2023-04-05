@@ -1,8 +1,8 @@
 use item::Instance;
-use libycresources::formats::map;
-use libycresources::formats::map::tiles::Group;
-use libycresources::formats::pal::Palette;
-use libycresources::formats::pro::meta::info::flags::Root::Flat;
+use ycresources::formats::map;
+use ycresources::formats::map::tiles::Group;
+use ycresources::formats::pal::Palette;
+use ycresources::formats::pro::meta::info::flags::Root::Flat;
 
 use crate::cli::export::filter::Layers;
 use crate::error::Error;

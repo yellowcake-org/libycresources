@@ -1,4 +1,4 @@
-pub(crate) fn armor(armor: &libycresources::formats::pro::object::item::armor::Instance) {
+pub(crate) fn armor(armor: &ycresources::formats::pro::object::item::armor::Instance) {
     println!("Item is Armor");
     println!("Class: {:?}", armor.class);
     println!("Perk: {:?}", armor.perk);

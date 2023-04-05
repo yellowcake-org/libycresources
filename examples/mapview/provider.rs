@@ -3,15 +3,15 @@ use std::io::{BufRead, BufReader, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-use libycresources::common::types::errors;
-use libycresources::common::types::geometry::Orientation;
-use libycresources::common::types::models::Identifier;
-use libycresources::common::types::models::sprite::Kind;
-use libycresources::formats::{frm, pal, pro};
-use libycresources::formats::frm::Sprite;
-use libycresources::formats::map::parse;
-use libycresources::formats::pal::Palette;
-use libycresources::formats::pro::{ObjectType, Prototype};
+use ycresources::common::types::errors;
+use ycresources::common::types::geometry::Orientation;
+use ycresources::common::types::models::Identifier;
+use ycresources::common::types::models::sprite::Kind;
+use ycresources::formats::{frm, pal, pro};
+use ycresources::formats::frm::Sprite;
+use ycresources::formats::map::parse;
+use ycresources::formats::pal::Palette;
+use ycresources::formats::pro::{ObjectType, Prototype};
 
 use crate::error;
 use crate::traits::render;

@@ -1,4 +1,4 @@
-pub(crate) fn ladder(ladder: &libycresources::formats::pro::object::scenery::ladder::Instance) {
+pub(crate) fn ladder(ladder: &ycresources::formats::pro::object::scenery::ladder::Instance) {
     println!("Scenery is Ladder");
     println!();
 

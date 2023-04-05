@@ -1,4 +1,4 @@
-pub(crate) fn drug(drug: &libycresources::formats::pro::object::item::drug::Instance) {
+pub(crate) fn drug(drug: &ycresources::formats::pro::object::item::drug::Instance) {
     println!("Item is Drug");
     println!();
 
