@@ -1,8 +1,8 @@
 use std::ops::Range;
 
-use libycresources::common::types::geometry::Coordinate;
-use libycresources::formats::frm::Sprite;
-use libycresources::formats::pal::Palette;
+use ycresources::common::types::geometry::Coordinate;
+use ycresources::formats::frm::Sprite;
+use ycresources::formats::pal::Palette;
 
 pub(crate) struct Instance<'a> {
     pub(crate) sprite: Sprite,

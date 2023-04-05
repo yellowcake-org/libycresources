@@ -8,11 +8,11 @@ use png;
 use cli::{Action, Options};
 use cli::export::elevation;
 use cli::export::filter::{Filter, Layers};
-use libycresources::common::types::geometry::Scaled;
-use libycresources::common::types::space;
-use libycresources::formats::{map, pal};
-use libycresources::formats::map::blueprint::prototype::Instance;
-use libycresources::formats::map::tiles::Group;
+use ycresources::common::types::geometry::Scaled;
+use ycresources::common::types::space;
+use ycresources::formats::{map, pal};
+use ycresources::formats::map::blueprint::prototype::Instance;
+use ycresources::formats::map::tiles::Group;
 use provider::CommonProvider;
 
 use crate::cli::export::darkness::Darkness;

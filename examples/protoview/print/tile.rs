@@ -1,4 +1,4 @@
-pub(crate) fn tile(tile: &libycresources::formats::pro::object::tile::Instance) {
+pub(crate) fn tile(tile: &ycresources::formats::pro::object::tile::Instance) {
     println!("Prototype is Tile");
     println!();
 

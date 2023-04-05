@@ -2,7 +2,7 @@ use std::fs::File;
 
 use clap::Parser;
 
-use libycresources::formats::dat;
+use ycresources::formats::dat;
 
 pub(crate) mod extract;
 pub(crate) mod print;

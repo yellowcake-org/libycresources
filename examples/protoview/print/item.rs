@@ -1,4 +1,4 @@
-use libycresources::formats::pro::object::item::Type;
+use ycresources::formats::pro::object::item::Type;
 
 mod armor;
 mod container;
@@ -8,7 +8,7 @@ mod ammo;
 mod misc;
 mod key;
 
-pub(crate) fn item(item: &libycresources::formats::pro::object::item::Instance) {
+pub(crate) fn item(item: &ycresources::formats::pro::object::item::Instance) {
     println!("Prototype is Item");
     println!();
     println!("Flags: {:?}", item.flags);

@@ -1,4 +1,4 @@
-pub(crate) fn elevator(elevator: &libycresources::formats::pro::object::scenery::elevator::Instance) {
+pub(crate) fn elevator(elevator: &ycresources::formats::pro::object::scenery::elevator::Instance) {
     println!("Scenery is Elevator");
     println!();
 

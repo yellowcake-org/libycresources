@@ -2,8 +2,8 @@ use std::fs::File;
 
 use clap::Parser;
 
-use libycresources::common::graphics;
-use libycresources::formats::pal;
+use ycresources::common::graphics;
+use ycresources::formats::pal;
 
 pub mod render;
 

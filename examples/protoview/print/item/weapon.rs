@@ -1,4 +1,4 @@
-pub(crate) fn weapon(weapon: &libycresources::formats::pro::object::item::weapon::Instance) {
+pub(crate) fn weapon(weapon: &ycresources::formats::pro::object::item::weapon::Instance) {
     println!("Item is Weapon");
     println!();
 

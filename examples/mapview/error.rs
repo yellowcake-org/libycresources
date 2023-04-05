@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use libycresources::common::types::errors;
+use ycresources::common::types::errors;
 
 pub(crate) enum Error<'a> {
     Corrupted(&'a str),

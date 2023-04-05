@@ -1,4 +1,4 @@
-use libycresources::formats::pro::object::scenery::SceneryType;
+use ycresources::formats::pro::object::scenery::SceneryType;
 
 mod door;
 mod stairs;
@@ -6,7 +6,7 @@ mod elevator;
 mod ladder;
 mod generic;
 
-pub(crate) fn scenery(scenery: &libycresources::formats::pro::object::scenery::Instance) {
+pub(crate) fn scenery(scenery: &ycresources::formats::pro::object::scenery::Instance) {
     println!("Prototype is Scenery");
     println!();
 

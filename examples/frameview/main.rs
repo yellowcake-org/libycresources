@@ -2,7 +2,7 @@ use std::fs::File;
 
 use clap::Parser;
 
-use libycresources::formats::{frm, pal};
+use ycresources::formats::{frm, pal};
 
 pub mod render;
 

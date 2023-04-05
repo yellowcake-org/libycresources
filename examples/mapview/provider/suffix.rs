@@ -1,5 +1,5 @@
-use libycresources::formats::pro::object::common::critter;
-use libycresources::formats::pro::object::item::weapon;
+use ycresources::formats::pro::object::common::critter;
+use ycresources::formats::pro::object::item::weapon;
 
 pub(crate) fn detect(weapon: &Option<weapon::Animation>, animation: &critter::Animation) -> Option<(char, char)> {
     fn w_code(weapon: &Option<weapon::Animation>) -> char {

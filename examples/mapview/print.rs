@@ -1,4 +1,4 @@
-use libycresources::formats::map;
+use ycresources::formats::map;
 
 mod tiles;
 mod scripts;

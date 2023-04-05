@@ -1,4 +1,4 @@
-use libycresources::formats::dat;
+use ycresources::formats::dat;
 
 pub(crate) fn tree(root: &dat::Directory) {
     let mut flag_path = Vec::new();

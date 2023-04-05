@@ -1,4 +1,4 @@
-use libycresources::formats::aaf;
+use ycresources::formats::aaf;
 
 pub fn glyph(glyph: &aaf::Glyph) {
     if !glyph.dots.is_empty() {

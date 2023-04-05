@@ -1,5 +1,5 @@
-use libycresources::formats::pro;
-use libycresources::formats::pro::Type;
+use ycresources::formats::pro;
+use ycresources::formats::pro::Type;
 
 mod item;
 mod critter;

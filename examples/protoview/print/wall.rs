@@ -1,4 +1,4 @@
-pub(crate) fn wall(wall: &libycresources::formats::pro::object::wall::Instance) {
+pub(crate) fn wall(wall: &ycresources::formats::pro::object::wall::Instance) {
     println!("Prototype is Wall");
     println!();
 

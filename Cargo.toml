@@ -1,7 +1,18 @@
 [package]
+name = "ycresources"
 edition = "2021"
-name = "libycresources"
-version = "0.2.0"
+version = "0.2.2"
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+byteorder = "1.2"
+
+[dev-dependencies]
+png = "0.17.7"
+bmp = "0.5.0"
+clap = "3.0.0-beta.5"
 
 [[example]]
 name = "undat"
@@ -17,11 +28,3 @@ name = "protoview"
 
 [[example]]
 name = "mapview"
-
-[dependencies]
-byteorder = "1.2"
-
-[dev-dependencies]
-png = "0.17.7"
-bmp = "0.5.0"
-clap = "3.0.0-beta.5"

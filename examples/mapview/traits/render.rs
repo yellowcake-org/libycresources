@@ -1,5 +1,5 @@
-use libycresources::common::types::models::{Identifier, sprite};
-use libycresources::formats::{frm, pal};
+use ycresources::common::types::models::{Identifier, sprite};
+use ycresources::formats::{frm, pal};
 
 use crate::error::Error;
 

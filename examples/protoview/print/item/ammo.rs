@@ -1,4 +1,4 @@
-pub(crate) fn ammo(ammo: &libycresources::formats::pro::object::item::ammo::Instance) {
+pub(crate) fn ammo(ammo: &ycresources::formats::pro::object::item::ammo::Instance) {
     println!("Item is Ammo");
     println!("Caliber: {:?}", ammo.caliber);
     println!("Count: {:?}", ammo.count);
